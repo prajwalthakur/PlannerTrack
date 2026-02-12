@@ -1,0 +1,11 @@
+.git/
+.github
+.gitignore
+.pixi/
+
+**/log*
+**/build*
+**/install*
+**/Dockerfile
+
+docker-compose.yaml

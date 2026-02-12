@@ -1,5 +1,5 @@
-# Motion Planning and Obstacle Avoidance Algorithms in ROS2 and C++
-A C++ based ROS2 software stack for rapid testing of motion planning, obstacle avoidance, and filtering techniques.
+# PlannerTrack 
+PlannerTrack is a Motion planning and control for structured environments such as autonomous driving and racing, including lane following, lane changes, MPC, and MPCC.
 1. A modularized package supporting various vehicle dynamics/kinematics models. 
 2. The vehicle class is implemented as a shared/static library and leverages CppAD for automatic differentiation, enabling seamless integration with existing planning algorithms.
 
