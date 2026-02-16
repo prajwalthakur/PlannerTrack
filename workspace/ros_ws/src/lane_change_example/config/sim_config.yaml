@@ -1,0 +1,100 @@
+/**:
+  ros__parameters:
+    configuration_file: "/workspace/ros_ws/src/lane_change_example/config/sim_config.yaml"
+    simulation:
+      simTimeStep: 0.01
+      statePublisherTimeStep: 0.05
+      fixedFrame: "world"
+      num_vehicles: 2
+    laneChangeExample:
+      initPoseLeft: [0.0,0.0,0.0]
+      finalPoseLeft: [50.0,0.0,0.0]
+      waypointStep: 0.5
+      egoVehId: 1
+    vehicle1_param:
+      body_color: [1.0, 0.57, 0.1, 1.0]
+      wheel_color: [0.2, 0.2, 0.2, 1.0]
+      geomModelType: "rectangular"
+      collFootPrintType: "ellipse"
+      vehLength: 0.58   
+      vehWidth: 0.31           # in meters
+      collisionFootPrint:
+        majorAxis: 0.60
+        minorAxis: 0.34
+      numStates: 5                 # number of states currently : x,y,yaw,vx,steering
+      numControlInputs: 2                 # control acc,steering_dot
+      sim_deltaT: 0.01             # state update time
+      state_publish_deltaT: 0.05  # state publisher delta-time
+      veh_width: 0.31           # in meters
+      veh_length: 0.58   
+      veh_wheel_radius: 0.35
+      vehWheelBase: 0.34
+      mass: 1.0         # in kg
+      initXPose: 5.0 # x-position (world frame)
+      initYPose: -0.9 # y-position (world frame)
+      initYaw: 0.0 # yaw
+      initVx: 0.3 # longitudinal speed of vehicle
+      initSf: 0.0 # front steering in radians
+      initAcc: 0.0 # acceleration
+      initSv:  0.0 # steering velocity
+      integration:
+        type: "rk4"
+        integrationStepSize: 0.01 #rk4/euler integration time-step
+    vehicle2_param:
+      body_color: [0.0, 0.4, 1.0, 1.0]
+      wheel_color: [0.1, 0.1, 0.1, 1.0]
+      geomModelType: "rectangular"
+      collFootPrintType: "ellipse"
+      vehLength: 0.58   
+      vehWidth: 0.31           # in meters
+      collisionFootPrint:
+        majorAxis: 0.60
+        minorAxis: 0.34
+      numStates: 5                 # number of states currently : x,y,yaw,vx,steering
+      numControlInputs: 2                 # control acc,steering_dot
+      sim_deltaT: 0.01             # state update time
+      state_publish_deltaT: 0.05  # state publisher delta-time
+      veh_width: 0.31           # in meters
+      veh_length: 0.58   
+      veh_wheel_radius: 0.35
+      vehWheelBase: 0.34
+      mass: 1.0         # in kg
+      initXPose: 10.0 # x-position (world frame)
+      initYPose: -0.9 # y-position (world frame)
+      initYaw: 0.0 # yaw
+      initVx: 0.2 # longitudinal speed of vehicle
+      initSf: 0.0 # front steering in radians
+      initAcc: 0.0 # acceleration
+      initSv:  0.0 # steering velocity
+      integration:
+        type: "rk4"
+        integrationStepSize: 0.01 #rk4/euler integration time-step
+    vehicle3_param:
+      body_color: [0.9, 0.4, 1.0, 1.0]
+      wheel_color: [0.1, 0.1, 0.1, 1.0]
+      geomModelType: "rectangular"
+      collFootPrintType: "ellipse"
+      vehLength: 0.58   
+      vehWidth: 0.31           # in meters
+      collisionFootPrint:
+        majorAxis: 0.60
+        minorAxis: 0.34
+      numStates: 5                 # number of states currently : x,y,yaw,vx,steering
+      numControlInputs: 2                 # control acc,steering_dot
+      sim_deltaT: 0.01             # state update time
+      state_publish_deltaT: 0.05  # state publisher delta-time
+      veh_width: 0.31           # in meters
+      veh_length: 0.58   
+      veh_wheel_radius: 0.35
+      vehWheelBase: 0.34
+      mass: 1.0         # in kg
+      initXPose: 10.0 # x-position (world frame)
+      initYPose: -0.3 # y-position (world frame)
+      initYaw: 0.0 # yaw
+      initVx: 0.2 # longitudinal speed of vehicle
+      initSf: 0.0 # front steering in radians
+      initAcc: 0.0 # acceleration
+      initSv:  0.0 # steering velocity
+      integration:
+        type: "rk4"
+        integrationStepSize: 0.01 #rk4/euler integration time-step

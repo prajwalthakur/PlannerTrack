@@ -1,0 +1,20 @@
+#include "VehicleModel.h"
+
+////////////////////////////////////////////////////////////////////////////////
+
+VehicleModel::VehicleModel(YAML::Node& simConfig, YAML::Node& vehConfig)
+:mSimConfig(simConfig), mVehConfig(vehConfig){};
+
+////////////////////////////////////////////////////////////////////////////////
+
+const UniqueId& VehicleModel::id() const 
+{ 
+    return mId; 
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+void VehicleModel::updateCommandedControl(const InputVector& u)
+{
+    mStateModel->updateCommandedControl(u);
+}

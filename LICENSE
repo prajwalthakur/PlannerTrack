@@ -1,41 +1,21 @@
-MIT License – Non-Commercial, Non-Academic, Attribution (MIT-NC-NA)
+MIT License
 
 Copyright (c) 2025 Prajwal Thakur
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the “Software”), to deal
-in the Software for personal, non-commercial, and non-academic purposes,
-including without limitation the rights to use, copy, modify, merge, publish
-and distribute copies of the Software, subject to the following conditions:
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
 
-A. **Non-Commercial**:  
-   The Software (or any derivative work) must not be sold, offered for sale,
-   licensed for a fee, or used in any product or service for which payment,
-   monetary or otherwise, is received, without prior written permission from
-   the copyright holder.
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
 
-B. **Non-Academic**:  
-   Use of the Software (or any derivative work) in academic research,
-   coursework, theses, dissertations, scholarly publications, or conference
-   presentations is prohibited without prior written permission from the
-   copyright holder.
-
-C. **Attribution / Link-Back**:  
-   All copies, substantial portions, or derivative works must **prominently
-   reference** the original repository  
-   <https://github.com/<user>/<repo>>  
-   (or the commit hash if the code has been forked privately) in source files,
-   documentation, README files, and, where applicable, end-user interfaces.
-
-D. **Copyright Notice**:  
-   The above copyright notice and this permission notice shall be included in
-   all copies or substantial portions of the Software.
-
-E. **No Warranty**:  
-   THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-   IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-   FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-   AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-   LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
-   DEALINGS IN THE SOFTWARE.
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.

@@ -1,0 +1,163 @@
+<?xml version="1.0"?>
+
+<!-- A simple model of the racecar for rviz -->
+
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="racecar">
+
+    <xacro:arg name="car_name" default="default_name"/>
+    <xacro:arg name="body_r" default="1.0"/>
+    <xacro:arg name="body_g" default="0.0"/>
+    <xacro:arg name="body_b" default="0.0"/>
+    <xacro:arg name="body_a" default="1.0"/>
+
+    <xacro:arg name="wheel_r" default="0.2"/>
+    <xacro:arg name="wheel_g" default="0.2"/>
+    <xacro:arg name="wheel_b" default="0.2"/>
+    <xacro:arg name="wheel_a" default="1.0"/>
+
+    <xacro:property name="wheelbase" value="0.3302" />
+    <xacro:property name="width" value="0.2032" />
+    <xacro:property name="height" value="0.1" />
+    <xacro:property name="ground_offset" value="0.04" />
+    <xacro:property name="wheel_radius" value="0.0508" />
+    <xacro:property name="wheel_length" value="0.0381" />
+    <xacro:property name="laser_distance_from_base_link" value="0.275" />
+    <xacro:property name="laser_height" value="0.05" />
+    <xacro:property name="laser_radius" value="0.026" />
+
+
+    <xacro:property name="car_name" value="$(arg car_name)"/>
+
+    <xacro:property name="body_r" value="$(arg body_r)"/>
+    <xacro:property name="body_g" value="$(arg body_g)"/>
+    <xacro:property name="body_b" value="$(arg body_b)"/>
+    <xacro:property name="body_a" value="$(arg body_a)"/>
+
+    <xacro:property name="wheel_r" value="$(arg wheel_r)"/>
+    <xacro:property name="wheel_g" value="$(arg wheel_g)"/>
+    <xacro:property name="wheel_b" value="$(arg wheel_b)"/>
+    <xacro:property name="wheel_a" value="$(arg wheel_a)"/>
+
+
+
+    <material name="black">
+        <color rgba="0.2 0.2 0.2 1."/>
+    </material>
+
+    <material name="red">
+        <color rgba="1. 0.57 0.1 1."/>
+    </material>
+
+    <material name="body_color">
+    <color rgba="${body_r} ${body_g} ${body_b} ${body_a}"/>
+    </material>
+
+    <material name="wheel_color">
+    <color rgba="${wheel_r} ${wheel_g} ${wheel_b} ${wheel_a}"/>
+    </material>
+
+
+    <link name="${car_name}/base_link">
+    <visual>
+        <origin xyz="${wheelbase/2} 0 ${ground_offset+height/2}"/>
+        <geometry>
+        <box size="${wheelbase} ${width} ${height}"/>
+        </geometry>
+        <material name="body_color"/>
+    </visual>
+    </link>
+
+    <joint name="base_to_laser_model" type="fixed">
+    <parent link="${car_name}/base_link"/>
+    <child link="${car_name}/laser_model"/>
+    <origin xyz="${laser_distance_from_base_link} 0 ${ground_offset+height+(laser_height/2)}"/>
+    </joint>
+
+    <link name="${car_name}/laser_model">
+    <visual>
+        <geometry>
+        <cylinder radius="${laser_radius}" length="${laser_height}"/>
+        </geometry>
+        <material name="black"/>
+    </visual>
+    </link>
+
+    <joint name="$base_to_back_left_wheel" type="fixed">
+    <parent link="${car_name}/base_link"/>
+    <child link="${car_name}/back_left_wheel"/>
+    <origin xyz="0 ${(wheel_length+width)/2} ${wheel_radius}"/>
+    </joint>
+
+    <link name="${car_name}/back_left_wheel">
+    <visual>
+        <geometry>
+        <cylinder radius="${wheel_radius}" length="${wheel_length}"/>
+        </geometry>
+        <material name="black"/>
+        <origin rpy="${pi/2} 0 0"/>
+    </visual>
+    </link>
+
+    <joint name="base_to_back_right_wheel" type="fixed">
+    <parent link="${car_name}/base_link"/>
+    <child link="${car_name}/back_right_wheel"/>
+    <origin xyz="0 ${-(wheel_length+width)/2} ${wheel_radius}"/>
+    </joint>
+
+    <link name="${car_name}/back_right_wheel">
+    <visual>
+        <geometry>
+        <cylinder radius="${wheel_radius}" length="${wheel_length}"/>
+        </geometry>
+        <material name="black"/>
+        <origin rpy="${pi/2} 0 0"/>
+    </visual>
+    </link>
+
+    <joint name="base_to_front_left_hinge" type="fixed">
+    <parent link="${car_name}/base_link"/>
+    <child link="${car_name}/front_left_hinge"/>
+    <origin xyz="${wheelbase} ${(wheel_length+width)/2} ${wheel_radius}"/>
+    </joint>
+
+    <link name="${car_name}/front_left_hinge"/>
+
+    <joint name="${car_name}/front_left_hinge_to_wheel" type="continuous">
+    <parent link="${car_name}/front_left_hinge"/>
+    <child link="${car_name}/front_left_wheel"/>
+    </joint>
+
+    <link name="${car_name}/front_left_wheel">
+    <visual>
+        <geometry>
+        <cylinder radius="${wheel_radius}" length="${wheel_length}"/>
+        </geometry>
+        <material name="black"/>
+        <origin rpy="${pi/2} 0 0"/>
+    </visual>
+    </link>
+
+    <joint name="base_to_front_right_hinge" type="fixed">
+    <parent link="${car_name}/base_link"/>
+    <child link="${car_name}/front_right_hinge"/>
+    <origin xyz="${wheelbase} ${-(wheel_length+width)/2} ${wheel_radius}"/>
+    </joint>
+
+    <link name="${car_name}/front_right_hinge"/>
+
+    <joint name="${car_name}/front_right_hinge_to_wheel" type="continuous">
+    <parent link="${car_name}/front_right_hinge"/>
+    <child link="${car_name}/front_right_wheel"/>
+    </joint>
+
+    <link name="${car_name}/front_right_wheel">
+    <visual>
+        <geometry>
+        <cylinder radius="${wheel_radius}" length="${wheel_length}"/>
+        </geometry>
+        <material name="black"/>
+        <origin rpy="${pi/2} 0 0"/>
+    </visual>
+    </link>
+
+</robot>

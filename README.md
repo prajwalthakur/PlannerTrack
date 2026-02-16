@@ -1,40 +1,37 @@
 # PlannerTrack 
-PlannerTrack is a Motion planning and control for structured environments such as autonomous driving and racing, including lane following, lane changes, MPC, and MPCC.
-1. A modularized package supporting various vehicle dynamics/kinematics models. 
-2. The vehicle class is implemented as a shared/static library and leverages CppAD for automatic differentiation, enabling seamless integration with existing planning algorithms.
 
+PlannerTrack is a modular multi-agent motion planning and control framework designed for structured environments such as autonomous driving and racing. It supports custom scenario generation, along with advanced control strategies including Model Predictive Control (MPC) and Model Predictive Contouring Control (MPCC).
 
+Key Features
 
-This repository contains the various motion planning algorthims , including obstacle avoidance strategies in ros2 humble.
+1. Modular Vehicle Modeling
+Supports multiple vehicle kinematic and dynamic models through a modular architecture, enabling flexible experimentation and system extensibility.
 
-List of Vehicles
-1. Single Track Ackerman Steering Kinematics Model
+2. Reusable Vehicle Library
+The vehicle abstraction is implemented as a shared/static C++ library, allowing seamless integration with planning and control algorithms while maintaining clear separation between modeling and decision layers.
 
+3. Multi-Agent & Heterogeneous Support
+Enables simulation and coordination of multiple vehicles—either homogeneous or heterogeneous—within the same environment.
 
-List of Motion Planning Algorithms
+4. Scenario Configuration via YAML
+Provides configurable scenario generation using .yaml files, making it easy to define structured road layouts, vehicle parameters, and experiment setups.
 
-1. Quadratic Programming (QP) Based Model Predictive Control
-2. QP based Model Predictive Contouring Control
-3. Model Predictive Path Integral Contol (MPPI) based Path Tracking Algorithm
-4. Frenet Frame Based Non-Linear MPC 
-
-List of Obstacle Avoidance Algorithm
-1. Corridor Based Obstacle Avoidance ( can be used with 1,2,3 motion planning )
-2 . Control Barrier Function (CBF) , only be used with non-linear MPC 
 
 # Docker Image Installation 
-1. Change the root directory name in `scripts/deploy/base.sh` 
-2. From root of the directory  run  `./scripts/build/build.sh`
+1. From root of the directory  run  `./scripts/.build/build.sh`
 After above two steps the Docker Image with the name of **mp_ros2** would have been created
 
-# To run the docker Conatiner
+# To run the docker Container
 
-3. From root of the directory run `./scripts/deploy/devel.sh`
+3. From root of the directory run `./scripts/.deploy/devel.sh`
 
-# steps to launch the demo
-1. run `ros2 launch vehicle_interface vehicle_interface.launch.py` to launch the vehicle interface node
-2. run `ros2 launch visualizer visualizer.launch.py` to visualize the sim
-3. run `ros2 topic pub /ego_command project_utils/msg/EigenVector data:\ [0.04,-0.002]\ `  input command (acc, steering angle)
+# steps to launch the demo for lane change ( In progress )
+1. run `ros2 launch lane_change_example lane_change_example.launch.py` to launch the lane change example.
+3. run `ros2 topic pub /vehicle_1/control_command project_utils/msg/EigenVector "data: [1.0, 0.0]"`  to control vehicle with id 1 . Input command (acc, steering angle)
+4. run `ros2 topic pub /vehicle_2/control_command project_utils/msg/EigenVector "data: [0.8, 0.0]"` to control vehicle with id 2 .
+
+Demo Video:
+
 
 
 ## License
@@ -53,27 +50,19 @@ Any contribution by creating an issue or sending a pull request is welcome!!
 
 
 
-
-## Update-2
-## visualizer node has been implemented
-
-
-https://github.com/user-attachments/assets/94ec17ad-1860-4e79-a23e-117c120975bd
-
-
-
-## Update-1
-## vehicle Interface node has been implemented
-
-
-
-<!-- https://github.com/user-attachments/assets/4257c3ff-0bd3-4313-8ca6-d322eb27ab34 -->
-
-
-
-
-
-
 ## Author
 [Prajwal Thakur](https://github.com/prajwalthakur) 
 
+
+## Independent Work Declaration
+
+PlannerTrack was initiated and developed independently by Prajwal Thakur
+prior to current employment.
+
+This project is maintained as a personal open-source initiative,
+developed outside the scope of employment, using personal time and
+equipment. It is based solely on publicly available research and
+standard algorithms.
+
+This repository does not contain any proprietary, confidential, or
+employer-owned intellectual property.

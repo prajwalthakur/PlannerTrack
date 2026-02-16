@@ -32,25 +32,63 @@ RUN apt-get update && apt-get install -y \
     libxkbcommon0 \
     && rm -rf /var/lib/apt/lists/*
 # ---------- Mesa (CPU OpenGL, RViz, Qt) ----------
-RUN add-apt-repository ppa:kisak/kisak-mesa && \
-    apt-get update && apt-get install -y \
-        mesa-utils \
-        libgl1-mesa-dri \
-        libgl1 \
-        libegl1 \
-        libxcb-cursor0 \
-        libxcb-xinerama0 \
-        libxcb-xkb1 \
-        libxkbcommon-x11-0 \
-        libsm6 \
-        libice6 \
-        libfontconfig1 \
-        libfreetype6 \
-        libdbus-1-3 \
-        libglib2.0-0 \
-        python3-opengl \
-        ffmpeg \
+# RUN add-apt-repository ppa:kisak/kisak-mesa && \
+#     apt-get update && apt-get install -y \
+#         mesa-utils \
+#         libgl1-mesa-dri \
+#         libgl1 \
+#         libegl1 \
+#         libxcb-cursor0 \
+#         libxcb-xinerama0 \
+#         libxcb-xkb1 \
+#         libxkbcommon-x11-0 \
+#         libsm6 \
+#         libice6 \
+#         libfontconfig1 \
+#         libfreetype6 \
+#         libdbus-1-3 \
+#         libglib2.0-0 \
+#         python3-opengl \
+#         ffmpeg \
+#     && rm -rf /var/lib/apt/lists/*
+
+# ---------- OpenGL runtime (Noble / 24.04 compatible) ----------
+RUN apt-get update && apt-get install -y \
+    libgl1 \
+    libglx0 \
+    libglvnd0 \
+    libegl1 \
+    libx11-6 \
+    libxrandr2 \
+    libxinerama1 \
+    libxcursor1 \
+    libxi6 \
     && rm -rf /var/lib/apt/lists/*
+
+# ---------- RViz2 ----------
+RUN apt-get update && apt-get install -y \
+    ros-${ROS_DISTRO}-rviz2 \
+    ros-${ROS_DISTRO}-rviz-common \
+    ros-${ROS_DISTRO}-rviz-rendering \
+    ros-${ROS_DISTRO}-rviz-ogre-vendor \
+    && rm -rf /var/lib/apt/lists/*
+
+
+
+# RUN apt-get update && apt-get install -y \
+#     ros-${ROS_DISTRO}-rviz2 \
+#     ros-${ROS_DISTRO}-rviz-common \
+#     ros-${ROS_DISTRO}-rviz-ogre-vendor \
+#     && rm -rf /var/lib/apt/lists/*
+
+
+# RUN apt-get update && apt-get install -y \
+#     libopengl0 \
+#     libglvnd0 \
+#     libgl1-mesa-glx \
+#     && rm -rf /var/lib/apt/lists/*
+
+
 
 # ---------- Qt + Python bindings (SYSTEM) ----------
 RUN apt-get update && apt-get install -y \
