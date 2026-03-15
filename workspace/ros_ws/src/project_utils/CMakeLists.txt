@@ -14,9 +14,14 @@ endif()
 set(THIS_PACKAGE_INCLUDE_DEPENDS
   ament_cmake
   rclcpp
+  Boost
   eigen3_cmake_module
   Eigen3
   rosidl_default_generators
+  geometry_msgs
+  std_msgs
+  nav_msgs
+  builtin_interfaces
 )
 
 foreach(Dependency IN ITEMS ${THIS_PACKAGE_INCLUDE_DEPENDS})
@@ -28,10 +33,25 @@ endforeach()
 # =============================
 set(MSG_FILES
   "msg/EigenVector.msg"
+  "msg/ackermann/control/Control.msg"
+  "msg/ackermann/control/ControlHorizon.msg"
+  "msg/ackermann/control/Lateral.msg"
+  "msg/ackermann/control/Longitudinal.msg"
+  "msg/ackermann/planning/PathPoint.msg"
+  "msg/ackermann/planning/Path.msg"
+  "msg/ackermann/planning/TrajectoryPoint.msg"
+  "msg/ackermann/planning/Trajectory.msg"
+  "msg/ackermann/vehicle/SteeringReport.msg"
+  "msg/common/Float64Stamped.msg"
 )
 
 rosidl_generate_interfaces(${PROJECT_NAME}
   ${MSG_FILES}
+  DEPENDENCIES
+    geometry_msgs
+    std_msgs
+    nav_msgs
+    builtin_interfaces
 )
 
 # =============================

@@ -93,7 +93,7 @@ void SingleTrackDynStateModel::setState(const StateVector & statevector){
     mStateStruct.yaw = mStateVector(2);
     mStateStruct.vx = mStateVector(3);
     mStateStruct.sf = mStateVector(4);
-    std::cerr << " updated states " <<  mStateStruct.x << " " << mStateStruct.y << std::endl;
+   // std::cerr << " updated states " <<  mStateStruct.x << " " << mStateStruct.y << std::endl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

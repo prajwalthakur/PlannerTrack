@@ -113,3 +113,11 @@ inline std::string concatString(std::vector<std::string>& vec)
     }
     return newString;
 }
+
+////////////////////////////////////////////////////////////////////////////////
+
+inline double deg2rad(double degree)
+{
+    double radian = degree*0.0174533;
+    return radian;
+}

@@ -36,7 +36,7 @@ void RectangularGeomClass::step(const ptSharedPtr<stPose>& pose)
         std::cerr << "[ Rectangular Geometric Model ]: Collision Footprint is nullptr, Please set the pointer.";
     mCollisionFootprint->step(mPose);
     calcVertices();
-    printVertices();
+    //printVertices();
 }
 
 //////////////////////////////////////////////////////////////////////////

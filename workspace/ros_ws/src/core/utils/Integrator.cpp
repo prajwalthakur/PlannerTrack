@@ -41,7 +41,7 @@ StateVector IntegratorClass::rk4Integrator(const StateVector& x, const InputVect
     StateVector k3 = mDynamicsFunc(x + (ts/2.)*k2,u);
     StateVector k4 = mDynamicsFunc(x + (ts/2.)*k3,u);
     StateVector x_next = x + ts*(k1/6.+k2/3.+k3/3.+k4/6.);
-    std::cerr << " x_next " << x_next << std::endl;
+    //std::cerr << " x_next " << x_next << std::endl;
     return x_next;
 }
 
@@ -82,9 +82,9 @@ void IntegratorClass::simNextState(const InputVector& u ) const
         x_next=this->rk4Integrator(x_next,u,mIntegrationStepSize);
     }
     //RCLCPP_INFO(this->get_logger(), "rk4 called");
-    std::cerr << " rk4 integrator called "  << " "; 
+    //std::cerr << " rk4 integrator called "  << " "; 
     this->mSetStateFunc(x_next);
-    std::cerr << " lol "  << " "; 
+    // std::cerr << " lo "  << " "; 
     this->mSetInputFunc(u);
     
 }

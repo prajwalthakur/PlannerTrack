@@ -190,16 +190,17 @@ function(project_target_link_libraries)
        return()
     endif()
     foreach(_other_target IN ITEMS ${ARGN} )
-        target_link_libraries(${_target_name}  ${_other_target})
+        target_link_libraries(${_target_name} PUBLIC ${_other_target})
+        #message(WARNING "########## Linking  ${_other_target}")  
         # Include the directories.
-        #message(WARNING "########## ADDING  BEFORE  ${PROJECT_DIR_SRC}/${_other_target}")  
         #target_include_directories(${_target_name} PUBLIC ${PROJECT_DIR_SRC}/${_other_target}) 
         if(EXISTS ${PROJECT_DIR_SRC}/${_other_target})
             target_include_directories(${_target_name} PUBLIC ${PROJECT_DIR_SRC}/${_other_target})
-            #message(WARNING "########## ADDING   ${PROJECT_DIR_SRC}/${_other_target}")  
+            #message(WARNING "########## including dirs   ${PROJECT_DIR_SRC}/${_other_target}")  
         endif()
     endforeach()
 endfunction()
+
 
 ###############################################################################################
 

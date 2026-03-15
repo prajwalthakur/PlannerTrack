@@ -18,12 +18,12 @@ SingleTrackDynModel::SingleTrackDynModel(YAML::Node& simConfig, YAML::Node& vehC
         ptSharedPtr<CollisionFootPrint> collFootPrint = std::make_shared<EllipseCollisionFootPrint>(majorAxis,minorAxis);
         mGeomModel->setCollisionFootPrint(collFootPrint);
     }
-    std::cerr  << " trying to add mStateModel"<<std::endl;
+    //std::cerr  << " trying to add mStateModel"<<std::endl;
     mStateModel = std::make_shared<SingleTrackDynStateModel>(mSimConfig, mVehConfig, mId);
     mStateModel->createIntegrator();
-    std::cerr  << " trying to add numStates"<<std::endl;
+    //std::cerr  << " trying to add numStates"<<std::endl;
     mNumStates = vehConfig["numStates"].as<int>();
-    std::cerr  << " trying to add numControlInputs";
+    //std::cerr  << " trying to add numControlInputs";
     mNumControlInputs = vehConfig["numControlInputs"].as<int>();
     
 }
