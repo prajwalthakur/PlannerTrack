@@ -5,7 +5,7 @@
 int main(int argc, char * argv[])
 {
   rclcpp::init(argc, argv);
-  auto node = std::make_shared<VehicleInterface>();
+  auto node = std::make_shared<AgentInterface>();
   node->onConfigure();
   node->onActivate();
   rclcpp::spin(node);

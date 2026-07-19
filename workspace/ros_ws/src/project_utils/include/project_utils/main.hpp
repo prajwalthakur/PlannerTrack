@@ -6,4 +6,3 @@
 #include "project_utils/parameter.hpp"
 #include "project_utils/pose_definition.hpp"
 #include "project_utils/types.hpp"
-int main();
