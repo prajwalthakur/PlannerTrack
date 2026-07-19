@@ -1,0 +1,82 @@
+# Plain YAML, loaded directly via YAML::LoadFile() in agent_sim -- NOT a
+# ros__parameters file. Named keys (agent_1, agent_2, ...) become each
+# agent's UniqueId. Agent count is derived from this map's size, not
+# tracked separately anywhere.
+#
+# Each agent names four pluginlib lookup names (must match the bare
+# type="..." in that plugin's plugins.xml) plus that plugin's own param
+# block. VehicleModelFactory will load each plugin and call
+# initialize()/initialze() with only that plugin's *_params sub-node --
+# not the whole agent block -- matching how RectangularGeometry/
+# EllipseCollisionFootPrint already read their params (top-level keys of
+# whatever node they're handed).
+
+agents:
+
+  agent_1:
+    dynamics_plugin: SingleTrackDynStateModel
+    dynamics_params:
+      numStates: 5
+      numControlInputs: 2
+      initXPose: 0.0
+      initYPose: 0.0
+      initYaw: 0.0
+      initVx: 0.0
+      initSf: 0.0             # initial steering angle (rad)
+      initAcc: 0.0
+      initSv: 0.0              # initial steering velocity (rad/s)
+      vehWheelBase: 0.34
+      integration:
+        integrationStepSize: 0.001   # rk4 integration step (s), independent of simTimeStep this is (model_dt)
+
+    geometry_plugin: RectangularGeometry
+    geometry_params:
+      length: 0.58
+      width: 0.31
+
+    collision_plugin: EllipseCollisionFootPrint
+    collision_params:
+      major_axis_length: 0.60
+      minor_axis_length: 0.34
+
+    sensor_plugin: LidarSensorModel
+    sensor_params:
+      num_beams: 360
+      angle_min: -3.14159265
+      angle_max: 3.14159265
+      range_min: 0.05
+      range_max: 10.0
+
+  agent_2:
+    dynamics_plugin: SingleTrackDynStateModel
+    dynamics_params:
+      numStates: 5
+      numControlInputs: 2
+      initXPose: 2.0            # offset from agent_1 so they don't spawn overlapping
+      initYPose: 0.0
+      initYaw: 0.0
+      initVx: 0.0
+      initSf: 0.0
+      initAcc: 0.0
+      initSv: 0.0
+      vehWheelBase: 0.30        # deliberately different from agent_1, to prove params are per-agent
+      integration:
+        integrationStepSize: 0.001
+
+    geometry_plugin: RectangularGeometry
+    geometry_params:
+      length: 0.58
+      width: 0.31
+
+    collision_plugin: EllipseCollisionFootPrint
+    collision_params:
+      major_axis_length: 0.60
+      minor_axis_length: 0.34
+
+    sensor_plugin: LidarSensorModel
+    sensor_params:
+      num_beams: 360
+      angle_min: -3.14159265
+      angle_max: 3.14159265
+      range_min: 0.05
+      range_max: 10.0

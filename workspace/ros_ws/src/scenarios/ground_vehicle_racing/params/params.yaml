@@ -1,0 +1,41 @@
+/**:
+  ros__parameters:
+    sim_config_file: "/workspace/ros_ws/src/project_utils/config/sim.yaml"
+    agents_config_file: "/workspace/ros_ws/src/project_utils/config/agents.yaml"
+
+    agent_interface:
+      state_publisher_dt: 0.01  # odom/TF publish rate (s)
+      fixed_frame: "odom"
+      num_agents: 2  #should be same as defined in agents.yaml
+    obstacles:
+      type: "circle"
+      num_obstacles: 6
+      obstacle_1:
+        position: [-4.0, 3.4, 0.0, -1.57]
+        radius: 0.4
+        color: [1.0, 0.0, 0.0, 1.0]
+
+      obstacle_2:
+        position: [-2.0, 3.0, 0.0, -1.57]
+        radius: 0.4
+        color: [1.0, 0.0, 0.0, 1.0]
+      
+      obstacle_3:
+        position: [0.0,  3.0, 0.0, -1.57]
+        radius: 0.4
+        color: [1.0, 0.0, 0.0, 1.0]
+
+      obstacle_4:
+        position: [3.0,  3.0, 0.0, -1.57]
+        radius: 0.4
+        color: [1.0, 0.0, 0.0, 1.0]
+      
+      obstacle_5:
+        position: [-7.0,  3.4, 0.0, -1.57]
+        radius: 0.4
+        color: [1.0, 0.0, 0.0, 1.0]
+
+      obstacle_6:
+        position: [-9.0,  3.4, 0.0, -1.57]
+        radius: 0.4
+        color: [1.0, 0.0, 0.0, 1.0]

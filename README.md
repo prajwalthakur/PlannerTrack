@@ -1,40 +1,75 @@
-# PlannerTrack 
+# PlannerTrack-V2
 
-PlannerTrack is a modular multi-agent motion planning and control framework designed for structured environments such as autonomous driving and racing. It supports custom scenario generation, along with advanced control strategies including Model Predictive Control (MPC) and Model Predictive Contouring Control (MPCC).
+A ROS2 (Jazzy) simulation platform for developing and testing autonomous
+vehicle algorithms , behavior, multi-agent coordination, planning, and
+control, built around a heterogeneous multi-agent simulator core, with a
+plugin architecture designed to support multiple vehicle types (ground
+vehicles , aerial vehicles (planned)) without hardcoding vehicle-specific
+simulation code.
 
-Key Features
+## Key Features
 
-1. Modular Vehicle Modeling
-Supports multiple vehicle kinematic and dynamic models through a modular architecture, enabling flexible experimentation and system extensibility.
+- **Heterogeneous multi-agent simulation** — each agent's dynamics,
+  geometry, and collision model are independently swappable ROS2
+  `pluginlib` plugins, resolved by name at runtime. Adding a new vehicle
+  type (ground, and eventually aerial) means writing a new plugin package —
+  zero changes to the simulator core.
+- **Config-driven scenarios** — which agents exist, which vehicle models
+  they use, and their parameters are all defined in YAML, not hardcoded.
+  Different multi-agent scenarios are a config change, not a code change.
+- **Clean plant/controller separation** — the simulator consumes only
+  already-computed control commands over generic, vehicle-agnostic ROS2
+  messages; planning and control logic live in independent, swappable
+  components, not inside the simulator itself.
+- **Motion planning components** — sampling-based path planning and
+  trajectory generation for Ackermann-style vehicles (`planning/`),
+  developed alongside the simulator.
+- **RViz-based multi-agent visualization** — see it running:
+  [`video/multi_agent_rviz.mp4`](video/multi_agent_rviz.mp4).
+- Built for **ROS2 Jazzy**, with a Dockerized, bind-mounted dev environment.
 
-2. Reusable Vehicle Library
-The vehicle abstraction is implemented as a shared/static C++ library, allowing seamless integration with planning and control algorithms while maintaining clear separation between modeling and decision layers.
+## Status: actively under restructuring (WIP)
 
-3. Multi-Agent & Heterogeneous Support
-Enables simulation and coordination of multiple vehicles—either homogeneous or heterogeneous—within the same environment.
+This branch is mid-rework of the simulator's core: `workspace/ros_ws/src`'s
+vehicle model layer is being rebuilt around ROS2 `pluginlib`, so that a new
+vehicle's dynamics, geometry, and collision model can be added as a plugin
+package without editing or recompiling the simulator itself. 
 
-4. Scenario Configuration via YAML
-Provides configurable scenario generation using .yaml files, making it easy to define structured road layouts, vehicle parameters, and experiment setups.
+## Architecture (current design)
 
+- **`motion_model_base`** — the core plugin interfaces: `DynamicModel`,
+  `GeometricModel`, `CollisionFootPrint` (each a `pluginlib` base class),
+  plus `AgentModel` (composes one instance of each into a single simulated
+  agent) and `VehicleModelFactory` (builds an `AgentModel` from a YAML
+  config block by loading the three named plugins at runtime — no compile-time
+  knowledge of any concrete vehicle type).
+- **`motion_model_shapes`** — geometry/collision plugin implementations
+  (e.g. rectangular geometry, ellipse collision footprint), shared across
+  vehicle families since shape is independent of how a vehicle moves.
+- **`motion_model_ground_vehicles`** — vehicle dynamics plugins for ground
+  vehicles (currently a single-track/Ackermann bicycle model). A future
+  `motion_model_aerial_vehicles` would hold drone dynamics.
+- **`agent_sim`** — the ROS2 orchestrator node. Owns the simulation loop,
+  reads per-agent YAML config, and is the only package that talks to
+  `pluginlib` or config files directly — it never references a concrete
+  vehicle type.
 
-# Docker Image Installation 
-1. From root of the directory  run  `./scripts/.build/build.sh`
-After above two steps the Docker Image with the name of **mp_ros2** would have been created
+Adding a new vehicle type is meant to mean: write a new plugin package,
+reference it by name in a YAML config file — no changes to `agent_sim` or
+`motion_model_base`.
 
-# To run the docker Container
+## Getting Started
 
-3. From root of the directory run `./scripts/.deploy/devel.sh`
+Build the dev image and start a development container (workspace is
+bind-mounted, not baked into the image):
 
-# steps to launch the demo for lane change ( In progress )
-1. run `ros2 launch lane_change_example lane_change_example.launch.py` to launch the lane change example.
-3. run `ros2 topic pub /vehicle_1/control_command project_utils/msg/EigenVector "data: [1.0, 0.0]"`  to control vehicle with id 1 . Input command (acc, steering angle)
-4. run `ros2 topic pub /vehicle_2/control_command project_utils/msg/EigenVector "data: [0.8, 0.0]"` to control vehicle with id 2 .
+```bash
+./scripts/.build/.build.sh
+./scripts/.deploy/devel.sh        # CPU; pass -c explicitly if needed
+```
 
-Demo Video:
-
-https://github.com/user-attachments/assets/fe5b9a02-f122-407f-aee5-424504de4339
-
-
+Inside the container, build with `colcon` against ROS2 Jazzy in the usual
+way (`colcon build --packages-select <package>` from `/workspace/ros_ws`).
 
 ## License
 MIT  

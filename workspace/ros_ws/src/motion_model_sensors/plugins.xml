@@ -1,0 +1,5 @@
+<library path="motion_model_sensors">
+  <class type="LidarSensorModel" base_class_type="SensorModel">
+    <description>Brute-force ray-casting 2D lidar sensor.</description>
+  </class>
+</library>

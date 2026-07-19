@@ -5,4 +5,4 @@ source "$(dirname "$0")/base.sh"
 
 stop_docker
 
-run_docker mp_ros2:latest "/root/app.sh"
+run_docker planner_track:latest "/root/app.sh"

@@ -1,0 +1,43 @@
+<!-- -*- mode: XML -*- -->
+<launch>
+  <arg name="racecar_version" default="NUC2" description="'SIM' / 'NUCx'" />
+  <arg name="map_name" description="Map name in stack_master/maps" />
+  <arg name="sim" default="False" description="True/False if you want to run simulation" />
+  <arg name="loc_algorithm" default="slam" description="'slam' / 'synpf' to switch localisation algorithm" />
+  <arg name="publish_markers" default="true" description="Enable publishing of visualization markers" />
+  <arg name="publish_shortest_path" default="true" description="Enable publishing of shortest path" />
+  <arg name="publish_centerline" default="false" description="Enable publishing of centerline" />
+  <arg name="publish_lattice" default="false" description="Enable publishing of lattice" />
+  <!-- Note: This is merely the share path (read-only) as the base_system
+    is not expected to modify maps in any way. -->
+  <let name="map_path" value="$(find-pkg-share stack_master)/maps/$(var map_name)" />
+
+
+  <!-- launch global parameter node -->
+  <node pkg="stack_master" name="global_parameters" exec="global_parameter_node">
+    <param name="racecar_version" value="$(var racecar_version)" />
+    <param name="sim" value="$(var sim)" />
+    <param name="map_path" value="$(var map_path)" />
+    <param name="use_sim_time" value="$(var sim)" />
+  </node>
+
+    <!-- launch global trajectory republisher via included launch -->
+    <include file="$(find-pkg-share global_planner)/launch/global_trajectory_publisher_launch.xml">
+        <arg name="map_path" value="$(var map_path)" />
+        <arg name="publish_markers" value="true" />
+        <arg name="publish_shortest_path" value="true" />
+        <arg name="publish_centerline" value="false" />
+        <arg name="publish_lattice" value="false" />
+    </include>
+
+
+  <!-- launch sector tuner -->
+  <node pkg="sector_tuner" name="sector_tuner" exec="sector_tuner">
+    <param name="map_name" value="$(var map_name)" />
+    <param from="$(find-pkg-share stack_master)/maps/$(var map_name)/speed_scaling.yaml" />
+  </node>
+
+  <!-- launch lap analyser -->
+  <node pkg="lap_analyser" name="lap_analyser" exec="lap_analyser" output="screen" />
+
+</launch>

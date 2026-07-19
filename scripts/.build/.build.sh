@@ -1,2 +1,2 @@
 #!/bin/bash
-docker build --rm  $@ -t mp_ros2:latest -f "$(dirname "$0")/../../.docker/mp_ros2.Dockerfile" "$(dirname "$0")/../.."
+docker build --rm  $@ -t planner_track:latest -f "$(dirname "$0")/../../.docker/planner_track.Dockerfile" "$(dirname "$0")/../.."

@@ -1,0 +1,8 @@
+<!--
+Author: Prajwal Thakur <prajwalthakur98@gmail.com>
+-->
+<library path="motion_model_ground_vehicles">
+  <class type="SingleTrackDynStateModel" base_class_type="DynamicModel">
+    <description>Single-track dynamic state model.</description>
+  </class>
+</library>

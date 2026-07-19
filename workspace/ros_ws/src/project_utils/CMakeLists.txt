@@ -1,6 +1,9 @@
 cmake_minimum_required(VERSION 3.8)
 project(project_utils)
 
+
+
+
 # =============================
 # Compiler options
 # =============================
@@ -11,154 +14,88 @@ endif()
 # =============================
 # Dependencies
 # =============================
+# find_package(ament_cmake REQUIRED)
+# find_package(rclcpp REQUIRED)
+# find_package(Eigen3 REQUIRED)
+# find_package(Boost REQUIRED)
+# find_package(project_utils_msgs REQUIRED)
+
 set(THIS_PACKAGE_INCLUDE_DEPENDS
   ament_cmake
   rclcpp
   Boost
   eigen3_cmake_module
   Eigen3
-  rosidl_default_generators
   geometry_msgs
   std_msgs
   nav_msgs
-  builtin_interfaces
+  tf2_geometry_msgs
+  project_utils_msgs
 )
 
 foreach(Dependency IN ITEMS ${THIS_PACKAGE_INCLUDE_DEPENDS})
   find_package(${Dependency} REQUIRED)
 endforeach()
-
 # =============================
-# Messages
+# Library
 # =============================
-set(MSG_FILES
-  "msg/EigenVector.msg"
-  "msg/ackermann/control/Control.msg"
-  "msg/ackermann/control/ControlHorizon.msg"
-  "msg/ackermann/control/Lateral.msg"
-  "msg/ackermann/control/Longitudinal.msg"
-  "msg/ackermann/planning/PathPoint.msg"
-  "msg/ackermann/planning/Path.msg"
-  "msg/ackermann/planning/TrajectoryPoint.msg"
-  "msg/ackermann/planning/Trajectory.msg"
-  "msg/ackermann/vehicle/SteeringReport.msg"
-  "msg/common/Float64Stamped.msg"
-)
-
-rosidl_generate_interfaces(${PROJECT_NAME}
-  ${MSG_FILES}
-  DEPENDENCIES
-    geometry_msgs
-    std_msgs
-    nav_msgs
-    builtin_interfaces
-)
-
-# =============================
-# project_utils library
-# =============================
-add_library(project_utils_lib SHARED
+add_library(project_utils SHARED
   src/main.cpp
+  src/integrator.cpp
+  src/common_utils.cpp
+  src/pose_definition.cpp
+  src/unique_id.cpp
+  src/unique_id_generator.cpp
+  src/random_type.cpp
+  src/random.cpp
 )
 
-target_include_directories(project_utils_lib PUBLIC
-  $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/rosidl_generator_cpp>
+target_link_libraries(project_utils
+  Eigen3::Eigen
+)
+target_include_directories(project_utils PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include>
 )
 
-ament_target_dependencies(project_utils_lib
-  PUBLIC ${THIS_PACKAGE_INCLUDE_DEPENDS}
-)
-
-# =============================
-# Build core (pure CMake project)
-# =============================
-add_subdirectory(
-  ${CMAKE_CURRENT_SOURCE_DIR}/../core
-  ${CMAKE_BINARY_DIR}/core_build
-)
-
-# =============================
-# INSTALL + EXPORT CORE TARGETS  
-# =============================
-
-# Install core libraries AND export them as CMake targets
-install(TARGETS
-  core
-  utils
-  vehicleModel
-  EXPORT coreTargets
-  ARCHIVE DESTINATION lib
-  LIBRARY DESTINATION lib
-  RUNTIME DESTINATION bin
-)
-
-install(
-  EXPORT coreTargets
-  NAMESPACE project_utils::
-  DESTINATION share/${PROJECT_NAME}/cmake
+ament_target_dependencies(project_utils
+  rclcpp
+  project_utils_msgs
+  tf2_geometry_msgs
+  nav_msgs
 )
 # =============================
-# INSTALL CORE HEADERS
+# Install
 # =============================
-install(
-  DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/../core/
-  DESTINATION include
-  FILES_MATCHING PATTERN "*.h"
-)
-
-# =============================
-# Install project_utils headers
-# =============================
-install(
-  DIRECTORY include/
-  DESTINATION include
-)
-
-# =============================
-# Install configs & maps
-# =============================
-install(
-  DIRECTORY config/
-  DESTINATION share/${PROJECT_NAME}/config
-)
-
-install(
-  DIRECTORY maps/
-  DESTINATION share/${PROJECT_NAME}/maps
-)
-
-# =============================
-# Install project_utils library
-# =============================
-install(TARGETS project_utils_lib
+install(TARGETS project_utils
   EXPORT export_${PROJECT_NAME}
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
 )
 
-# =============================
-# EXPORTS (for downstream packages)
-# =============================
+install(DIRECTORY include/
+  DESTINATION include
+)
 
-# Export installed include directory
+# install(
+#   DIRECTORY config/
+#   DESTINATION share/${PROJECT_NAME}/config
+# )
+
+
+
+# =============================
+# Export
+# =============================
 ament_export_include_directories(include)
 
-#Export REAL CMake targets (NOT raw -l flags)
-ament_export_targets(coreTargets HAS_LIBRARY_TARGET)
 ament_export_targets(export_${PROJECT_NAME} HAS_LIBRARY_TARGET)
 
-ament_export_dependencies(${THIS_PACKAGE_INCLUDE_DEPENDS})
-
-# =============================
-# Testing
-# =============================
-if(BUILD_TESTING)
-  find_package(ament_lint_auto REQUIRED)
-  set(ament_cmake_copyright_FOUND TRUE)
-  set(ament_cmake_cpplint_FOUND TRUE)
-  ament_lint_auto_find_test_dependencies()
-endif()
+ament_export_dependencies(
+  rclcpp
+  project_utils_msgs
+  tf2_geometry_msgs
+  nav_msgs
+)
 
 ament_package()

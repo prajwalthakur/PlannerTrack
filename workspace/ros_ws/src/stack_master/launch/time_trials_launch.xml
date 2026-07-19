@@ -1,0 +1,111 @@
+<?xml version="1.0"?>
+<launch>
+
+    <!-- ===================================================== -->
+    <!-- Exposed topic arguments -->
+    <!-- These can be overridden by parent launch files -->
+    <!-- ===================================================== -->
+
+    <!-- Subscriber topics -->
+    <arg name="global_waypoints_topic"
+         default="/global_waypoints_scaled" />
+
+    <arg name="car_state_frenet_topic"
+         default="/car_state/frenet/odom" />
+
+    <arg name="car_pose_topic"
+         default="/car_state/pose" />
+
+    <arg name="avoidance_waypoints_topic"
+         default="/planner/avoidance/otwpnts" />
+
+    <arg name="obstacles_topic"
+         default="/perception/obstacles" />
+
+    <!-- Publisher topics -->
+    <arg name="state_topic"
+         default="/state" />
+
+    <arg name="state_marker_topic"
+         default="/state_marker" />
+
+    <arg name="local_waypoints_topic"
+         default="/local_waypoints" />
+
+    <arg name="local_waypoints_markers_topic"
+         default="/local_waypoints/markers" />
+  
+     <arg name="car_state_odom_topic"
+          default="/car_state/odom" />
+    <!-- ===================================================== -->
+    <!-- Trajectory follower -->
+    <!-- ===================================================== -->
+
+     <!-- Include trajectory follower launch -->
+     <include file="$(find-pkg-share trajectory_follower_node)/launch/trajectory_follower_node_launch.xml">
+          <!-- Optional: override arguments -->
+          <arg name="use_external_target_vel" value="true"/>
+          <arg name="external_target_vel" value="0.5"/>
+          <arg name="lateral_deviation" value="0.0"/>
+
+          <arg name="current_odometry_topic" value="$(var car_state_odom_topic)"/>
+          <arg name="state_machine_topic" value="/state"/>
+          <arg name="local_waypoints_topic" value="/local_waypoints"/>
+          <arg name="control_cmd_topic" value="/controller/control_cmd"/>
+     </include>
+
+     <!-- <arg name="current_odometry_topic" value="$(var car_state_odom_topic)"/> -->
+    <!-- ===================================================== -->
+    <!-- Command gate -->
+    <!-- ===================================================== -->
+
+    <include file="$(find-pkg-share cmd_gate)/launch/cmd_gate_node_launch.xml">
+    </include>
+
+    <!-- ===================================================== -->
+    <!-- State machine -->
+    <!-- ===================================================== -->
+
+    <include file="$(find-pkg-share state_machine)/launch/state_machine_launch.xml">
+
+        <arg name="param_file"
+             value="$(find-pkg-share stack_master)/config/state_machine_params.yaml" />
+
+        <arg name="mode"
+             value="timetrials" />
+
+        <arg name="overtake_mode"
+             value="dummy" />
+
+        <!-- Subscriber topics -->
+        <arg name="global_waypoints_topic"
+             value="$(var global_waypoints_topic)" />
+
+        <arg name="car_state_frenet_topic"
+             value="$(var car_state_frenet_topic)" />
+
+        <arg name="car_pose_topic"
+             value="$(var car_pose_topic)" />
+
+        <arg name="avoidance_waypoints_topic"
+             value="$(var avoidance_waypoints_topic)" />
+
+        <arg name="obstacles_topic"
+             value="$(var obstacles_topic)" />
+
+        <!-- Publisher topics -->
+        <arg name="state_topic"
+             value="$(var state_topic)" />
+
+        <arg name="state_marker_topic"
+             value="$(var state_marker_topic)" />
+
+        <arg name="local_waypoints_topic"
+             value="$(var local_waypoints_topic)" />
+
+        <arg name="local_waypoints_markers_topic"
+             value="$(var local_waypoints_markers_topic)" />
+
+    </include>
+
+</launch>

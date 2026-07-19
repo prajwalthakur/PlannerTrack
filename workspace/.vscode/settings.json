@@ -1,4 +1,64 @@
 {
+  "editor.formatOnSave": true,
+  "[cpp]": {
+    "editor.defaultFormatter": "xaver.clang-format",
+    "editor.formatOnSave": true
+  },
+  "[c]": {
+    "editor.defaultFormatter": "xaver.clang-format",
+    "editor.formatOnSave": true
+  },
+  "clang-format.executable": "/workspace/ros_ws/tools/clang_format_with_separators.sh",
+  "clang-format.style": "file",
+  "clang-format.fallbackStyle": "none",
+  "C_Cpp.clang_format_path": "/workspace/ros_ws/tools/clang_format_with_separators.sh",
+  "C_Cpp.clang_format_style": "file",
+  "C_Cpp.formatting": "clangFormat",
+
+  "psi-header.config": {
+    "forceToTop": true,
+    "blankLinesAfter": 1,
+    "license": "Custom"
+  },
+  "psi-header.variables": [
+    ["author", "Prajwal Thakur"],
+    ["authoremail", "prajwalthakur98@gmail.com"]
+  ],
+  "psi-header.templates": [
+    {
+      "language": "*",
+      "template": ["Author: <<author>> <<<authoremail>>>"]
+    }
+  ],
+  "psi-header.lang-config": [
+    {
+      "language": "cpp",
+      "begin": "/*",
+      "prefix": " * ",
+      "end": " */"
+    },
+    {
+      "language": "c",
+      "begin": "/*",
+      "prefix": " * ",
+      "end": " */"
+    },
+    {
+      "language": "python",
+      "begin": "",
+      "prefix": "# ",
+      "end": ""
+    }
+  ],
+  "psi-header.changes-tracking": {
+    "isActive": true,
+    "modAuthor": "Modified By:",
+    "modDate": "Last Modified:",
+    "modDateFormat": "date",
+    "autoHeader": "autoSave",
+    "excludeGlob": ["**/build/**", "**/install/**", "**/log/**"]
+  },
+
   "C_Cpp.errorSquiggles": "disabled",
   "files.associations": {
     "random": "cpp",

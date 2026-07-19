@@ -1,0 +1,8 @@
+<library path="motion_model_shapes">
+  <class type="EllipseCollisionFootPrint" base_class_type="CollisionFootPrint">
+    <description>Ellipse-shaped collision footprint proxy.</description>
+  </class>
+  <class type="RectangularGeometry" base_class_type="GeometricModel">
+    <description>Rectangular geometric model.</description>
+  </class>
+</library>

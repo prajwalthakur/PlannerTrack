@@ -1,0 +1,65 @@
+<?xml version="1.0"?>
+<launch>
+
+  <!-- ===================================================== -->
+  <!-- Parameters -->
+  <!-- ===================================================== -->
+
+  <arg name="use_external_target_vel" default="false" />
+  <arg name="external_target_vel" default="5.0" />
+  <arg name="lateral_deviation" default="0.0" />
+
+  <!-- ===================================================== -->
+  <!-- Topic remapping arguments -->
+  <!-- ===================================================== -->
+
+  <arg name="current_odometry_topic"
+       default="/autodrive/roboracer_1/odom" />
+
+  <arg name="state_machine_topic"
+       default="/state" />
+
+  <arg name="local_waypoints_topic"
+       default="/local_waypoints" />
+
+  <arg name="control_cmd_topic"
+       default="/controller/control_cmd" />
+
+  <!-- ===================================================== -->
+  <!-- Controller node -->
+  <!-- ===================================================== -->
+
+  <node
+    pkg="trajectory_follower_node"
+    exec="controller_node_exe"
+    name="controller"
+    output="screen">
+
+    <param from="$(find-pkg-share project_utils)/config/params.yaml" />
+
+    <!-- Parameters -->
+    <param name="use_external_target_vel"
+           value="$(var use_external_target_vel)" />
+
+    <param name="external_target_vel"
+           value="$(var external_target_vel)" />
+
+    <param name="lateral_deviation"
+           value="$(var lateral_deviation)" />
+
+    <!-- Topic remapping -->
+    <remap from="~/input/current_odometry"
+           to="$(var current_odometry_topic)" />
+
+    <remap from="~/input/state_machine"
+           to="$(var state_machine_topic)" />
+
+    <remap from="~/input/local_waypoints"
+           to="$(var local_waypoints_topic)" />
+
+    <remap from="~/output/control_cmd"
+           to="$(var control_cmd_topic)" />
+
+  </node>
+
+</launch>

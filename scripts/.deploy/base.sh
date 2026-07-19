@@ -1,7 +1,7 @@
 #!/bin/bash
 # base.sh (or wherever run_docker lives)
 PROJECT_ROOT="${PROJECT_ROOT:-$PWD}"
-BASE_NAME="${BASE_NAME:-mp_ros2}"
+BASE_NAME="${BASE_NAME:-planner_track}"
 IMAGE_NAME="${IMAGE_NAME:-${BASE_NAME}}"
 CONTAINER_NAME="${CONTAINER_NAME:-${BASE_NAME}}"
 

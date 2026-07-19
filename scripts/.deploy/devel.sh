@@ -17,11 +17,17 @@ shift "$(($OPTIND -1))"
 if [ "$mode" = "gpu" ]; then
   run_docker --gpus all \
     --mount type=bind,src="${PROJECT_ROOT}/workspace/ros_ws/src",target="/workspace/ros_ws/src" \
+    --mount type=bind,src="${PROJECT_ROOT}/workspace/.vscode",target="/workspace/ros_ws/.vscode" \
+    --mount type=bind,src="${PROJECT_ROOT}/workspace/.clang-format",target="/workspace/ros_ws/.clang-format" \
+    --mount type=bind,src="${PROJECT_ROOT}/workspace/tools",target="/workspace/ros_ws/tools" \
     --mount type=bind,src="/tmp/.X11-unix",target="/tmp/.X11-unix",readonly \
     -- bash
 else
   run_docker \
     --mount type=bind,src="${PROJECT_ROOT}/workspace/ros_ws/src",target="/workspace/ros_ws/src" \
+    --mount type=bind,src="${PROJECT_ROOT}/workspace/.vscode",target="/workspace/ros_ws/.vscode" \
+    --mount type=bind,src="${PROJECT_ROOT}/workspace/.clang-format",target="/workspace/ros_ws/.clang-format" \
+    --mount type=bind,src="${PROJECT_ROOT}/workspace/tools",target="/workspace/ros_ws/tools" \
     --mount type=bind,src="/tmp/.X11-unix",target="/tmp/.X11-unix",readonly \
     -- bash
 fi
