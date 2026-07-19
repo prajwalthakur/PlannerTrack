@@ -1,19 +1,19 @@
-# autoware_cmake
+# mpl_cmake
 
 This package provides CMake scripts for Autoware.
 
 ## Usage
 
-### autoware_package.cmake
+### mpl_package.cmake
 
-Call `autoware_package()` before defining build targets, which will set common options for Autoware.
+Call `mpl_package()` before defining build targets, which will set common options for Autoware.
 
 ```cmake
 cmake_minimum_required(VERSION 3.5)
 project(package_name)
 
-find_package(autoware_cmake REQUIRED)
-autoware_package()
+find_package(mpl_cmake REQUIRED)
+mpl_package()
 
 ament_auto_add_library(...)
 ```
@@ -37,8 +37,8 @@ This macro addresses a naming convention conflict between Autoware packages (whi
 cmake_minimum_required(VERSION 3.14)
 project(autoware_interpolation)
 
-find_package(autoware_cmake REQUIRED)
-autoware_package()
+find_package(mpl_cmake REQUIRED)
+mpl_package()
 
 ament_auto_add_library(autoware_interpolation SHARED
   src/linear_interpolation.cpp

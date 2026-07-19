@@ -30,7 +30,6 @@ endforeach()
 
 # ── Library: all agent_sim components ─────────────────────────────────────────
 set(LIB_SOURCES
-  src/lidar_sensor.cpp
   src/vehicle_interface_class.cpp
 )
 

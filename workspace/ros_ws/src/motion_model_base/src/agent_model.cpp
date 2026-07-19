@@ -33,6 +33,13 @@ const GeometricModel & AgentModel::geometry() const
 
 //////////////////////////////////////////////////////////////////////////
 
+const SensorModel & AgentModel::sensor() const
+{
+	return *mSensorModel;
+}
+
+//////////////////////////////////////////////////////////////////////////
+
 stPose AgentModel::getStatePose() const
 {
 	return mDynamicModel->getStatePose();

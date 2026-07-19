@@ -40,35 +40,6 @@
 
 using EigenVector = project_utils_msgs::msg::EigenVector;
 
-// // Pull lidar types into global scope
-// using lidar_sim::LidarParams;
-// using lidar_sim::LidarSensor;
-// using lidar_sim::WorldCircle;
-// using lidar_sim::WorldOBB;
-// using lidar_sim::WorldSegment;
-
-// ── Simple PID with output clamp ──────────────────────────────────────────────
-// struct PidController
-// {
-// 	double kp{1.0}, ki{0.0}, kd{0.0};
-// 	double out_min{-1e9}, out_max{1e9};
-// 	double integral{0.0};
-// 	double prev_error{0.0};
-
-// 	double compute(double error, double dt)
-// 	{
-// 		integral += error * dt;
-// 		const double derivative = (dt > 1e-9) ? (error - prev_error) / dt : 0.0;
-// 		prev_error = error;
-// 		return std::clamp(kp * error + ki * integral + kd * derivative, out_min, out_max);
-// 	}
-
-// 	void reset()
-// 	{
-// 		integral = 0.0;
-// 		prev_error = 0.0;
-// 	}
-// };
 
 class AgentInterface : public rclcpp::Node
 {
@@ -83,24 +54,19 @@ class AgentInterface : public rclcpp::Node
 		UniqueId id{"agent"};
 		ptSharedPtr<AgentModel> model;
 
-		// std::shared_ptr<SingleTrackDynStateModel> stateModel;
-		// std::shared_ptr<RectangularGeometry> geomModel;
-		// std::shared_ptr<EllipseCollisionFootPrint> footprint;
 
-		// OBB half-extents for lidar
-		float hl{0.0f}, hw{0.0f};
-
-		// Live pose for lidar ray-casting
-		float x{0.0f}, y{0.0f}, phi{0.0f};
-
-		// Subscribes to a raw control input, forwarded straight to
-		// AgentModel::updateCommandedControl() -- no PID loop here, that
-		// belongs to the controller/ package family.
         rclcpp::Subscription<EigenVector>::SharedPtr controlSub;
 		rclcpp::Publisher<nav_msgs::msg::Odometry>::SharedPtr odomPub;
-		// rclcpp::Publisher<project_utils_msgs::msg::LaneId>::SharedPtr laneLocPub;
-		// rclcpp::Publisher<sensor_msgs::msg::JointState>::SharedPtr jointStatePub;
 		rclcpp::Publisher<sensor_msgs::msg::LaserScan>::SharedPtr scanPub;
+
+		// Cached from this agent's own sensor_params (YAML) for building
+		// LaserScan headers -- not queryable from SensorModel itself, since
+		// angle/range metadata is lidar-specific and doesn't belong on the
+		// generic sensor interface.
+		float lidarAngleMin{-3.14159265f};
+		float lidarAngleMax{3.14159265f};
+		float lidarRangeMin{0.05f};
+		float lidarRangeMax{10.0f};
 	};
 
 	void loadRosParams();
@@ -108,7 +74,7 @@ class AgentInterface : public rclcpp::Node
 
 	void stateUpdateTimerCallback();  // step every agent's model, then refresh the world snapshot
 	void statePubTimerCallback();  // odom + TF
-	// void lidarTimerCallback();  // LaserScan
+	void lidarTimerCallback();  // LaserScan
 
 	void publishStaticTFs();
 	void broadcastAgentTF(int agentNum, const stPose & pose);
@@ -120,13 +86,8 @@ class AgentInterface : public rclcpp::Node
 	std::vector<AgentData> mAgents;
 	int mNumAgents{0};
 
-	// LidarSensor mLidar;
-	// LidarParams mLidarParams;
-
-	// float mVisDt{0.1f};
 	std::vector<ShapeDescriptor> mObstacleCircles;
-	// std::vector<WorldSegment> mWallSegments;
-	// GraphLocalization mGraphLoc;
+
 
 	rclcpp::TimerBase::SharedPtr mStateUpdateTimer;
 	rclcpp::TimerBase::SharedPtr mStatePubTimer;
@@ -135,13 +96,11 @@ class AgentInterface : public rclcpp::Node
 	std::unique_ptr<tf2_ros::TransformBroadcaster> mTfBroadcaster;
 	std::shared_ptr<tf2_ros::StaticTransformBroadcaster> mStaticTfBroadcaster;
 
-	// // PID gains (shared across agents, loaded from params)
-	// double mKpV{2.0}, mKiV{0.0}, mKdV{0.05};
-	// double mKpW{2.0}, mKiW{0.0}, mKdW{0.05};
-	// double mAccMax{3.0}, mAlphaMax{3.5};
+
 
 	double mSimTimeStep{0.01};
 	double mStatePublisherTimeStep{0.05};
+	double mVisDt{0.1};
 	std::string mFixedFrame{"world"};
 
 	std::string mSimConfigFile;
