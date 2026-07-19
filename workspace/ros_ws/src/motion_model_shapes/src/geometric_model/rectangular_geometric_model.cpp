@@ -23,6 +23,11 @@ void RectangularGeometry::initialize(const YAML::Node & params, const UniqueId &
 	mWidth = params["width"].as<double>();
 	mId = id; // base
 	mVertices = std::make_shared<stVertices>();
+	// Must be non-null immediately, not just after the first step(): other
+	// agents' sensors can call describe() on this object before this
+	// agent's own step() has run for the first time this tick (WorldSnapshot
+	// is built from every agent's current geometry before any of them step).
+	mPose = std::make_shared<stPose>();
 }
 //////////////////////////////////////////////////////////////////////////
 

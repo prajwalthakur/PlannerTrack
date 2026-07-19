@@ -41,7 +41,7 @@ void AgentInterface::onConfigure()
 	get(mStatePublisherTimeStep, "agent_interface.state_publisher_dt", 0.05);
 	get(mVisDt, "lidar.vis_dt", 0.1);
 	get(mFixedFrame, "agent_interface.fixed_frame", std::string("odom"));
-	get(mNumAgents, "agents.num_agents", 0);
+	get(mNumAgents, "agent_interface.num_agents", 0);
 	get(mSimConfigFile, "sim_config_file", std::string(""));
 	get(mAgentsConfigFile, "agents_config_file", std::string(""));
 

@@ -34,8 +34,7 @@ struct InputStruct
 
 //////////////////////////////////////////////////////////////////////////
 
-class SingleTrackDynStateModel : public DynamicModel,
-                                 public std::enable_shared_from_this<SingleTrackDynStateModel>
+class SingleTrackDynStateModel : public DynamicModel
 {
 	using BaseType = DynamicModel;
 

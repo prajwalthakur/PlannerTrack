@@ -60,14 +60,18 @@ void SingleTrackDynStateModel::createIntegrator(YAML::Node & simConfig, YAML::No
 {
 	double intTimeStep = vehYamlConfig["integration"]["integrationStepSize"].as<double>();
 	double simTimeStep = simConfig["simTimeStep"].as<double>();
-	auto selfPtr = shared_from_this();
+	// Plain `this`, not shared_from_this(): mIntegrator is a member of this
+	// object, so it can't outlive it, and shared_from_this() throws
+	// bad_weak_ptr for instances constructed via pluginlib::ClassLoader
+	// (the shared_ptr gets built through the type-erased base-class
+	// pointer, so enable_shared_from_this's hookup never fires).
 	mIntegrator = std::make_shared<IntegratorClass>(
-	    [selfPtr](const StateVector & state, const InputVector & input) -> StateVector {
-		    return selfPtr->xdot(state, input);
+	    [this](const StateVector & state, const InputVector & input) -> StateVector {
+		    return xdot(state, input);
 	    },
-	    [selfPtr]() -> const StateVector & { return selfPtr->getState(); },
-	    [selfPtr](const StateVector & state) -> void { return selfPtr->setState(state); },
-	    [selfPtr](const InputVector & input) -> void { return selfPtr->setInput(input); },
+	    [this]() -> const StateVector & { return getState(); },
+	    [this](const StateVector & state) -> void { return setState(state); },
+	    [this](const InputVector & input) -> void { return setInput(input); },
 	    intTimeStep, simTimeStep);
 }
 
