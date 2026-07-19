@@ -30,6 +30,9 @@ class AgentModel
 	// past AgentModel's own lifetime (same reasoning as constructor params
 	// being shared_ptr).
 	const GeometricModel & geometry() const;
+	// Non-owning access to this agent's collision footprint -- same lifetime
+	// caveat as geometry().
+	const CollisionFootPrint & collisionFootprint() const;
 	// Non-owning access to this agent's sensor, e.g. for publishing its last
 	// computed reading (SensorModel::getReadings()) -- same lifetime caveat
 	// as geometry().

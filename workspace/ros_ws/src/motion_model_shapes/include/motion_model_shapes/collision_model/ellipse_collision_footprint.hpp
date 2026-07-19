@@ -31,6 +31,7 @@ class EllipseCollisionFootPrint : public CollisionFootPrint
 	bool contains(const std::shared_ptr<stPose> & pose) const;
 	// Update collision foot print model
 	void step(const stPose & pose) override;
+	ShapeDescriptor describe() const override;
 
   private:
 	std::shared_ptr<stPose> mPose{nullptr};

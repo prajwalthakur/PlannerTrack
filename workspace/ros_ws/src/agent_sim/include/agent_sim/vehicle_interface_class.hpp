@@ -27,6 +27,7 @@
 #include <geometry_msgs/msg/transform_stamped.hpp>
 #include <nav_msgs/msg/odometry.hpp>
 #include <sensor_msgs/msg/laser_scan.hpp>
+#include <visualization_msgs/msg/marker_array.hpp>
 
 #include <tf2/LinearMath/Quaternion.h>
 #include <tf2_ros/static_transform_broadcaster.h>
@@ -95,6 +96,7 @@ class AgentInterface : public rclcpp::Node
 
 	std::unique_ptr<tf2_ros::TransformBroadcaster> mTfBroadcaster;
 	std::shared_ptr<tf2_ros::StaticTransformBroadcaster> mStaticTfBroadcaster;
+	rclcpp::Publisher<visualization_msgs::msg::MarkerArray>::SharedPtr mMarkerPub;
 
 
 

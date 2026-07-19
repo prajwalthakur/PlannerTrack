@@ -119,4 +119,18 @@ std::pair<double, bool> EllipseCollisionFootPrint::detectCollision(
 
 //////////////////////////////////////////////////////////////////////////
 
+ShapeDescriptor EllipseCollisionFootPrint::describe() const
+{
+	ShapeDescriptor desc;
+	desc.kind = ShapeDescriptor::Kind::Ellipse;
+	desc.ellipse.cx = mPose->xCoord;
+	desc.ellipse.cy = mPose->yCoord;
+	desc.ellipse.majorAxisLength = mMajorAxisLength;
+	desc.ellipse.minorAxisLength = mMinorAxisLength;
+	desc.ellipse.phi = mPose->yaw;
+	return desc;
+}
+
+//////////////////////////////////////////////////////////////////////////
+
 PLUGINLIB_EXPORT_CLASS(EllipseCollisionFootPrint, CollisionFootPrint)

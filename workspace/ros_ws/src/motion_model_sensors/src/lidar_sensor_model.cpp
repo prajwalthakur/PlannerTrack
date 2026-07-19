@@ -179,6 +179,11 @@ float LidarSensorModel::rayShape(
 			return rayCircle(ox, oy, dx, dy, shape.circle, range_min);
 		case ShapeDescriptor::Kind::Polygon:
 			return rayPolygon(ox, oy, dx, dy, shape.polygon, range_min);
+		case ShapeDescriptor::Kind::Ellipse:
+			// CollisionFootPrint::describe() can return this, but only
+			// GeometricModel::describe() ever feeds a WorldSnapshot -- a
+			// lidar never actually sees this case today.
+			break;
 	}
 	return kInf;
 }

@@ -33,6 +33,13 @@ const GeometricModel & AgentModel::geometry() const
 
 //////////////////////////////////////////////////////////////////////////
 
+const CollisionFootPrint & AgentModel::collisionFootprint() const
+{
+	return *mCollisionFootPrint;
+}
+
+//////////////////////////////////////////////////////////////////////////
+
 const SensorModel & AgentModel::sensor() const
 {
 	return *mSensorModel;

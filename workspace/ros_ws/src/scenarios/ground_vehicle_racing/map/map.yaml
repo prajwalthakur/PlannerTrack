@@ -1,4 +1,4 @@
-image: roboracer_r1.pgm
+image: map.pgm
 mode: trinary
 resolution: 0.05
 origin: [-3.68, -8.57, 0]

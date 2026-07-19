@@ -32,6 +32,7 @@ void AgentInterface::onConfigure()
 	mParameters = std::make_unique<mpl::rclcpp_utils::Parameters>(*this);
 	mTfBroadcaster = std::make_unique<tf2_ros::TransformBroadcaster>(*this);
 	mStaticTfBroadcaster = std::make_shared<tf2_ros::StaticTransformBroadcaster>(this);
+	mMarkerPub = create_publisher<visualization_msgs::msg::MarkerArray>("/agent_markers", 10);
 	mLogger = mpl::rclcpp_utils::Logger(get_logger(), "veh-interface-logger");
 	mVehicleFactory = std::make_unique<VehicleModelFactory>(mLogger);
 	auto get = mParameters->getParamGetter("");
@@ -201,6 +202,7 @@ void AgentInterface::stateUpdateTimerCallback()
 void AgentInterface::statePubTimerCallback()
 {
 	const rclcpp::Time stamp = now();
+	visualization_msgs::msg::MarkerArray markers;
 	for (auto & ag : mAgents) {
 		if (!ag.model) {
 			continue;
@@ -224,7 +226,56 @@ void AgentInterface::statePubTimerCallback()
 
 		// TF
 		broadcastAgentTF(agentNum, pose);
+
+		// Geometry visualization -- a CUBE sized from the agent's own
+		// RectangularGeometry, anchored at its base_link frame's origin
+		// (identity pose here) so TF -- already broadcast above -- does the
+		// world placement instead of duplicating pose math into the marker.
+		const ShapeDescriptor desc = ag.model->geometry().describe();
+		if (desc.kind == ShapeDescriptor::Kind::Rectangle) {
+			visualization_msgs::msg::Marker marker;
+			marker.header.stamp = stamp;
+			marker.header.frame_id = "agent_" + std::to_string(agentNum) + "_base_link";
+			marker.ns = "agents";
+			marker.id = agentNum;
+			marker.type = visualization_msgs::msg::Marker::CUBE;
+			marker.action = visualization_msgs::msg::Marker::ADD;
+			marker.pose.orientation.w = 1.0;
+			marker.scale.x = desc.rect.length;
+			marker.scale.y = desc.rect.width;
+			marker.scale.z = 0.2;
+			marker.color.r = 0.1f;
+			marker.color.g = 0.6f;
+			marker.color.b = 1.0f;
+			marker.color.a = 0.8f;
+			markers.markers.push_back(marker);
+		}
+
+		// Collision footprint visualization 
+		// SPHERE marker with scale.x != scale.y renders as an ellipse.
+		// Semi-transparent and a different color from the true-shape CUBE
+		// above: this is a safety-margin overlay, not the rendered body.
+		const ShapeDescriptor footprintDesc = ag.model->collisionFootprint().describe();
+		if (footprintDesc.kind == ShapeDescriptor::Kind::Ellipse) {
+			visualization_msgs::msg::Marker marker;
+			marker.header.stamp = stamp;
+			marker.header.frame_id = "agent_" + std::to_string(agentNum) + "_base_link";
+			marker.ns = "agents_footprint";
+			marker.id = agentNum;
+			marker.type = visualization_msgs::msg::Marker::SPHERE;
+			marker.action = visualization_msgs::msg::Marker::ADD;
+			marker.pose.orientation.w = 1.0;
+			marker.scale.x = footprintDesc.ellipse.majorAxisLength;
+			marker.scale.y = footprintDesc.ellipse.minorAxisLength;
+			marker.scale.z = 0.05;
+			marker.color.r = 1.0f;
+			marker.color.g = 0.3f;
+			marker.color.b = 0.1f;
+			marker.color.a = 0.35f;
+			markers.markers.push_back(marker);
+		}
 	}
+	mMarkerPub->publish(markers);
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

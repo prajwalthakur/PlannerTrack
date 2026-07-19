@@ -24,11 +24,19 @@ struct CircleData
 	double radius{0.0};
 };
 
+struct EllipseData
+{
+	double cx{0.0}, cy{0.0};  // center
+	double majorAxisLength{0.0}, minorAxisLength{0.0};  // full lengths, not semi-axes
+	double phi{0.0};  // heading (radians)
+};
+
 struct ShapeDescriptor
 {
-	enum class Kind { Rectangle, Circle, Polygon } kind{Kind::Polygon};
+	enum class Kind { Rectangle, Circle, Polygon, Ellipse } kind{Kind::Polygon};
 	RectangleData rect;  // valid iff kind == Rectangle
 	CircleData circle;  // valid iff kind == Circle
+	EllipseData ellipse;  // valid iff kind == Ellipse
 	// Fallback for anything else. Also used for line-segment obstacles (a
 	// 2-vertex "polygon" is treated as an open segment, not a closed loop).
 	std::vector<stPose> polygon;

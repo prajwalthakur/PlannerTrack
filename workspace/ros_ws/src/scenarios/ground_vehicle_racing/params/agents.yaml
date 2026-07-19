@@ -80,3 +80,37 @@ agents:
       angle_max: 3.14159265
       range_min: 0.05
       range_max: 10.0
+
+  agent_3:
+    dynamics_plugin: SingleTrackDynStateModel
+    dynamics_params:
+      numStates: 5
+      numControlInputs: 2
+      initXPose: 4.0            # offset from agent_1 so they don't spawn overlapping
+      initYPose: 0.0
+      initYaw: 0.0
+      initVx: 0.0
+      initSf: 0.0
+      initAcc: 0.0
+      initSv: 0.0
+      vehWheelBase: 0.30        # deliberately different from agent_1, to prove params are per-agent
+      integration:
+        integrationStepSize: 0.001
+
+    geometry_plugin: RectangularGeometry
+    geometry_params:
+      length: 0.58
+      width: 0.31
+
+    collision_plugin: EllipseCollisionFootPrint
+    collision_params:
+      major_axis_length: 0.60
+      minor_axis_length: 0.34
+
+    sensor_plugin: LidarSensorModel
+    sensor_params:
+      num_beams: 360
+      angle_min: -3.14159265
+      angle_max: 3.14159265
+      range_min: 0.05
+      range_max: 10.0

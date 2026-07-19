@@ -20,6 +20,7 @@ set(THIS_PACKAGE_INCLUDE_DEPENDS
     project_utils_msgs
     motion_model_base
     pluginlib
+    visualization_msgs
 )
 
 find_package(yaml-cpp REQUIRED)
