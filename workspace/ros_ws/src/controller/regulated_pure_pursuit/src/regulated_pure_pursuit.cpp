@@ -30,7 +30,7 @@ RegulatedPP::RegulatedPP([[maybe_unused]] rclcpp::Node & node)
 
 	// Debug Publishers
 	pub_debug_marker_ =
-	    node.create_publisher<visualization_msgs::msg::MarkerArray>("~/debug/markers", 0);
+	    node.create_publisher<visualization_msgs::msg::MarkerArray>("~/debug/markers", 1);
 	// Publish predicted trajectory
 	pub_predicted_trajectory_ = node.create_publisher<project_utils_msgs::msg::Trajectory>(
 	    "~/output/predicted_trajectory", 1);

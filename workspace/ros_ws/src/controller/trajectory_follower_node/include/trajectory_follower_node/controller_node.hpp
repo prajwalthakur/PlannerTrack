@@ -37,11 +37,11 @@
 #include "tf2_msgs/msg/tf_message.hpp"
 #include "visualization_msgs/msg/marker_array.hpp"
 // custom msgs
-#include "f110_msgs/msg/wpnt_array.hpp"
 #include "project_utils_msgs/msg/control.hpp"
 #include "project_utils_msgs/msg/control_horizon.hpp"
 #include "project_utils_msgs/msg/longitudinal.hpp"
 #include "project_utils_msgs/msg/trajectory.hpp"
+#include "project_utils_msgs/msg/wpnt_array.hpp"
 
 using project_utils_msgs::msg::Float64Stamped;
 
@@ -103,7 +103,11 @@ class Controller : public rclcpp::Node
 	// Publish the processing time
 	void publishProcessingTime(
 	    const double tMs, [[maybe_unused]] const rclcpp::Publisher<Float64Stamped>::SharedPtr pub);
+	
 
+	// create agent model
+	void createAgentModel();
+	
   private:
 	// logger
 	mpl::rclcpp_utils::Logger mLogger;
@@ -116,6 +120,14 @@ class Controller : public rclcpp::Node
 	bool mEnableControlCmdHorizonPub{false};
 	bool mHybridControllerMode{false};
 
+	// Which agent this controller instance drives -- read from the per-agent
+	// launch params (scenarios/.../launch/ground_vehicle_racing.launch.py),
+	// used to pick this agent's YAML block out of agents_config_file so the
+	// controller can build the same vehicle model agent_sim uses.
+	std::string mSimConfigFile;
+	std::string mAgentsConfigFile;
+	int mAgentNumber{0};
+
 	std::optional<LongitudinalOutput> mLongitudinalOutput{std::nullopt};
 	std::unique_ptr<trajectory_follower::LongitudinalControllerBase> mLongitudinalController{
 	    nullptr};
@@ -124,7 +136,7 @@ class Controller : public rclcpp::Node
 
 	// Subscriber
 	mpl_utils::InternalProcessPollingSubscriber<project_utils_msgs::msg::Trajectory> mSubRefPath{
-	    this, "~/input/reference_trajectory"};
+	    this, "~/input/reference_trajectory",rclcpp::QoS{1}.transient_local()};
 	mpl_utils::InternalProcessPollingSubscriber<nav_msgs::msg::Odometry> mSubOdometry{
 	    this, "~/input/current_odometry"};
 	mpl_utils::InternalProcessPollingSubscriber<project_utils_msgs::msg::SteeringReport>
@@ -133,7 +145,7 @@ class Controller : public rclcpp::Node
 	    mSubAccel{this, "~/input/current_accel"};
 	mpl_utils::InternalProcessPollingSubscriber<std_msgs::msg::String> mSubStateMachine{
 	    this, "~/input/state_machine"};
-	mpl_utils::InternalProcessPollingSubscriber<f110_msgs::msg::WpntArray> mSubLocalWp{
+	mpl_utils::InternalProcessPollingSubscriber<project_utils_msgs::msg::WpntArray> mSubLocalWp{
 	    this, "~/input/local_waypoints"};  // waypoints (x, y, v, norm trackbound, s, kappa)
 
 	// Publishers
@@ -148,7 +160,7 @@ class Controller : public rclcpp::Node
 	project_utils_msgs::msg::SteeringReport::ConstSharedPtr mCurrentSteeringPtr;
 	geometry_msgs::msg::AccelWithCovarianceStamped::ConstSharedPtr mCurrentAccelPtr;
 	std_msgs::msg::String::ConstSharedPtr mCurrentStatePtr;
-	f110_msgs::msg::WpntArray::ConstSharedPtr mCurrentLocalWpPtr;
+	project_utils_msgs::msg::WpntArray::ConstSharedPtr mCurrentLocalWpPtr;
 
 	static constexpr double loggerThrottleInterval = 5000;  // in ms -> 5 sec
 };

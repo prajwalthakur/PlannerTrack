@@ -70,10 +70,15 @@ void AgentModel::updateCommandedControl(const InputVector & u)
 
 void AgentModel::step(const WorldSnapshot & world)
 {
-	mLogger.info("stepping agent, id: %d ", mId.value());
+	//mLogger.info("stepping agent, id: %d ", mId.value());
 	mDynamicModel->step();
 	auto pose = mDynamicModel->getStatePose();
 	mGeomModel->step(pose);
 	mSensorModel->step(mId, pose, world);
 	mCollisionFootPrint->step(pose);
+}
+
+void AgentModel::publishStates() const
+{
+	mDynamicModel->publishStates();
 }

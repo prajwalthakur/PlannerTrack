@@ -173,8 +173,9 @@ bool Optimizer::optimize(const trajectory_follower::InputData & inputData,
 
 	//mLogger.info("local wp size = %d", inputData.mLocalWpArray.wpnts.size());
 
-	mpl::extra_utils::convertPathWptsToTrajectory(
-	    inputData.mLocalWpArray, mLocalTrajectoryToFollow);
+	// mpl::extra_utils::convertPathWptsToTrajectory(
+	//     inputData.mLocalWpArray, mLocalTrajectoryToFollow);
+	mLocalTrajectoryToFollow = inputData.mCurrentTrajectory;
 	// mLogger.info("convertPathWptsToTrajectory called");
 
 	// project_utils_msgs::msg::Trajectory

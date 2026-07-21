@@ -2,12 +2,15 @@
  * Author: Prajwal Thakur <prajwalthakur98@gmail.com>
  */
 #pragma once
+#include "project_utils/integrator.hpp"
 #include "project_utils/macros_expression.hpp"
 #include "project_utils/pose_definition.hpp"
-#include "project_utils/integrator.hpp"
 #include "project_utils/unique_id.hpp"
 
+#include <rclcpp/rclcpp.hpp>
 #include <yaml-cpp/yaml.h>
+
+#include <string>
 ////////////////////////////////////////////////////////////////////////////////
 
 class DynamicModel
@@ -32,6 +35,23 @@ class DynamicModel
 	virtual void setState(const StateVector &) = 0;
 	// Set the integrator for the state model.
 	virtual void createIntegrator() = 0;
+	// Wire up this model's own ROS I/O. Called once after initialze(), since
+	// pluginlib default-constructs plugins (createSharedInstance takes no
+	// args), so a node can't be threaded through the constructor. node/ns
+	// let a concrete model create whatever publishers it needs -- not every
+	// agent type publishes the same things -- namespaced consistently with
+	// the rest of the sim (e.g. ns == "agent_3" -> topic "/agent_3/odom",
+	// frame "agent_3_base_link"). Default is a no-op: models with nothing to
+	// publish aren't forced to override it.
+	virtual void setupRos(
+	    const rclcpp::Node::SharedPtr & node, const std::string & ns, const std::string & fixedFrame)
+	{
+		mNode = node;
+		mNamespace = ns;
+		mFixedFrame = fixedFrame;
+	}
+	// pusblish the states (odom, steering feedback etc, whatever information we need to publish)
+	virtual void publishStates() const = 0;
 
   protected:
 	ptSharedPtr<IntegratorClass> mIntegrator{nullptr};
@@ -39,4 +59,7 @@ class DynamicModel
 	YAML::Node mVehConfig;
 	InputVector mCommandedControl;
 	UniqueId mId;
+	rclcpp::Node::SharedPtr mNode;
+	std::string mNamespace;
+	std::string mFixedFrame;
 };

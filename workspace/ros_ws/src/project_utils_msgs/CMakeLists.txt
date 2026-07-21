@@ -40,6 +40,9 @@ set(MSG_FILES
   "msg/ackermann/vehicle/SteeringReport.msg"
   "msg/common/Float64Stamped.msg"
   "msg/debug_msgs/Float32MultiArrayStamped.msg"
+  "msg/f110/PidData.msg"
+  "msg/f110/Wpnt.msg"
+  "msg/f110/WpntArray.msg"
 )
 
 rosidl_generate_interfaces(${PROJECT_NAME}

@@ -11,7 +11,10 @@
 
   <depend>motion_model_base</depend>
   <depend>project_utils</depend>
+  <depend>project_utils_msgs</depend>
   <depend>pluginlib</depend>
+  <depend>rclcpp</depend>
+  <depend>nav_msgs</depend>
   <depend>Eigen3</depend>
   <depend>eigen3_cmake_module</depend>
   <depend>yaml-cpp</depend>

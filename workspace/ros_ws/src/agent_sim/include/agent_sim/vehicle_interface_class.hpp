@@ -25,7 +25,6 @@
 #include <rclcpp/rclcpp.hpp>
 
 #include <geometry_msgs/msg/transform_stamped.hpp>
-#include <nav_msgs/msg/odometry.hpp>
 #include <sensor_msgs/msg/laser_scan.hpp>
 #include <visualization_msgs/msg/marker_array.hpp>
 
@@ -57,7 +56,6 @@ class AgentInterface : public rclcpp::Node
 
 
         rclcpp::Subscription<EigenVector>::SharedPtr controlSub;
-		rclcpp::Publisher<nav_msgs::msg::Odometry>::SharedPtr odomPub;
 		rclcpp::Publisher<sensor_msgs::msg::LaserScan>::SharedPtr scanPub;
 
 		// Cached from this agent's own sensor_params (YAML) for building

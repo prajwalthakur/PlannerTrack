@@ -11,4 +11,12 @@ install(
   DESTINATION share/${PROJECT_NAME}
 )
 
+# Also install the waypoints publisher script as a real `ros2 run`-able
+# executable (the DIRECTORY install above only copies it under share/,
+# which ros2 run doesn't look in).
+install(PROGRAMS
+  ground_vehicle_racing/scripts/global_waypoints_publisher.py
+  DESTINATION lib/${PROJECT_NAME}
+)
+
 ament_package()

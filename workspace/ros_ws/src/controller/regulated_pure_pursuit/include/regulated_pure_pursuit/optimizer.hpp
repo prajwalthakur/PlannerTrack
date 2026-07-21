@@ -22,9 +22,9 @@
 #include <Eigen/Dense>
 #include <rclcpp/rclcpp.hpp>
 
-#include "f110_msgs/msg/wpnt_array.hpp"
 #include "project_utils_msgs/msg/float32_multi_array_stamped.hpp"
 #include "project_utils_msgs/msg/trajectory.hpp"
+#include "project_utils_msgs/msg/wpnt_array.hpp"
 #include <geometry_msgs/msg/pose.hpp>
 
 #include <optional>
@@ -99,7 +99,7 @@ struct stOptimParam
 	float max_steering_angle{0.3};
 
 	bool set_external_target_speed{false};
-	
+
 	float external_target_speed{0.5};
 };
 
@@ -126,7 +126,7 @@ class Optimizer
 	// void getInitialGuess(mpcc_controller::model::stState & xInit);
 
   private:
-	void convertWptsToPoints(const f110_msgs::msg::WpntArray & wpts,
+	void convertWptsToPoints(const project_utils_msgs::msg::WpntArray & wpts,
 	    std::vector<geometry_msgs::msg::Point> & geomPoints);
 	// void updateInitialGuess(mpcc_controller::model::stState & xInit);
 	// void generateInitialGuess(mpcc_controller::model::stState & xInit);

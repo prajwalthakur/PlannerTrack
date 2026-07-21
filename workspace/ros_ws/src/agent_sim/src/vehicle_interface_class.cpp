@@ -106,7 +106,9 @@ void AgentInterface::addAgents()
 		auto id = UniqueId("agent", i);
 		auto & agent = mAgents[i];
 		agent.id = id;
-		agent.model = mVehicleFactory->create(mSimConfig, agentNode, id);
+		// create state publisher
+		agent.model = mVehicleFactory->create(
+		    mSimConfig, agentNode, id, shared_from_this(), mFixedFrame, true);
 		agent.controlSub =
 		    create_subscription<EigenVector>("/agent_" + std::to_string(i) + "/control", 1,
 		        [this, idx = i](EigenVector::SharedPtr msg) {
@@ -114,9 +116,6 @@ void AgentInterface::addAgents()
 			            msg->data.data(), static_cast<Eigen::Index>(msg->data.size()));
 			        mAgents[idx].model->updateCommandedControl(u);
 		        });
-
-		agent.odomPub =
-		    create_publisher<nav_msgs::msg::Odometry>("/agent_" + std::to_string(i) + "/odom", 10);
 
 		agent.scanPub = create_publisher<sensor_msgs::msg::LaserScan>(
 		    "/agent_" + std::to_string(i) + "/scan", 10);
@@ -178,7 +177,6 @@ void AgentInterface::broadcastAgentTF(int agentNum, const stPose & pose)
 
 void AgentInterface::stateUpdateTimerCallback()
 {
-
 	WorldSnapshot worldSnapShot;
 	worldSnapShot.agents.reserve(mAgents.size());
 	for (auto & ag : mAgents) {
@@ -207,22 +205,13 @@ void AgentInterface::statePubTimerCallback()
 		if (!ag.model) {
 			continue;
 		}
+		// Model-specific publishing (odom, steering feedback, etc.) -- each
+		// dynamics plugin owns this via the publishers it set up in
+		// setupRos(), since not every agent type publishes the same things.
+		ag.model->publishStates();
 
 		const int agentNum = static_cast<int>(ag.id.value());
 		const stPose pose = ag.model->getStatePose();
-		const StateVector & sv = ag.model->getState();
-
-		// Odometry
-		nav_msgs::msg::Odometry odom;
-		odom.header.stamp = stamp;
-		odom.header.frame_id = mFixedFrame;
-		odom.child_frame_id = "agent_" + std::to_string(agentNum) + "_base_link";
-		odom.pose.pose.position.x = pose.xCoord;
-		odom.pose.pose.position.y = pose.yCoord;
-		odom.pose.pose.position.z = pose.zCoord;
-		odom.pose.pose.orientation = mpl::geometry_utils::createQuaternionFromYaw(pose.yaw);
-		odom.twist.twist.linear.x = (sv.size() > 3) ? sv(3) : 0.0;
-		ag.odomPub->publish(odom);
 
 		// TF
 		broadcastAgentTF(agentNum, pose);
@@ -251,7 +240,7 @@ void AgentInterface::statePubTimerCallback()
 			markers.markers.push_back(marker);
 		}
 
-		// Collision footprint visualization 
+		// Collision footprint visualization
 		// SPHERE marker with scale.x != scale.y renders as an ellipse.
 		// Semi-transparent and a different color from the true-shape CUBE
 		// above: this is a safety-margin overlay, not the rendered body.

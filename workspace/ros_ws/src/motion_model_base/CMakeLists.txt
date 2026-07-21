@@ -10,6 +10,7 @@ find_package(ament_cmake REQUIRED)
 find_package(ament_cmake_ros REQUIRED)
 find_package(project_utils REQUIRED)
 find_package(pluginlib REQUIRED)
+find_package(rclcpp REQUIRED)
 find_package(Eigen3 REQUIRED)
 find_package(eigen3_cmake_module REQUIRED)
 find_package(yaml-cpp REQUIRED)
@@ -31,6 +32,7 @@ ament_target_dependencies(
   PUBLIC
   "project_utils"
   "pluginlib"
+  "rclcpp"
   "Eigen3"
   "eigen3_cmake_module"
 )

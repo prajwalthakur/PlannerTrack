@@ -16,10 +16,15 @@
 namespace mpl::control::trajectory_follower
 {
 
+//////////////////////////////////////////////////////////////////////////
+
 void LongitudinalControllerBase::sync(LateralSyncData const & lateralSyncData)
 {
 	mLateralSyncData = lateralSyncData;
 }
+
+//////////////////////////////////////////////////////////////////////////
+
 void LongitudinalControllerBase::reset()
 {
 	mLateralSyncData.mIsSteerConverged = false;

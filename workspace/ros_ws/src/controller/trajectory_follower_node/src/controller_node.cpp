@@ -15,6 +15,9 @@
 
 namespace
 {
+
+//////////////////////////////////////////////////////////////////////////
+
 template <typename T>
 std::vector<T> resampleHorizonByZeroOrderHold(
     const std::vector<T> & origHorizon, const double origTimeStepMs, const double newTimeStepMs)
@@ -38,6 +41,8 @@ namespace mpl::control::trajectory_follower_node
 {
 using std::placeholders::_1;
 
+//////////////////////////////////////////////////////////////////////////
+
 Controller::Controller(const rclcpp::NodeOptions & nodeOptions) : Node("controller", nodeOptions)
 {
 	// Logger
@@ -54,6 +59,11 @@ Controller::Controller(const rclcpp::NodeOptions & nodeOptions) : Node("controll
 	double ctrlPeriodSec = 1.0 / ctrlPeriodHz;
 	// mLogger.info("ctrlPeriodSec %f", ctrlPeriodSec);
 	getParam(mTimeoutThrSec, "timeout_thr_sec", 0.48f);
+
+	// per-agent identity, set by ground_vehicle_racing.launch.py
+	getParam(mSimConfigFile, "sim_config_file", std::string(""));
+	getParam(mAgentsConfigFile, "agents_config_file", std::string(""));
+	getParam(mAgentNumber, "agent_number", 0);
 
 	// not used
 	mCyclicMessageTimeoutThrSec = mpl::rclcpp_utils::get_or_declare_parameter<double>(
@@ -96,6 +106,13 @@ Controller::Controller(const rclcpp::NodeOptions & nodeOptions) : Node("controll
 			throw std::domain_error("[mHybridController] invalid algorithm");
 		}
 	}
+
+	// Build this agent's vehicle model -- ControllerBase::createAgent()
+	// already does the VehicleModelFactory/pluginlib work, so just call it
+	// on whichever algorithm object(s) got constructed above rather than
+	// duplicating that construction here.
+	createAgentModel();
+
 	// select the lateral controller mode
 
 	mControlCmdPub = create_publisher<project_utils_msgs::msg::Control>(
@@ -126,7 +143,34 @@ Controller::Controller(const rclcpp::NodeOptions & nodeOptions) : Node("controll
 	}
 }
 
-////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+void Controller::createAgentModel()
+{
+	if (mSimConfigFile.empty() || mAgentsConfigFile.empty()) {
+		mLogger.info("sim_config_file/agents_config_file not set, skipping agent model creation.");
+		return;
+	}
+
+	const YAML::Node simConfig = YAML::LoadFile(mSimConfigFile);
+	const YAML::Node agentsConfig = YAML::LoadFile(mAgentsConfigFile);
+	const YAML::Node agentConfig = agentsConfig["agents"]["agent_" + std::to_string(mAgentNumber)];
+
+	// ControllerBase::createAgent() owns the actual VehicleModelFactory/
+	// pluginlib construction -- just invoke it on whichever algorithm
+	// object(s) this instance is actually running.
+	if (mHybridControllerMode) {
+		if (!mHybridController->createAgent(simConfig, agentConfig, mAgentNumber)) {
+			throw std::runtime_error("Controller: failed to create agent model (hybrid)");
+		}
+	} else {
+		if (!mLateralController->createAgent(simConfig, agentConfig, mAgentNumber)) {
+			throw std::runtime_error("Controller: failed to create agent model (lateral)");
+		}
+	}
+}
+
+//////////////////////////////////////////////////////////////////////////
 
 bool Controller::processData(rclcpp::Clock & clock)
 {
@@ -150,16 +194,14 @@ bool Controller::processData(rclcpp::Clock & clock)
 		return false;
 	};
 	bool odomReady = getData(mCurrentOdometryPtr, mSubOdometry, "odometry");
-	bool stateReady = getData(mCurrentStatePtr, mSubStateMachine, "state-machine");
-	bool wpReady = getData(mCurrentLocalWpPtr, mSubLocalWp, "local-wp");
+	// bool stateReady = getData(mCurrentStatePtr, mSubStateMachine, "state-machine");
+	// bool wpReady = getData(mCurrentLocalWpPtr, mSubLocalWp, "local-wp");
+	bool trajReady = getData(mCurrentTrajectoryPtr, mSubRefPath, "reference-trajectory");
+	bool steerReady = getData(mCurrentSteeringPtr,mSubSteering,"steering");
+	mLogger.info_throttle(clock, loggerThrottleInterval,
+	    "odom=%d, traj-ready=%d, steer-ready %d", odomReady, trajReady, steerReady);
 
-	mLogger.info_throttle(clock,loggerThrottleInterval,
-		"odom=%d, state=%d, wp=%d",
-		odomReady,
-		stateReady,
-		wpReady);
-
-	isReady = odomReady && stateReady && wpReady;
+	isReady = odomReady  && trajReady && steerReady;
 	// isReady&= getData(mCurrentAccelPtr,mSubAccel,"acceleration"); #TODO:
 	// isReady&= getData(mCurrentSteeringPtr,mSubSteering,"steering"); #TODO:
 	// isReady&= getData(mCurrentTrajectoryPtr,mSubRefPath,"trajectory"); #TODO:
@@ -169,7 +211,7 @@ bool Controller::processData(rclcpp::Clock & clock)
 	return isReady;
 }
 
-////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
 
 bool Controller::isTimeOut(
     trajectory_follower::LongitudinalOutput & longOut, trajectory_follower::LateralOutput & latOut)
@@ -189,7 +231,7 @@ bool Controller::isTimeOut(
 	return false;
 }
 
-////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
 
 bool Controller::isTimeOut(trajectory_follower::HybridOutput & hybridOut)
 {
@@ -202,7 +244,7 @@ bool Controller::isTimeOut(trajectory_follower::HybridOutput & hybridOut)
 	return false;
 }
 
-////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
 
 std::unique_ptr<trajectory_follower::InputData> Controller::createInputData(rclcpp::Clock & clock)
 {
@@ -211,26 +253,27 @@ std::unique_ptr<trajectory_follower::InputData> Controller::createInputData(rclc
 	}
 	auto inputData = std::make_unique<trajectory_follower::InputData>();
 	inputData->mCurrentOdometry = *(mCurrentOdometryPtr);
-	inputData->mLocalWpArray = *(mCurrentLocalWpPtr);
-	inputData->mStateMachine = *(mCurrentStatePtr);
-	// inputData.mCurrentTrajectory = *mCurrentTrajectoryPtr;
-	// inputData.mCurrentSteering = *mCurrentSteeringPtr;
+	// inputData->mLocalWpArray = *(mCurrentLocalWpPtr);
+	// inputData->mStateMachine = *(mCurrentStatePtr);
+	inputData->mCurrentTrajectory = *(mCurrentTrajectoryPtr);
+	inputData->mCurrentSteering = *(mCurrentSteeringPtr);
 	// inputData.mCurrentAcc = *mCurrentAccelPtr;
 	return inputData;
 }
 
-////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
 
 void Controller::callbackTimerControl()
 {
-	mLogger.info_throttle(*get_clock(),loggerThrottleInterval,"In controll callback");
+	mLogger.info_throttle(*get_clock(), loggerThrottleInterval, "In controll callback");
 	project_utils_msgs::msg::Control controlCmdOut;
 	controlCmdOut.stamp = this->now();
 	// 1.Create Input data
 	const auto inputData = createInputData(*get_clock());
 	// mLogger.info("checking if input ready.");
 	if (!inputData) {
-		mLogger.info_throttle(*get_clock(),loggerThrottleInterval,"Control is skipped since input data is not ready.");
+		mLogger.info_throttle(*get_clock(), loggerThrottleInterval,
+		    "Control is skipped since input data is not ready.");
 		return;
 	}
 	// mLogger.info("checking if controller ready");
@@ -253,8 +296,8 @@ void Controller::callbackTimerControl()
 			return;
 		}
 	}
-	
-	//mLogger.info("controller ready");
+
+	// mLogger.info("controller ready");
 
 	// 3 . run controllers
 	trajectory_follower::LateralOutput latOut;
@@ -274,7 +317,7 @@ void Controller::callbackTimerControl()
 		longOut = mLongitudinalController->run(*inputData);
 		// mLogger.info("long run");
 	} else {
-		//mLogger.info("calling hybrid controller ");
+		// mLogger.info("calling hybrid controller ");
 		hybridOut = mHybridController->run(*inputData);
 		mLogger.info_throttle(*get_clock(), loggerThrottleInterval, "called hybrid controller ");
 	}
@@ -326,7 +369,7 @@ void Controller::callbackTimerControl()
 	}
 }
 
-////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
 
 void Controller::publishDebugMarker(
     [[maybe_unused]] const trajectory_follower::InputData & inputData,
@@ -356,7 +399,7 @@ void Controller::publishDebugMarker(
 	// debug_marker_pub_->publish(debug_marker_array);
 }
 
-////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
 
 void Controller::publishProcessingTime(
     const double t_ms, [[maybe_unused]] const rclcpp::Publisher<Float64Stamped>::SharedPtr pub)
@@ -367,7 +410,7 @@ void Controller::publishProcessingTime(
 	// pub->publish(msg);
 }
 
-////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
 
 std::optional<ControlHorizon> Controller::mergeLatLonHorizon(const LateralHorizon & lateralHorizon,
     const LongitudinalHorizon & longitudinalHorizon, const rclcpp::Time & stamp)

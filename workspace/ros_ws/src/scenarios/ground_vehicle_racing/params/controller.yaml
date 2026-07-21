@@ -1,0 +1,90 @@
+/**/controller: # matches any namespace + a node literally named "controller"
+  ros__parameters:
+    g: 9.8
+    controller_frequency: 50.0 # controller frequency
+    timeout_thr_sec: 0.025   # timeout (if next control output is not within threshold, controller will not publish the comand )
+    hybrid_mode_active: true # true if want to use hybrid controller mode
+    hybrid_mode: "regulated_pp" #"mpcc" # only active if hybrid_mode_active is set to true
+    lateral_controller_mode: "dummy_lateral"
+    longitudinal_controller_mode: "dummy_longitudinal"
+    regulated_pp:
+      optimizer:
+        set_external_target_speed: true
+        external_target_speed: 1.0
+        ld_velocity_ratio: 1.2
+        ld_lateral_error_ratio: 2.5
+        ld_curvature_ratio: 60.0
+        long_ld_lateral_error_threshold: 0.3
+        min_lookahead_distance: 0.7
+        max_lookahead_distance: 2.4
+        converged_steer_rad: 0.1
+        reverse_min_lookahead_distance: 1.5
+        prediction_ds: 0.2
+        prediction_distance_length: 10.0
+        resampling_ds: 0.1
+        curvature_calculation_distance: 1.0
+        max_steering_angle: 0.40
+        speed_lookahead: 0.02 
+        lat_err_coeff: 1.0
+        enable_path_smoothing: false
+        path_filter_moving_ave_num: 10.0
+      vehicle:
+        mu: 1.0489 # Surface friction coefficient
+        # Cornering stiffness coefficients (typical small-scale racecar values)
+        C_Sf: 4.718    # front [N/rad] (approx, tune if needed)
+        C_Sr: 5.456    # rear  [N/rad] (approx, tune if needed)
+        # Geometry (meters)
+        lf: 0.15875    # distance from CoG to front axle
+        lr: 0.17145    # distance from CoG to rear axle
+        hcg: 0.074     # height of center of gravity
+        # Mass & inertia
+        m: 3.74        # mass [kg]
+        Iz: 0.15    # yaw moment of inertia [kg*m^2]
+        # Steering constraints
+        s_min: -0.4189   # min steering angle [rad]
+        s_max: 0.4189    # max steering angle [rad]
+        sv_min: -3.2     # min steering velocity [rad/s]
+        sv_max: 3.2      # max steering velocity [rad/s]
+        # Longitudinal constraints
+        a_max: 9.51      # max acceleration [m/s^2]
+        v_min: -5.0      # min velocity [m/s] (reverse allowed)
+        v_max: 20.0      # max velocity [m/s]
+        # Switching velocity (for traction / motor model)
+        v_switch: 7.319  # velocity where accel model changes
+        if_switch: true  # enable switching model
+        # Vehicle dimensions (meters)
+        width: 0.31
+        length: 0.58
+        model_dt: 0.05
+        integrator_model_dt: 0.02 # should be same as model_dt 
+        integrator_integration_dt: 0.01 # rk4 will compute the next state in two steps (0.02/0.01), should be less than integrator_model_dt
+
+
+/**/wheel_odometry_node: # matches any namespace + a node literally named "wheel_odometry_node"
+  ros__parameters:
+    publish_tf: false
+    odom_pub_rate: 50.0 #not used
+    tf_pub_rate: 50.0
+    odom_frame: "odom"
+    base_frame: "base_link"
+    raw_odom_pub_topic: "/ego_car/raw/odom"
+    raw_imu_pub_topic: "/raw/imu"  #not used
+    raw_lidar_pub_topic: "/raw/lidar" #not used
+    wheel_radius: 0.0590
+    wheel_base: 0.32
+    car_width: 0.2700
+    wheel_seperation: 0.2700 #ig
+    counts_per_rev: -1.0 # not using it, encoder is giving angles
+    conversation_ratio: 120.0
+    velocity_rolling_window_size: 5
+    exp_filter_alpha: 0.8
+    use_exp_filter: true
+    exp_tau: 0.02
+    sync_queue: 10
+    use_servo_cmd_to_calc_angular_velocity: false
+    left_encoder_sub_topic: "/autodrive/roboracer_1/left_encoder"
+    right_encoder_sub_topic: "/autodrive/roboracer_1/right_encoder"
+    imu_sub_topic: "/autodrive/roboracer_1/imu"
+    steering_sub_stopic: "autodrive/roboracer_1/steering"
+    throttle_sub_topic: "/autodrive/roboracer_1/throttle"
+

@@ -2,6 +2,7 @@ find_package(mpl_cmake REQUIRED)
 find_package(project_utils REQUIRED)
 find_package(project_utils_testing REQUIRED)
 find_package(rclcpp REQUIRED)
+find_package(ament_index_cpp REQUIRED)
 
 project_add_gtest()
 
@@ -16,6 +17,7 @@ ament_target_dependencies(
   rclcpp
   project_utils
   project_utils_testing
+  ament_index_cpp
 )
 
 install(

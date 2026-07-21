@@ -15,6 +15,8 @@
 namespace mpl::control::trajectory_follower
 {
 
+//////////////////////////////////////////////////////////////////////////
+
 void LateralControllerBase::sync(LongitudinalSyncData const & longitudinalSyncData)
 {
 	mLongitudinalSyncData = longitudinalSyncData;

@@ -19,10 +19,10 @@
 #include "nav_msgs/msg/odometry.hpp"
 #include "std_msgs/msg/string.hpp"
 // custom msgs
-#include "f110_msgs/msg/wpnt_array.hpp"
 #include "project_utils_msgs/msg/path.hpp"
 #include "project_utils_msgs/msg/steering_report.hpp"
 #include "project_utils_msgs/msg/trajectory.hpp"
+#include "project_utils_msgs/msg/wpnt_array.hpp"
 
 // This file defines the input data structure for the trajectory follower
 // controllers.
@@ -36,9 +36,9 @@ namespace mpl::control::trajectory_follower
 struct InputData
 {
 	nav_msgs::msg::Odometry mCurrentOdometry;
-	f110_msgs::msg::WpntArray mLocalWpArray;
-	std_msgs::msg::String mStateMachine;
-	// project_utils_msgs::msg::Trajectory mCurrentTrajectory;
+	//project_utils_msgs::msg::WpntArray mLocalWpArray;
+	//std_msgs::msg::String mStateMachine;
+	project_utils_msgs::msg::Trajectory mCurrentTrajectory;
 	// nav_msgs::msg::Odometry mCurrentOdometry;
 	// project_utils_msgs::msg::Path mPathToFollow;
 	// geometry_msgs::msg::AccelWithCovarianceStamped mCurrentAcc;

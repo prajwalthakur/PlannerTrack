@@ -1,5 +1,7 @@
 # PlannerTrack-V2
 
+![PlannerTrack](images/PlannerTrack.png)
+
 A ROS2 (Jazzy) simulation platform for developing and testing autonomous
 vehicle algorithms , behavior, multi-agent coordination, planning, and
 control, built around a heterogeneous multi-agent simulator core, with a

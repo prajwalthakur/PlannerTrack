@@ -10,7 +10,10 @@ find_package(ament_cmake REQUIRED)
 find_package(ament_cmake_ros REQUIRED)
 find_package(motion_model_base REQUIRED)
 find_package(project_utils REQUIRED)
+find_package(project_utils_msgs REQUIRED)
 find_package(pluginlib REQUIRED)
+find_package(rclcpp REQUIRED)
+find_package(nav_msgs REQUIRED)
 find_package(Eigen3 REQUIRED)
 find_package(eigen3_cmake_module REQUIRED)
 find_package(yaml-cpp REQUIRED)
@@ -27,7 +30,10 @@ ament_target_dependencies(
   motion_model_ground_vehicles
   "motion_model_base"
   "project_utils"
+  "project_utils_msgs"
   "pluginlib"
+  "rclcpp"
+  "nav_msgs"
   "Eigen3"
   "eigen3_cmake_module"
 )

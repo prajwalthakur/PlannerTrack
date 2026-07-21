@@ -13,4 +13,5 @@
 # limitations under the License.
 
 include("${mpl_cmake_DIR}/mpl_package.cmake")
+include("${mpl_cmake_DIR}/mpl_util.cmake")
 include("${mpl_cmake_DIR}/mpl_ament_auto_package.cmake")

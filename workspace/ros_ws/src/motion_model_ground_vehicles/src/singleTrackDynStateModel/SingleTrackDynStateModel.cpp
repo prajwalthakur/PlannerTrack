@@ -3,6 +3,8 @@
  */
 #include "motion_model_ground_vehicles/singleTrackDynStateModel/SingleTrackDynStateModel.hpp"
 
+#include "project_utils/geometry_utils.hpp"
+
 #include <pluginlib/class_list_macros.hpp>
 
 //////////////////////////////////////////////////////////////////////////
@@ -42,7 +44,6 @@ void SingleTrackDynStateModel::initialze(
 	mInitAcc = mVehConfig["initAcc"].as<double>();
 	mInitSv = mVehConfig["initSv"].as<double>();
 	mVehWheelBase = mVehConfig["vehWheelBase"].as<double>();
-	
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -71,8 +72,8 @@ void SingleTrackDynStateModel::createIntegrator(YAML::Node & simConfig, YAML::No
 	    },
 	    [this]() -> const StateVector & { return getState(); },
 	    [this](const StateVector & state) -> void { return setState(state); },
-	    [this](const InputVector & input) -> void { return setInput(input); },
-	    intTimeStep, simTimeStep);
+	    [this](const InputVector & input) -> void { return setInput(input); }, intTimeStep,
+	    simTimeStep);
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -160,7 +161,6 @@ StateVector SingleTrackDynStateModel::xdot(
 void SingleTrackDynStateModel::updateCommandedControl()
 {
 	mCommandedControl = mInputVector;
-	
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -232,6 +232,41 @@ InputStruct SingleTrackDynStateModel::VectorToInput(const InputVector & inputvec
 	return input;
 }
 
-////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+void SingleTrackDynStateModel::setupRos(
+    const rclcpp::Node::SharedPtr & node, const std::string & ns, const std::string & fixedFrame)
+{
+	DynamicModel::setupRos(node, ns, fixedFrame);
+	mOdomPub = mNode->create_publisher<nav_msgs::msg::Odometry>("/" + mNamespace + "/odom", 10);
+	mSteeringPub = mNode->create_publisher<project_utils_msgs::msg::SteeringReport>(
+	    "/" + mNamespace + "/steering_report", 10);
+}
+
+//////////////////////////////////////////////////////////////////////////
+
+void SingleTrackDynStateModel::publishStates() const
+{
+	if (!mOdomPub) {
+		return;
+	}
+	nav_msgs::msg::Odometry odom;
+	odom.header.stamp = mNode->now();
+	odom.header.frame_id = mFixedFrame;
+	odom.child_frame_id = mNamespace + "_base_link";
+	odom.pose.pose.position.x = mStateStruct.x;
+	odom.pose.pose.position.y = mStateStruct.y;
+	odom.pose.pose.position.z = mStateStruct.z;
+	odom.pose.pose.orientation = mpl::geometry_utils::createQuaternionFromYaw(mStateStruct.yaw);
+	odom.twist.twist.linear.x = mStateStruct.vx;
+	mOdomPub->publish(odom);
+
+	if (mSteeringPub) {
+		project_utils_msgs::msg::SteeringReport steering;
+		steering.stamp = mNode->now();
+		steering.steering_tire_angle = static_cast<float>(mStateStruct.sf);
+		mSteeringPub->publish(steering);
+	}
+}
 
 PLUGINLIB_EXPORT_CLASS(SingleTrackDynStateModel, DynamicModel)

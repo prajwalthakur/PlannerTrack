@@ -13,6 +13,9 @@
 
   <depend>mpl_cmake</depend>
   <depend>project_utils</depend>
+  <depend>motion_model_base</depend>
+  <depend>pluginlib</depend>
+  <depend>yaml-cpp</depend>
   <depend>geometry_msgs</depend>
   <depend>nav_msgs</depend>
   <depend>rclcpp</depend>

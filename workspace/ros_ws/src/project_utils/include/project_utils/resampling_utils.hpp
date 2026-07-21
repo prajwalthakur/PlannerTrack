@@ -2,18 +2,18 @@
 #include "project_utils/geometry_utils.hpp"
 #include "project_utils/validation_utils.hpp"
 
-#include "f110_msgs/msg/wpnt_array.hpp"
 #include "geometry_msgs/msg/point.hpp"
 #include "geometry_msgs/msg/pose.hpp"
 #include "geometry_msgs/msg/quaternion.hpp"
 #include "project_utils_msgs/msg/trajectory.hpp"
 #include "project_utils_msgs/msg/trajectory_point.hpp"
+#include "project_utils_msgs/msg/wpnt_array.hpp"
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
 
 namespace mpl::extra_utils
 {
 
-inline void convertPathWptsToTrajectory(const f110_msgs::msg::WpntArray & waypoints,
+inline void convertPathWptsToTrajectory(const project_utils_msgs::msg::WpntArray & waypoints,
     project_utils_msgs::msg::Trajectory & trajectory,
     const std_msgs::msg::Header & header = std_msgs::msg::Header{})
 {
@@ -78,6 +78,75 @@ inline void convertPathWptsToTrajectory(const f110_msgs::msg::WpntArray & waypoi
 		prev_point = traj_point.pose.position;
 	}
 }
+
+
+// inline void convertToTrajectory(const project_utils_msgs::msg::Trajectory & waypoints,
+//     project_utils_msgs::msg::Trajectory & trajectory,
+//     const std_msgs::msg::Header & header = std_msgs::msg::Header{})
+// {
+// 	const std::size_t num_wp = waypoints.wpnts.size();
+
+// 	trajectory.points.clear();
+// 	trajectory.points.reserve(num_wp);
+// 	trajectory.header = header;
+
+// 	double t_prev = 0.0;
+// 	geometry_msgs::msg::Point prev_point;
+// 	bool is_first_point = true;
+
+// 	for (const auto & wpnt : waypoints.wpnts) {
+// 		project_utils_msgs::msg::TrajectoryPoint traj_point;
+
+// 		// Position
+// 		traj_point.pose.position.x = wpnt.x_m;
+// 		traj_point.pose.position.y = wpnt.y_m;
+// 		traj_point.pose.position.z = 0.0;
+
+// 		// Orientation from yaw
+// 		// Assumation : That the trajectory is same as path yaw, which is not
+// 		// True in general
+// 		// only when the car is following closely the path
+// 		traj_point.pose.orientation = mpl::geometry_utils::createQuaternionFromYaw(wpnt.psi_rad);
+
+// 		// Velocity
+// 		traj_point.longitudinal_velocity_mps = wpnt.vx_mps;
+// 		traj_point.lateral_velocity_mps = 0.0;
+
+// 		// Acceleration
+// 		traj_point.acceleration_mps2 = wpnt.ax_mps2;
+
+// 		// Steering (not directly available from waypoint)
+// 		traj_point.front_wheel_angle_rad = 0.0;
+// 		traj_point.rear_wheel_angle_rad = 0.0;
+
+// 		// Time from start
+// 		if (is_first_point) {
+// 			traj_point.time_from_start.sec = 0;
+// 			traj_point.time_from_start.nanosec = 0;
+// 			is_first_point = false;
+// 		} else {
+// 			const double ds =
+// 			    mpl::geometry_utils::calcDistance2d(prev_point, traj_point.pose.position);
+
+// 			const double v = std::max(static_cast<double>(wpnt.vx_mps), 0.1);
+// 			const double dt = ds / v;
+
+// 			t_prev += dt;
+
+// 			traj_point.time_from_start.sec = static_cast<int32_t>(t_prev);
+
+// 			traj_point.time_from_start.nanosec =
+// 			    static_cast<uint32_t>((t_prev - std::floor(t_prev)) * 1e9);
+// 		}
+
+// 		traj_point.track_kappa_radpm = wpnt.kappa_radpm;
+// 		trajectory.points.push_back(traj_point);
+
+// 		prev_point = traj_point.pose.position;
+// 	}
+// }
+
+
 
 /**
  * @brief A resampling function for a trajectory. Note that in a default setting, position xy are

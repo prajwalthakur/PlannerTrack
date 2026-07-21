@@ -1,19 +1,19 @@
-# mpl_cmake
+# autoware_cmake
 
 This package provides CMake scripts for Autoware.
 
 ## Usage
 
-### mpl_package.cmake
+### autoware_package.cmake
 
-Call `mpl_package()` before defining build targets, which will set common options for Autoware.
+Call `autoware_package()` before defining build targets, which will set common options for Autoware.
 
 ```cmake
 cmake_minimum_required(VERSION 3.5)
 project(package_name)
 
-find_package(mpl_cmake REQUIRED)
-mpl_package()
+find_package(autoware_cmake REQUIRED)
+autoware_package()
 
 ament_auto_add_library(...)
 ```
@@ -22,7 +22,7 @@ ament_auto_add_library(...)
 
 Use `autoware_ament_auto_package()` as a replacement for `ament_auto_package()` to maintain Autoware's include structure across ROS 2 Humble, Jazzy, and Kilted.
 
-This macro addresses a naming convention conflict between Autoware packages (which use `autoware_<module>` as package names) and Autoware include paths (which use `autoware/<module>/`). Starting with ROS 2 Kilted, `ament_auto_package()` will install headers to `include/${PROJECT_NAME}/`, which would create incorrect paths like `include/autoware_interpolation/autoware/interpolation/`.
+This macro addresses a naming convention conflict between Autoware packages (which use `autoware_<module>` as package names) and Autoware include paths (which use `autoware/<module>/`). Starting with ROS 2 Kilted, `ament_auto_package()` will install headers to `include/${PROJECT_NAME}/`, which would create incorrect paths like `include/interpolation_utils/interpolation_utils/`.
 
 #### Why use this?
 
@@ -35,12 +35,12 @@ This macro addresses a naming convention conflict between Autoware packages (whi
 
 ```cmake
 cmake_minimum_required(VERSION 3.14)
-project(autoware_interpolation)
+project(interpolation_utils)
 
-find_package(mpl_cmake REQUIRED)
-mpl_package()
+find_package(autoware_cmake REQUIRED)
+autoware_package()
 
-ament_auto_add_library(autoware_interpolation SHARED
+ament_auto_add_library(interpolation_utils SHARED
   src/linear_interpolation.cpp
   src/spline_interpolation.cpp
 )

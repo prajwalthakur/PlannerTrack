@@ -6,21 +6,41 @@
 Language: Cpp
 BasedOnStyle: Google
 
+# --- Tabs ---
+UseTab: ForIndentation   # safer than Always
+IndentWidth: 4
+TabWidth: 4
+ContinuationIndentWidth: 4
+
+# --- Indentation / layout ---
 AccessModifierOffset: -2
-AlignAfterOpenBracket: AlwaysBreak
+ConstructorInitializerIndentWidth: 4
+
+# --- Disable alignment that breaks with tabs ---
+AlignAfterOpenBracket: DontAlign
+AlignOperands: false
+AlignTrailingComments: false
+
+# --- Function / brace style ---
 AllowShortFunctionsOnASingleLine: InlineOnly
+BreakBeforeBraces: Custom
 BraceWrapping:
   AfterClass: true
   AfterFunction: true
   AfterNamespace: true
   AfterStruct: true
-BreakBeforeBraces: Custom
+
+# --- Line width ---
 ColumnLimit: 100
-ConstructorInitializerIndentWidth: 0
-ContinuationIndentWidth: 2
+
+# --- Pointer style ---
 DerivePointerAlignment: false
 PointerAlignment: Middle
+
+# --- Comments ---
 ReflowComments: true
+
+# --- Includes ---
 IncludeCategories:
   # C++ system headers
   - Regex: <[a-z_]*>

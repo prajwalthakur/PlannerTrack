@@ -48,6 +48,7 @@ add_library(project_utils SHARED
   src/unique_id_generator.cpp
   src/random_type.cpp
   src/random.cpp
+  src/planning_utils.cpp
 )
 
 target_link_libraries(project_utils

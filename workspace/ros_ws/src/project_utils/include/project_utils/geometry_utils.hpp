@@ -1,4 +1,4 @@
-// Author Prajwal Thakur 
+// Author Prajwal Thakur
 #pragma once
 #include "project_utils/vector2.hpp"
 
@@ -29,11 +29,15 @@ namespace mpl::geometry_utils
 
 constexpr double PI = 3.14159265358979323846;
 
+//////////////////////////////////////////////////////////////////////////
+
 template <class T>
 inline geometry_msgs::msg::Point create_point(T x_, T y_, T z_)
 {
 	return geometry_msgs::build<geometry_msgs::msg::Point>().x(x_).y(y_).z(z_);
 }
+
+//////////////////////////////////////////////////////////////////////////
 
 template <class T>
 inline geometry_msgs::msg::Point get_point(const T & p)
@@ -41,11 +45,15 @@ inline geometry_msgs::msg::Point get_point(const T & p)
 	return geometry_msgs::build<geometry_msgs::msg::Point>().x(p.x).y(p.y).z(p.z);
 }
 
+//////////////////////////////////////////////////////////////////////////
+
 template <>
 inline geometry_msgs::msg::Point get_point(const geometry_msgs::msg::Point & p)
 {
 	return p;
 }
+
+//////////////////////////////////////////////////////////////////////////
 
 template <>
 inline geometry_msgs::msg::Point get_point(const geometry_msgs::msg::Pose & p)
@@ -53,17 +61,23 @@ inline geometry_msgs::msg::Point get_point(const geometry_msgs::msg::Pose & p)
 	return p.position;
 }
 
+//////////////////////////////////////////////////////////////////////////
+
 template <>
 inline geometry_msgs::msg::Point get_point(const geometry_msgs::msg::PoseStamped & p)
 {
 	return p.pose.position;
 }
 
+//////////////////////////////////////////////////////////////////////////
+
 template <>
 inline geometry_msgs::msg::Point get_point(const project_utils_msgs::msg::PathPoint & p)
 {
 	return p.pose.position;
 }
+
+//////////////////////////////////////////////////////////////////////////
 
 template <>
 inline geometry_msgs::msg::Point get_point(const project_utils_msgs::msg::TrajectoryPoint & p)
@@ -72,10 +86,12 @@ inline geometry_msgs::msg::Point get_point(const project_utils_msgs::msg::Trajec
 }
 
 // template <>
-// inline geometry_msgs::msg::Point get_point(const f110_msgs::msg::Wpnt & waypoint)
+// inline geometry_msgs::msg::Point get_point(const project_utils_msgs::msg::Wpnt & waypoint)
 // {
 // 	return create_point(waypoint.x_m, waypoint.y_m, 0.0);
 // }
+
+//////////////////////////////////////////////////////////////////////////
 
 inline geometry_msgs::msg::Quaternion createQuaternionFromYaw(double yaw)
 {
@@ -86,10 +102,14 @@ inline geometry_msgs::msg::Quaternion createQuaternionFromYaw(double yaw)
 	return msg_q;
 }
 
+//////////////////////////////////////////////////////////////////////////
+
 inline double getYawFromQuaternion(const geometry_msgs::msg::Quaternion & q_msg)
 {
 	return tf2::getYaw(q_msg);
 }
+
+//////////////////////////////////////////////////////////////////////////
 
 template <class T1, class T2>
 inline double calcDistance2d(const T1 & point1, const T2 & point2)
@@ -98,6 +118,8 @@ inline double calcDistance2d(const T1 & point1, const T2 & point2)
 	auto p2 = get_point(point2);
 	return std::hypot((p1.x - p2.x), (p1.y - p2.y));
 }
+
+//////////////////////////////////////////////////////////////////////////
 
 template <class T1, class T2>
 inline double calcDistance2dSquare(const T1 & point1, const T2 & point2)
@@ -109,6 +131,8 @@ inline double calcDistance2dSquare(const T1 & point1, const T2 & point2)
 	return dx * dx + dy * dy;
 }
 
+//////////////////////////////////////////////////////////////////////////
+
 template <>
 inline double calcDistance2dSquare(const Vector2 & p1, const Vector2 & p2)
 {
@@ -116,6 +140,8 @@ inline double calcDistance2dSquare(const Vector2 & p1, const Vector2 & p2)
 	const double dy = p1.y() - p2.y();
 	return dx * dx + dy * dy;
 }
+
+//////////////////////////////////////////////////////////////////////////
 
 template <typename T>
 inline auto normalizeAngles(const T & angle)
@@ -135,11 +161,16 @@ inline auto normalizeAngles(const T & angle)
 }
 
 // ---------------- Shortest distance ----------------
+
+//////////////////////////////////////////////////////////////////////////
+
 template <typename T, typename F>
 inline auto calcAzimuthAngle(const T & from, const F & to)
 {
 	return normalizeAngles(to - from);
 }
+
+//////////////////////////////////////////////////////////////////////////
 
 template <typename T>
 inline auto calcNormalizedAngles(const T & dy, const T & dx)
@@ -148,6 +179,9 @@ inline auto calcNormalizedAngles(const T & dy, const T & dx)
 }
 
 // ---------------- Scalar normalized ----------------
+
+//////////////////////////////////////////////////////////////////////////
+
 template <typename T>
 inline T shortestAngularDistanceNormalized(const T & from, const T & to)
 {
@@ -160,6 +194,9 @@ inline T shortestAngularDistanceNormalized(const T & from, const T & to)
 }
 
 // ---------------- Eigen normalized ----------------
+
+//////////////////////////////////////////////////////////////////////////
+
 inline Eigen::ArrayXf shortestAngularDistanceNormalized(
     const Eigen::Ref<const Eigen::ArrayXf> & from, const Eigen::Ref<const Eigen::ArrayXf> & to)
 {
@@ -175,6 +212,9 @@ inline Eigen::ArrayXf shortestAngularDistanceNormalized(
  * @param direction direction in which Array will be shifted.
  *     1 for shift in right direction and -1 for left direction.
  */
+
+//////////////////////////////////////////////////////////////////////////
+
 inline void shiftColumnsByOnePlace(Eigen::Ref<Eigen::ArrayXXf> e, const int direction)
 {
 	if (abs(direction) != 1)
@@ -210,6 +250,9 @@ inline void shiftColumnsByOnePlace(Eigen::Ref<Eigen::ArrayXXf> e, const int dire
  * @param stamp Timestamp
  * @param frame Reference frame to use
  */
+
+//////////////////////////////////////////////////////////////////////////
+
 inline geometry_msgs::msg::TwistStamped toTwistStamped(
     float vx, float wz, const std_msgs::msg::Header & header)
 {
@@ -229,6 +272,9 @@ inline geometry_msgs::msg::TwistStamped toTwistStamped(
  * @param stamp Timestamp
  * @param frame Reference frame to use
  */
+
+//////////////////////////////////////////////////////////////////////////
+
 inline geometry_msgs::msg::TwistStamped toTwistStamped(
     float vx, float vy, float wz, const std_msgs::msg::Header & header)
 {
@@ -236,6 +282,8 @@ inline geometry_msgs::msg::TwistStamped toTwistStamped(
 	twist.twist.linear.y = vy;
 	return twist;
 }
+
+//////////////////////////////////////////////////////////////////////////
 
 inline std::vector<geometry_msgs::msg::Pose> extractPoses(
     const project_utils_msgs::msg::Trajectory & trajectory)
@@ -249,12 +297,16 @@ inline std::vector<geometry_msgs::msg::Pose> extractPoses(
 	return poses;
 }
 
+//////////////////////////////////////////////////////////////////////////
+
 inline float circleToCircleClosestDist(
     Vector2 c1Point, float c1Radius, Vector2 c2Point, float c2Radius)
 {
 	Vector2 deltaVec = c1Point - c2Point;
 	return (std::hypot(deltaVec.x(), deltaVec.y()) - c1Radius - c2Radius);
 }
+
+//////////////////////////////////////////////////////////////////////////
 
 inline float circleToLineSegClosestDist(
     Vector2 c1Point, float c1Radius, Vector2 start_point, Vector2 end_point)
@@ -270,8 +322,10 @@ inline float circleToLineSegClosestDist(
 	return dist;
 }
 
+//////////////////////////////////////////////////////////////////////////
+
 inline std::pair<float, Vector2> circleToLineSegClosestPoint(
-    Vector2 c1Point, float c1Radius, Vector2 start_point, Vector2 end_point)
+    Vector2 c1Point, [[maybe_unused]] float c1Radius, Vector2 start_point, Vector2 end_point)
 {
 	// projection parameter
 	auto vec1 = end_point - start_point;
@@ -282,10 +336,14 @@ inline std::pair<float, Vector2> circleToLineSegClosestPoint(
 	return std::make_pair(t, closestVec);
 }
 
+//////////////////////////////////////////////////////////////////////////
+
 inline float toRadians(float degree)
 {
 	return degree * (PI / 180.0);
 }
+
+//////////////////////////////////////////////////////////////////////////
 
 inline geometry_msgs::msg::PoseStamped odomToPoseStamped(const nav_msgs::msg::Odometry & odom)
 {

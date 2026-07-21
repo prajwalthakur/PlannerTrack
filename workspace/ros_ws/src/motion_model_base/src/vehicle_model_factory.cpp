@@ -17,7 +17,8 @@ VehicleModelFactory::VehicleModelFactory(mpl::rclcpp_utils::Logger & logger)
 //////////////////////////////////////////////////////////////////////////
 
 ptSharedPtr<AgentModel> VehicleModelFactory::create(
-    YAML::Node simConfig, const YAML::Node & agentConfig, const UniqueId & id)
+    YAML::Node simConfig, const YAML::Node & agentConfig, const UniqueId & id,
+    const rclcpp::Node::SharedPtr & node, const std::string & fixedFrame, bool createStPublisher)
 {
 	// Each *_plugin value is data read from YAML -- e.g. "SingleTrackDynStateModel",
 	// which physically lives in libmotion_model_ground_vehicles.so. This line is the
@@ -28,6 +29,10 @@ ptSharedPtr<AgentModel> VehicleModelFactory::create(
 	auto dyn = mDynamicsLoader.createSharedInstance(dynType);
 	YAML::Node dynParams = agentConfig["dynamics_params"];
 	dyn->initialze(simConfig, dynParams, id);
+	if(createStPublisher){
+		const std::string ns = "agent_" + std::to_string(id.value());
+		dyn->setupRos(node, ns, fixedFrame);
+	}
 	dyn->createIntegrator();
 
 	const std::string geomType = agentConfig["geometry_plugin"].as<std::string>();

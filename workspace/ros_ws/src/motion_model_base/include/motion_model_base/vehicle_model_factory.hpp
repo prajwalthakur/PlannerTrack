@@ -6,6 +6,7 @@
 #include <string>
 
 #include <pluginlib/class_loader.hpp>
+#include <rclcpp/rclcpp.hpp>
 #include <yaml-cpp/yaml.h>
 
 #include "motion_model_base/agent_model.hpp"
@@ -40,8 +41,12 @@ class VehicleModelFactory
 
         // simConfig taken by value (YAML::Node is a cheap handle type) so it
         // binds to DynamicModel::initialze()'s non-const YAML::Node& params.
+        // node/fixedFrame are forwarded to the dynamics plugin's setupRos()
+        // so it can create its own namespaced publishers -- see
+        // DynamicModel::setupRos() for why this can't happen in a ctor.
         ptSharedPtr<AgentModel> create(
-            YAML::Node simConfig, const YAML::Node & agentConfig, const UniqueId & id);
+            YAML::Node simConfig, const YAML::Node & agentConfig, const UniqueId & id,
+            const rclcpp::Node::SharedPtr & node, const std::string & fixedFrame,bool createStPublisher=false);
 
     private:
         mpl::rclcpp_utils::Logger mLogger;

@@ -3,9 +3,9 @@
  */
 #pragma once
 #include "motion_model_base/collision_model/collision_footprint.hpp"
-#include "motion_model_base/sensor_model/sensor_model.hpp"
 #include "motion_model_base/dynamic_model/dynamic_model.hpp"
 #include "motion_model_base/geometric_model/geometric_model.hpp"
+#include "motion_model_base/sensor_model/sensor_model.hpp"
 #include "project_utils/logger.hpp"
 #include "project_utils/main.hpp"
 class AgentModel
@@ -45,6 +45,7 @@ class AgentModel
 	// virtual bool checkNumStatesInputs(
 	//     const StateVector & stateVec, const InputVector & inputVec) = 0;
 	// virtual std::pair<int, int> getNumStatesInputs() = 0;
+	void publishStates() const;
 
   protected:
 	// YAML::Node mSimConfig;

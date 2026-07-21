@@ -8,6 +8,9 @@
 
 #include <Eigen/Dense>
 
+#include <nav_msgs/msg/odometry.hpp>
+#include <project_utils_msgs/msg/steering_report.hpp>
+
 #include <yaml-cpp/yaml.h>
 
 #include <cmath>
@@ -64,6 +67,9 @@ class SingleTrackDynStateModel : public DynamicModel
 	// Vehicle Dynamics
 	StateVector xdot(const StateVector &, const InputVector &) const;
 	void createIntegrator() override;
+	void setupRos(const rclcpp::Node::SharedPtr & node, const std::string & ns,
+	    const std::string & fixedFrame) override;
+	void publishStates() const override;
 
   private:
 	void reset();
@@ -90,6 +96,9 @@ class SingleTrackDynStateModel : public DynamicModel
 	StateStruct mStateStruct;
 	InputVector mInputVector;
 	StateVector mStateVector;
+
+	rclcpp::Publisher<nav_msgs::msg::Odometry>::SharedPtr mOdomPub;
+	rclcpp::Publisher<project_utils_msgs::msg::SteeringReport>::SharedPtr mSteeringPub;
 };
 
 //////////////////////////////////////////////////////////////////////////
