@@ -29,9 +29,7 @@ simulation code.
   already-computed control commands over generic, vehicle-agnostic ROS2
   messages; planning and control logic live in independent, swappable
   components, not inside the simulator itself.
-- **RViz-based multi-agent visualization** — see it running:
-  [YouTube](https://www.youtube.com/watch?v=Jcm3qd_RIX4) or
-  [`video/multi_agent_rviz.mp4`](video/multi_agent_rviz.mp4).
+- **RViz-based multi-agent visualization**
 - Built for **ROS2 Jazzy**, with a Dockerized, bind-mounted dev environment.
 
 ## Status
