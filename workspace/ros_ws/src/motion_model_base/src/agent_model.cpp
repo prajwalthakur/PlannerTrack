@@ -47,6 +47,13 @@ const SensorModel & AgentModel::sensor() const
 
 //////////////////////////////////////////////////////////////////////////
 
+const DynamicModel & AgentModel::dynamicModel() const
+{
+	return *mDynamicModel;
+}
+
+//////////////////////////////////////////////////////////////////////////
+
 stPose AgentModel::getStatePose() const
 {
 	return mDynamicModel->getStatePose();

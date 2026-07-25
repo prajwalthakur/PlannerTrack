@@ -37,6 +37,11 @@ class AgentModel
 	// computed reading (SensorModel::getReadings()) -- same lifetime caveat
 	// as geometry().
 	const SensorModel & sensor() const;
+	// Non-owning access to the dynamics model -- e.g. for a downstream
+	// controller that needs to dynamic_cast to the concrete type to reach
+	// vehicle-specific helpers (InputStruct/InputToVector). Same lifetime
+	// caveat as geometry().
+	const DynamicModel & dynamicModel() const;
 	// Current pose/state, delegated straight to the dynamics model -- for
 	// publishing (odometry, TF), not for driving simulation logic elsewhere.
 	stPose getStatePose() const;

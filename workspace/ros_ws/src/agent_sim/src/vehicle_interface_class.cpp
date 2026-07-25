@@ -110,8 +110,8 @@ void AgentInterface::addAgents()
 		agent.model = mVehicleFactory->create(
 		    mSimConfig, agentNode, id, shared_from_this(), mFixedFrame, true);
 		agent.controlSub =
-		    create_subscription<EigenVector>("/agent_" + std::to_string(i) + "/control", 1,
-		        [this, idx = i](EigenVector::SharedPtr msg) {
+		    create_subscription<EigenVectorStamped>("/agent_" + std::to_string(i) + "/control", 1,
+		        [this, idx = i](EigenVectorStamped::SharedPtr msg) {
 			        const InputVector u = Eigen::Map<const Eigen::VectorXd>(
 			            msg->data.data(), static_cast<Eigen::Index>(msg->data.size()));
 			        mAgents[idx].model->updateCommandedControl(u);

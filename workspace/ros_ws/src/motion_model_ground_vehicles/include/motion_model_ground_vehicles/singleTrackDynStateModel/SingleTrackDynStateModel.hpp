@@ -70,6 +70,7 @@ class SingleTrackDynStateModel : public DynamicModel
 	void setupRos(const rclcpp::Node::SharedPtr & node, const std::string & ns,
 	    const std::string & fixedFrame) override;
 	void publishStates() const override;
+	InputVector packAccelSteerRate(double acc, double steeringRate) const override;
 
   private:
 	void reset();

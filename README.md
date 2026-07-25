@@ -1,12 +1,18 @@
-# PlannerTrack-V2
+# PlannerTrack
 
-![PlannerTrack](images/PlannerTrack.png)
+![PlannerTrack](images/plannerTrack.gif)
 
-A ROS2 (Jazzy) simulation platform for developing and testing autonomous
-vehicle algorithms , behavior, multi-agent coordination, planning, and
+*Commanded vs. actual steering tire angle, logged and plotted live per
+agent — [full demo on YouTube](https://www.youtube.com/watch?v=Jcm3qd_RIX4).*
+
+**A ROS2 (Jazzy) testbed for multi-agent planning and control** — heterogeneous
+agents, swappable vehicle models, live control telemetry.
+
+PlannerTrack is a simulation platform for developing and testing autonomous
+vehicle algorithms, behavior, multi-agent coordination, planning, and
 control, built around a heterogeneous multi-agent simulator core, with a
 plugin architecture designed to support multiple vehicle types (ground
-vehicles , aerial vehicles (planned)) without hardcoding vehicle-specific
+vehicles, aerial vehicles planned) without hardcoding vehicle-specific
 simulation code.
 
 ## Key Features
@@ -23,19 +29,26 @@ simulation code.
   already-computed control commands over generic, vehicle-agnostic ROS2
   messages; planning and control logic live in independent, swappable
   components, not inside the simulator itself.
-- **Motion planning components** — sampling-based path planning and
-  trajectory generation for Ackermann-style vehicles (`planning/`),
-  developed alongside the simulator.
 - **RViz-based multi-agent visualization** — see it running:
+  [YouTube](https://www.youtube.com/watch?v=Jcm3qd_RIX4) or
   [`video/multi_agent_rviz.mp4`](video/multi_agent_rviz.mp4).
 - Built for **ROS2 Jazzy**, with a Dockerized, bind-mounted dev environment.
 
-## Status: actively under restructuring (WIP)
+## Status
 
-This branch is mid-rework of the simulator's core: `workspace/ros_ws/src`'s
-vehicle model layer is being rebuilt around ROS2 `pluginlib`, so that a new
-vehicle's dynamics, geometry, and collision model can be added as a plugin
-package without editing or recompiling the simulator itself. 
+**Working:** multiple agents drive a shared track under closed-loop lateral
+control (regulated pure pursuit), with commanded-vs-actual steering tire
+angle logged and plotted per agent in real time (see demo above).
+
+
+**Planned:**
+- **Predictive Controls** replacing pure pursuit as the tracking controller, evaluated on
+  the same commanded-vs-actual telemetry already in place  pure-pursuit
+  vs. Predictive Controls tracking error, directly comparable.
+- **collision avoidance** layered on top of Predictive controls, for safe
+  multi-agent interaction on shared track sections.
+- Sampling-based path/trajectory generation (`planning/`), once the above
+  lands.
 
 ## Architecture (current design)
 
@@ -73,6 +86,10 @@ bind-mounted, not baked into the image):
 Inside the container, build with `colcon` against ROS2 Jazzy in the usual
 way (`colcon build --packages-select <package>` from `/workspace/ros_ws`).
 
+To run the racing demo
+```bash
+  ros2 launch scenarios ground_vehicle_racing.launch.py
+```
 ## License
 MIT  
 
@@ -105,3 +122,25 @@ standard algorithms.
 
 This repository does not contain any proprietary, confidential, or
 employer-owned intellectual property.
+
+
+## Acknowledgments
+
+This project adapts code and build tooling from the
+[Autoware](https://github.com/autowarefoundation) project (Apache License
+2.0):
+
+- **`interpolation_utils`** — interpolation algorithms (linear, spline,
+  spherical linear, zero-order hold), adapted from Autoware's
+  `interpolation_utils` package, © Tier IV, Inc.
+- **`project_utils/parameter.hpp`, `project_utils/validation_utils.hpp`**,
+  and **`mpl_rclcpp_utils`** — ROS2 parameter and subscriber utilities,
+  adapted from Autoware common utilities, © Tier IV, Inc.
+- **`mpl_cmake`** — build tooling patterned after Autoware's CMake
+  conventions.
+
+Original copyright and license notices are retained in each adapted file.
+
+Beyond the packages above, some additional functions elsewhere in this
+repository were also adapted from Autoware, without a per-file upstream
+notice.

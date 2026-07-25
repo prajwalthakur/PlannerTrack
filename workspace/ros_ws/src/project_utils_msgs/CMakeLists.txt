@@ -29,6 +29,7 @@ endforeach()
 # =============================
 set(MSG_FILES
   "msg/EigenVector.msg"
+  "msg/EigenVectorStamped.msg"
   "msg/ackermann/control/Control.msg"
   "msg/ackermann/control/ControlHorizon.msg"
   "msg/ackermann/control/Lateral.msg"

@@ -82,6 +82,38 @@ def generate_launch_description():
         for i, _ in enumerate(agent_names, start=1)
     ]
 
+    # One pid_controller_node_exe per agent, downstream of controller_node_exe.
+    # controller_node_exe now publishes its high-level velocity/steering-angle
+    # setpoint on /agent_N/amr_control (project_utils_msgs/Control) instead of
+    # /agent_N/control -- this node closes the loop against that setpoint and
+    # this agent's own odom/steering_report feedback, and is the one that
+    # actually owns /agent_N/control (project_utils_msgs/EigenVectorStamped),
+    # which is what agent_sim's control subscriber expects.
+    pid_controller_nodes = [
+        Node(
+            package='pid_controller',
+            executable='pid_controller_node_exe',
+            name='pid_controller',
+            namespace=f'agent_{i}',
+            output='screen',
+            parameters=[
+                controller_config,
+                {
+                    'sim_config_file': sim_config,
+                    'agents_config_file': agents_config,
+                    'agent_number': i,
+                },
+            ],
+            remappings=[
+                ('~/input/current_odometry', f'/agent_{i}/odom'),
+                ('~/input/current_steering', f'/agent_{i}/steering_report'),
+                ('~/input/control_cmd', f'/agent_{i}/amr_control'),
+                ('~/output/control_cmd', f'/agent_{i}/control'),
+            ],
+        )
+        for i, _ in enumerate(agent_names, start=1)
+    ]
+
     return LaunchDescription([
         map_arg,
         Node(
@@ -147,4 +179,5 @@ def generate_launch_description():
             output='screen'
         ),
         *controller_nodes,
+        *pid_controller_nodes,
     ])

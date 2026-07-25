@@ -195,9 +195,17 @@ StateVector SingleTrackDynStateModel::StateToVector(const StateStruct & state_st
 InputVector SingleTrackDynStateModel::InputToVector(const InputStruct & input_struct) const
 {
 	InputVector input_vector;
-	input_vector(0) = input_struct.sv;
-	input_vector(1) = input_struct.acc;
+	input_vector.resize(NU);
+	input_vector(0) = input_struct.acc;
+	input_vector(1) = input_struct.sv;
 	return input_vector;
+}
+
+//////////////////////////////////////////////////////////////////////////
+
+InputVector SingleTrackDynStateModel::packAccelSteerRate(double acc, double steeringRate) const
+{
+	return InputToVector(InputStruct{acc, steeringRate});
 }
 
 //////////////////////////////////////////////////////////////////////////

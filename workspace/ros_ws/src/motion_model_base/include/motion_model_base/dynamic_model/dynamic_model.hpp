@@ -52,6 +52,15 @@ class DynamicModel
 	}
 	// pusblish the states (odom, steering feedback etc, whatever information we need to publish)
 	virtual void publishStates() const = 0;
+	// Pack a generic {acceleration, steering-rate} actuator command into this
+	// vehicle's own InputVector layout. Lets a downstream controller (e.g.
+	// pid_controller) go from a low-level PID output straight to the vector
+	// AgentModel::updateCommandedControl()/agent_sim expect, without ever
+	// knowing the concrete dynamics type -- avoids both duplicating each
+	// vehicle's input ordering in every controller AND needing a
+	// dynamic_cast (and therefore a direct link) to a concrete pluginlib
+	// class from outside its own translation unit.
+	virtual InputVector packAccelSteerRate(double acc, double steeringRate) const = 0;
 
   protected:
 	ptSharedPtr<IntegratorClass> mIntegrator{nullptr};

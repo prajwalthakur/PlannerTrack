@@ -21,7 +21,7 @@
 #include "project_utils/macros_expression.hpp"
 #include "project_utils/main.hpp"
 #include "project_utils_msgs/msg/eigen_vector.hpp"
-
+#include "project_utils_msgs/msg/eigen_vector_stamped.hpp"
 #include <rclcpp/rclcpp.hpp>
 
 #include <geometry_msgs/msg/transform_stamped.hpp>
@@ -39,6 +39,7 @@
 #include <vector>
 
 using EigenVector = project_utils_msgs::msg::EigenVector;
+using EigenVectorStamped = project_utils_msgs::msg::EigenVectorStamped;
 
 
 class AgentInterface : public rclcpp::Node
@@ -55,7 +56,7 @@ class AgentInterface : public rclcpp::Node
 		ptSharedPtr<AgentModel> model;
 
 
-        rclcpp::Subscription<EigenVector>::SharedPtr controlSub;
+        rclcpp::Subscription<EigenVectorStamped>::SharedPtr controlSub;
 		rclcpp::Publisher<sensor_msgs::msg::LaserScan>::SharedPtr scanPub;
 
 		// Cached from this agent's own sensor_params (YAML) for building

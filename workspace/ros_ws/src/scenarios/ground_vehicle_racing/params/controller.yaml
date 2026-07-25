@@ -10,7 +10,7 @@
     regulated_pp:
       optimizer:
         set_external_target_speed: true
-        external_target_speed: 1.0
+        external_target_speed: 3.0
         ld_velocity_ratio: 1.2
         ld_lateral_error_ratio: 2.5
         ld_curvature_ratio: 60.0
@@ -88,3 +88,19 @@
     steering_sub_stopic: "autodrive/roboracer_1/steering"
     throttle_sub_topic: "/autodrive/roboracer_1/throttle"
 
+/**/pid_controller:
+  ros__parameters:
+    controller_frequency: 100.0
+    timeout_thr_sec: 0.5
+    accel_pararms:
+      kp: 2.5
+      ki: 0.4
+      kd: 0.0
+      min: -9.51  # matches regulated_pp.vehicle.a_max 
+      max: 9.51   # regulated_pp.vehicle.a_max
+    steering_params:
+      kp: 4.0
+      ki: 0.0
+      kd: 0.8
+      min: -3.2  # regulated_pp.vehicle.sv_min
+      max: 3.2   # regulated_pp.vehicle.sv_max
