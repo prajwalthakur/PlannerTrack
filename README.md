@@ -1,9 +1,10 @@
 # PlannerTrack
 
-![PlannerTrack](images/plannerTrack.gif)
+![PlannerTrack](images/obs_avoidance.gif)
 
-*Commanded vs. actual steering tire angle, logged and plotted live per
-agent — [full demo on YouTube](https://www.youtube.com/watch?v=Jcm3qd_RIX4).*
+
+*Dynamic Obstacle Avoidance through vanilla mppi controller
+— [full demo on YouTube](https://www.youtube.com/watch?v=Jcm3qd_RIX4).*
 
 **A ROS2 (Jazzy) testbed for multi-agent planning and control** — heterogeneous
 agents, swappable vehicle models, live control telemetry.
@@ -14,6 +15,16 @@ control, built around a heterogeneous multi-agent simulator core, with a
 plugin architecture designed to support multiple vehicle types (ground
 vehicles, aerial vehicles planned) without hardcoding vehicle-specific
 simulation code.
+
+## Updates — 2026-08-03
+
+- **Dynamic (nonlinear) single-track bicycle model** added to the vehicle
+  dynamics plugin layer (`SingleTrackDynStateModel`) — agents can now be
+  simulated with a lateral-tire-force dynamic model, alongside the existing
+  kinematic bicycle model.
+- **MPPI controller** integrated as a selectable hybrid controller mode,
+  with a full critic stack (obstacle, cost, path-align, goal, constraint)
+  driving **dynamic obstacle avoidance** — see the demo GIF above.
 
 ## Key Features
 
@@ -32,21 +43,6 @@ simulation code.
 - **RViz-based multi-agent visualization**
 - Built for **ROS2 Jazzy**, with a Dockerized, bind-mounted dev environment.
 
-## Status
-
-**Working:** multiple agents drive a shared track under closed-loop lateral
-control (regulated pure pursuit), with commanded-vs-actual steering tire
-angle logged and plotted per agent in real time (see demo above).
-
-
-**Planned:**
-- **Predictive Controls** replacing pure pursuit as the tracking controller, evaluated on
-  the same commanded-vs-actual telemetry already in place  pure-pursuit
-  vs. Predictive Controls tracking error, directly comparable.
-- **collision avoidance** layered on top of Predictive controls, for safe
-  multi-agent interaction on shared track sections.
-- Sampling-based path/trajectory generation (`planning/`), once the above
-  lands.
 
 ## Architecture (current design)
 
@@ -60,16 +56,14 @@ angle logged and plotted per agent in real time (see demo above).
   (e.g. rectangular geometry, ellipse collision footprint), shared across
   vehicle families since shape is independent of how a vehicle moves.
 - **`motion_model_ground_vehicles`** — vehicle dynamics plugins for ground
-  vehicles (currently a single-track/Ackermann bicycle model). A future
-  `motion_model_aerial_vehicles` would hold drone dynamics.
+  vehicles: a kinematic bicycle model and a dynamic (nonlinear, lateral
+  tire-force) single-track model. A future `motion_model_aerial_vehicles`
+  would hold drone dynamics.
 - **`agent_sim`** — the ROS2 orchestrator node. Owns the simulation loop,
   reads per-agent YAML config, and is the only package that talks to
   `pluginlib` or config files directly — it never references a concrete
   vehicle type.
 
-Adding a new vehicle type is meant to mean: write a new plugin package,
-reference it by name in a YAML config file — no changes to `agent_sim` or
-`motion_model_base`.
 
 ## Getting Started
 

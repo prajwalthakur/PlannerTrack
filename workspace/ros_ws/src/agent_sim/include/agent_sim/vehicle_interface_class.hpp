@@ -16,6 +16,7 @@
 #pragma once
 
 #include "motion_model_base/agent_model.hpp"
+#include "motion_model_base/occupancy_grid_map.hpp"
 #include "motion_model_base/vehicle_model_factory.hpp"
 #include "project_utils/logger.hpp"
 #include "project_utils/macros_expression.hpp"
@@ -25,6 +26,7 @@
 #include <rclcpp/rclcpp.hpp>
 
 #include <geometry_msgs/msg/transform_stamped.hpp>
+#include <nav_msgs/msg/occupancy_grid.hpp>
 #include <sensor_msgs/msg/laser_scan.hpp>
 #include <visualization_msgs/msg/marker_array.hpp>
 
@@ -79,6 +81,10 @@ class AgentInterface : public rclcpp::Node
 	void publishStaticTFs();
 	void broadcastAgentTF(int agentNum, const stPose & pose);
 
+	// Latched, so this fires once whenever map_server (re)publishes -- fills
+	// mMapGrid, which stays nullptr-guarded in WorldSnapshot until then.
+	void mapCallback(nav_msgs::msg::OccupancyGrid::SharedPtr msg);
+
   private:
 	mpl::rclcpp_utils::Logger mLogger;
 	std::unique_ptr<mpl::rclcpp_utils::Parameters> mParameters;
@@ -88,6 +94,8 @@ class AgentInterface : public rclcpp::Node
 
 	std::vector<ShapeDescriptor> mObstacleCircles;
 
+	rclcpp::Subscription<nav_msgs::msg::OccupancyGrid>::SharedPtr mMapSub;
+	OccupancyGridMap mMapGrid;  // mMapGrid.valid() == false until /map arrives
 
 	rclcpp::TimerBase::SharedPtr mStateUpdateTimer;
 	rclcpp::TimerBase::SharedPtr mStatePubTimer;

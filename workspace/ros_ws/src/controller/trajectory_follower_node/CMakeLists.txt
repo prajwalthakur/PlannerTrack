@@ -19,10 +19,16 @@ ament_auto_add_library(${CONTROLLER_NODE} SHARED
   src/controller_node.cpp 
 )
 
-rclcpp_components_register_node(${CONTROLLER_NODE}
-  PLUGIN "mpl::control::trajectory_follower_node::Controller"
-  EXECUTABLE ${CONTROLLER_NODE}_exe
-)
+# Deliberately a plain executable (main.cpp directly constructs Controller),
+# not the rclcpp_components_register_node()-generated one: that generates an
+# executable which dlopens libcontroller_node.so itself via class_loader,
+# nesting Costmap2DROS's own pluginlib-based layer-plugin loading (ObstacleLayer/
+# InflationLayer, from liblayers.so) inside a second dlopen scope -- breaks
+# nav2_costmap_2d's plugin factory lookup ("no factory exists for it") even
+# though liblayers.so opens successfully. Direct linking avoids the extra
+# dlopen layer entirely.
+add_executable(${CONTROLLER_NODE}_exe src/main.cpp)
+target_link_libraries(${CONTROLLER_NODE}_exe ${CONTROLLER_NODE})
 
 install(TARGETS controller_node_exe
   DESTINATION lib/${PROJECT_NAME}

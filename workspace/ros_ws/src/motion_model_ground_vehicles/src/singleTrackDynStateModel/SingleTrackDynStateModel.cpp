@@ -9,25 +9,6 @@
 
 //////////////////////////////////////////////////////////////////////////
 
-// SingleTrackDynStateModel::SingleTrackDynStateModel(
-//     YAML::Node & simConfig, YAML::Node & vehConfig, const UniqueId & id)
-//     : BaseType(simConfig, vehConfig, id)
-// {
-// 	NX = mVehConfig["numStates"].as<int>();
-// 	NU = mVehConfig["numControlInputs"].as<int>();
-// 	mInitXPose = mVehConfig["initXPose"].as<double>();
-// 	mInitYPose = mVehConfig["initYPose"].as<double>();
-// 	mInitYaw = mVehConfig["initYaw"].as<double>();
-
-// 	mInitVx = mVehConfig["initVx"].as<double>();
-// 	mInitSf = mVehConfig["initSf"].as<double>();
-// 	mInitAcc = mVehConfig["initAcc"].as<double>();
-// 	mInitSv = mVehConfig["initSv"].as<double>();
-// 	mVehWheelBase = mVehConfig["vehWheelBase"].as<double>();
-// }
-
-//////////////////////////////////////////////////////////////////////////
-
 void SingleTrackDynStateModel::initialze(
     YAML::Node & simConfig, YAML::Node & vehConfig, const UniqueId & id)
 {
@@ -39,11 +20,18 @@ void SingleTrackDynStateModel::initialze(
 	mInitXPose = mVehConfig["initXPose"].as<double>();
 	mInitYPose = mVehConfig["initYPose"].as<double>();
 	mInitYaw = mVehConfig["initYaw"].as<double>();
+	mInitYawRate = mVehConfig["initYawRate"].as<double>();
 	mInitVx = mVehConfig["initVx"].as<double>();
+	mInitVy = mVehConfig["initVy"].as<double>();
 	mInitSf = mVehConfig["initSf"].as<double>();
 	mInitAcc = mVehConfig["initAcc"].as<double>();
 	mInitSv = mVehConfig["initSv"].as<double>();
-	mVehWheelBase = mVehConfig["vehWheelBase"].as<double>();
+	mMass = mVehConfig["mass"].as<double>();
+	mIz = mVehConfig["Iz"].as<double>();
+	mLf = mVehConfig["lf"].as<double>();
+	mLr = mVehConfig["lr"].as<double>();
+	mCf = mVehConfig["cf"].as<double>();
+	mCr = mVehConfig["cr"].as<double>();
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -84,18 +72,16 @@ void SingleTrackDynStateModel::reset()
 	mStateStruct.y = mInitYPose;
 	mStateStruct.yaw = mInitYaw;
 	mStateStruct.vx = mInitVx;
-	mStateStruct.sf = mInitSf;
+	mStateStruct.vy = mInitVy;
+	mStateStruct.yaw_rate = mInitYawRate;
+	mStateStruct.steer = mInitSf;
 	mInputStruct.acc = mInitAcc;
 	mInputStruct.sv = mInitSv;
 
 	mStateVector.resize(NX);
 	mInputVector.resize(NU);
 
-	mStateVector(0) = mStateStruct.x;
-	mStateVector(1) = mStateStruct.y;
-	mStateVector(2) = mStateStruct.yaw;
-	mStateVector(3) = mStateStruct.vx;
-	mStateVector(4) = mStateStruct.sf;
+	mStateVector = StateToVector(mStateStruct);
 
 	mInputVector(0) = mInitAcc;
 	mInputVector(1) = mInitSv;
@@ -106,11 +92,7 @@ void SingleTrackDynStateModel::reset()
 void SingleTrackDynStateModel::setState(const StateVector & statevector)
 {
 	mStateVector = statevector;
-	mStateStruct.x = mStateVector(0);
-	mStateStruct.y = mStateVector(1);
-	mStateStruct.yaw = mStateVector(2);
-	mStateStruct.vx = mStateVector(3);
-	mStateStruct.sf = mStateVector(4);
+	mStateStruct = VectorToState(mStateVector);
 	// std::cerr << " updated states " <<  mStateStruct.x << " " << mStateStruct.y << std::endl;
 }
 
@@ -147,12 +129,25 @@ StateVector SingleTrackDynStateModel::xdot(
 
 	auto xk = this->VectorToState(statevector);
 	auto uk = this->VectorToInput(inputvector);
-	// xdot,ydot,yawdot,vfodt,sfdot
-	statevector_dot(0) = xk.vx * std::cos(xk.yaw);
-	statevector_dot(1) = xk.vx * std::sin(xk.yaw);
-	statevector_dot(2) = xk.vx * std::tan(xk.sf) / mVehWheelBase;
-	statevector_dot(3) = uk.acc;
-	statevector_dot(4) = uk.sv;
+
+	// Linear tire model: front/rear slip angles from body-frame velocity at
+	// each axle, guarded against the vx->0 singularity in atan2's argument
+
+	constexpr double kMinVx = 0.05;
+	const double vx_safe =
+	    std::abs(xk.vx) < kMinVx ? std::copysign(kMinVx, xk.vx == 0.0 ? 1.0 : xk.vx) : xk.vx;
+	const double alpha_f = xk.steer - std::atan2(xk.vy + mLf * xk.yaw_rate, vx_safe);
+	const double alpha_r = -std::atan2(xk.vy - mLr * xk.yaw_rate, vx_safe);
+	const double fyf = mCf * alpha_f;
+	const double fyr = mCr * alpha_r;
+
+	statevector_dot(0) = xk.vx * std::cos(xk.yaw) - xk.vy * std::sin(xk.yaw);
+	statevector_dot(1) = xk.vx * std::sin(xk.yaw) + xk.vy * std::cos(xk.yaw);
+	statevector_dot(2) = xk.yaw_rate;
+	statevector_dot(3) = uk.acc + xk.vy * xk.yaw_rate;
+	statevector_dot(4) = (fyf * std::cos(xk.steer) + fyr) / mMass - xk.vx * xk.yaw_rate;
+	statevector_dot(5) = (mLf * fyf * std::cos(xk.steer) - mLr * fyr) / mIz;
+	statevector_dot(6) = uk.sv;
 	return statevector_dot;
 }
 
@@ -182,11 +177,14 @@ void SingleTrackDynStateModel::step()
 StateVector SingleTrackDynStateModel::StateToVector(const StateStruct & state_struct) const
 {
 	StateVector state_vector;
+	state_vector.resize(NX);
 	state_vector(0) = state_struct.x;
 	state_vector(1) = state_struct.y;
 	state_vector(2) = state_struct.yaw;
 	state_vector(3) = state_struct.vx;
-	state_vector(4) = state_struct.sf;
+	state_vector(4) = state_struct.vy;
+	state_vector(5) = state_struct.yaw_rate;
+	state_vector(6) = state_struct.steer;
 	return state_vector;
 }
 
@@ -217,7 +215,9 @@ StateStruct SingleTrackDynStateModel::VectorToState(const StateVector & statevec
 	st.y = statevector(1);
 	st.yaw = statevector(2);
 	st.vx = statevector(3);
-	st.sf = statevector(4);
+	st.vy = statevector(4);
+	st.yaw_rate = statevector(5);
+	st.steer = statevector(6);
 	return st;
 }
 
@@ -225,8 +225,8 @@ StateStruct SingleTrackDynStateModel::VectorToState(const StateVector & statevec
 
 stPose SingleTrackDynStateModel::getStatePose() const
 {
-	stPose st =
-	    stPose(mStateStruct.x, mStateStruct.y, mStateStruct.z, mStateStruct.yaw, mStateStruct.sf);
+	stPose st = stPose(
+	    mStateStruct.x, mStateStruct.y, mStateStruct.z, mStateStruct.yaw, mStateStruct.steer);
 	return st;
 }
 
@@ -267,12 +267,14 @@ void SingleTrackDynStateModel::publishStates() const
 	odom.pose.pose.position.z = mStateStruct.z;
 	odom.pose.pose.orientation = mpl::geometry_utils::createQuaternionFromYaw(mStateStruct.yaw);
 	odom.twist.twist.linear.x = mStateStruct.vx;
+	odom.twist.twist.linear.y = mStateStruct.vy;
+	odom.twist.twist.angular.z = mStateStruct.yaw_rate;
 	mOdomPub->publish(odom);
 
 	if (mSteeringPub) {
 		project_utils_msgs::msg::SteeringReport steering;
 		steering.stamp = mNode->now();
-		steering.steering_tire_angle = static_cast<float>(mStateStruct.sf);
+		steering.steering_tire_angle = static_cast<float>(mStateStruct.steer);
 		mSteeringPub->publish(steering);
 	}
 }

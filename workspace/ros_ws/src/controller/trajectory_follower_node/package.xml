@@ -15,6 +15,7 @@
   <depend>project_utils</depend>
   <depend>trajectory_follower_base</depend>
   <depend>regulated_pure_pursuit</depend>
+  <depend>mppi_controller</depend>
   <depend>dummy_lateral_controller</depend>
   <depend>dummy_longitudinal_controller</depend>
   <depend>visualization_msgs</depend>

@@ -1,0 +1,137 @@
+
+/**/controller: # matches any namespace + a node literally named "controller" (Controller's ctor, trajectory_follower_node)
+  ros__parameters:
+    # --- MPPI core parameters ---
+    controller_frequency: 20.0
+    hybrid_mode_active: true
+    hybrid_mode: "mppi_controller" # must match the isStringEqual() check in controller_mode.hpp
+    wheel_base: 0.34 
+    PathHandler:
+      prune_distance: 3.5
+      enforce_path_inversion: false
+      enforce_path_rotation: false
+      inversion_xy_tolerance: 0.2
+      inversion_yaw_tolerance: 0.4
+      minimum_rotation_angle: 0.785
+      reject_unit_path: false
+    FollowPath:
+      path_follow: true
+      time_steps: 70
+      model_dt: 0.05  #0.05
+      batch_size: 1500
+      iteration_count: 1
+      regenerate_noise: true
+      temperature: 0.2
+      gamma: 0.015
+      motion_model: "Ackermann"
+      open_loop: true
+      visualize: true  #visualize the rollouts
+      visualize_optimal_trajectory: true
+      publish_critics_stats: true
+      # --- Limits ---
+      min_turning_radius: 0.8
+      ax_max: 1.2
+      ax_min: -1.2
+      ay_max: 0.0
+      ay_min: -0.0
+      az_max: 0.7
+      vx_std: 0.5  # was 0.9 -- nearly the whole vx range, wasted most rollouts as clipped samples at 1.2 m/s top speed
+      vy_std: 0.01
+      wz_std: 0.3  
+      vx_max: 1.4
+      vx_min: -0.8  
+      vy_max: 0.0
+      wz_max: 1.5
+
+      TrajectoryVisualizer:
+        trajectory_step: 5
+        time_step: 5
+      # --- Critics configuration ---
+      # Cost map clearing bug: add obs remove obs costmap is not getting cleared properly, so the trajectories that are colliding with the obstacle get very high cost and the robot does not move.
+      critics: ["GoalCritic", "ConstraintCritic", "GoalAngleCritic", "PreferForwardCritic", "PathFollowCritic", "PathAngleCritic", "PathAlignCritic", "CostCritic"] #"PathAngleCritic", "PathAlignCritic" ]
+      ConstraintCritic:
+        enabled: true
+        cost_power: 1
+        cost_weight: 4.0
+      GoalCritic:
+        enabled: true
+        cost_power: 1
+        cost_weight: 50.0  #50 before
+        threshold_to_consider: 3.0
+      GoalAngleCritic:
+        enabled: true
+        cost_power: 1
+        cost_weight: 3.0
+        threshold_to_consider: 1.0
+        symmetric_yaw_tolerance: false # If robot is allow to reach to the goal in opposite direction
+      PreferForwardCritic:
+        enabled: true
+        cost_power: 1
+        cost_weight: 10.0
+        threshold_to_consider: 1.0
+      CostCritic:
+        enabled: true
+        cost_power: 1
+        cost_weight: 3.81
+        near_collision_cost: 253
+        critical_cost: 300.0
+        consider_footprint: true
+        collision_cost: 10000.0
+        near_goal_distance: 1.0
+        trajectory_point_step: 2
+      PathAlignCritic:
+        enabled: true
+        cost_power: 1
+        cost_weight: 5.0
+        max_path_occupancy_ratio: 0.05
+        trajectory_point_step: 4
+        threshold_to_consider: 1.0
+        offset_from_furthest: 20 # The path alignment cost will not be applied until trajectories have progressed at least 20 path points forward.
+        use_path_orientations: false # orientation of the path (smac planner, has information about the orientation the robot should acheive at (x,y))
+      PathFollowCritic:
+        enabled: true
+        cost_power: 1
+        cost_weight: 10.0   #5 before
+        offset_from_furthest: 8
+        threshold_to_consider: 1.0
+      PathAngleCritic:
+        enabled: true
+        cost_power: 1
+        cost_weight: 2.0
+        offset_from_furthest: 4
+        threshold_to_consider: 0.5
+        max_angle_to_furthest: 1.0
+        mode: 0
+
+/**/local_costmap:
+  local_costmap:
+    ros__parameters:
+      update_frequency: 10.0
+      publish_frequency: 10.0
+      global_frame: odom
+      robot_base_frame: ~/base_link
+      rolling_window: true
+      width: 8
+      height: 8
+      resolution: 0.05
+      footprint: "[[0.29, 0.155], [0.29, -0.155], [-0.29, -0.155], [-0.29, 0.155]]"
+      plugins: ["obstacle_layer", "inflation_layer"]
+      obstacle_layer:
+        plugin: "nav2_costmap_2d::ObstacleLayer"
+        enabled: true
+        observation_sources: scan
+        scan:
+          topic: ~/scan
+          max_obstacle_height: 2.0
+          clearing: true
+          marking: true
+          data_type: "LaserScan"
+          raytrace_max_range: 3.0
+          obstacle_max_range: 4.0
+      inflation_layer:
+        plugin: "nav2_costmap_2d::InflationLayer"
+        cost_scaling_factor: 3.0
+        inflation_radius: 0.4
+
+
+

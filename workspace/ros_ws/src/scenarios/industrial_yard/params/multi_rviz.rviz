@@ -64,13 +64,13 @@ Visualization Manager:
       Frame Timeout: 15
       Frames:
         All Enabled: true
-        agent_1_base_link:
+        agent_1/base_link:
           Value: true
-        agent_1_lidar_link:
+        agent_1/lidar_link:
           Value: true
-        agent_2_base_link:
+        agent_2/base_link:
           Value: true
-        agent_2_lidar_link:
+        agent_2/lidar_link:
           Value: true
         map:
           Value: true
@@ -84,11 +84,11 @@ Visualization Manager:
       Tree:
         map:
           odom:
-            agent_1_base_link:
-              agent_1_lidar_link:
+            agent_1/base_link:
+              agent_1/lidar_link:
                 {}
-            agent_2_base_link:
-              agent_2_lidar_link:
+            agent_2/base_link:
+              agent_2/lidar_link:
                 {}
       Update Interval: 0
       Value: true

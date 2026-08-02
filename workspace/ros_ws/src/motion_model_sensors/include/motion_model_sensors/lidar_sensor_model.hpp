@@ -31,6 +31,12 @@ class LidarSensorModel : public SensorModel
 	    float range_min) const;
 	float rayShape(
 	    float ox, float oy, float dx, float dy, const ShapeDescriptor & shape, float range_min) const;
+	// Grid-cell DDA (Amanatides-Woo) march against a map-derived occupancy
+	// grid -- O(cells crossed) per beam, unlike rayShape which is O(1) per
+	// shape but would need one shape per occupied pixel if the map were
+	// converted to rectangles instead.
+	float rayGrid(float ox, float oy, float dx, float dy, const OccupancyGridMap & grid,
+	    float range_min, float range_max) const;
 
   private:
 	int mNumBeams{360};

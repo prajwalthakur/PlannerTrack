@@ -169,6 +169,49 @@ float LidarSensorModel::rayPolygon(float ox, float oy, float dx, float dy,
 
 //////////////////////////////////////////////////////////////////////////
 
+float LidarSensorModel::rayGrid(float ox, float oy, float dx, float dy,
+    const OccupancyGridMap & grid, float range_min, float range_max) const
+{
+	const float res = grid.resolution;
+	const float originX = static_cast<float>(grid.originX);
+	const float originY = static_cast<float>(grid.originY);
+
+	int cellX = static_cast<int>(std::floor((ox - originX) / res));
+	int cellY = static_cast<int>(std::floor((oy - originY) / res));
+
+	const int stepX = (dx > 0.0f) ? 1 : (dx < 0.0f ? -1 : 0);
+	const int stepY = (dy > 0.0f) ? 1 : (dy < 0.0f ? -1 : 0);
+
+	// t-distance (world units) to cross one full cell along each axis.
+	const float tDeltaX = (dx != 0.0f) ? std::fabs(res / dx) : kInf;
+	const float tDeltaY = (dy != 0.0f) ? std::fabs(res / dy) : kInf;
+
+	// t-distance to the first cell boundary crossed along each axis.
+	const float nextBoundaryX = originX + static_cast<float>(cellX + (stepX > 0 ? 1 : 0)) * res;
+	const float nextBoundaryY = originY + static_cast<float>(cellY + (stepY > 0 ? 1 : 0)) * res;
+	float tMaxX = (dx != 0.0f) ? (nextBoundaryX - ox) / dx : kInf;
+	float tMaxY = (dy != 0.0f) ? (nextBoundaryY - oy) / dy : kInf;
+
+	float t = 0.0f;
+	while (t <= range_max) {
+		if (t > range_min && grid.isOccupied(cellX, cellY)) {
+			return t;
+		}
+		if (tMaxX < tMaxY) {
+			t = tMaxX;
+			cellX += stepX;
+			tMaxX += tDeltaX;
+		} else {
+			t = tMaxY;
+			cellY += stepY;
+			tMaxY += tDeltaY;
+		}
+	}
+	return kInf;
+}
+
+//////////////////////////////////////////////////////////////////////////
+
 float LidarSensorModel::rayShape(
     float ox, float oy, float dx, float dy, const ShapeDescriptor & shape, float range_min) const
 {
@@ -208,8 +251,7 @@ void LidarSensorModel::step(const UniqueId & id, const stPose & pose, const Worl
 	shapes.reserve(world.agents.size() + world.staticObstacles.size());
 	for (const auto * agentShape : world.agents) {
 		if (agentShape != nullptr) {
-			if(id==agentShape->describe().id)
-				continue;
+			if (id == agentShape->describe().id) continue;
 			shapes.push_back(agentShape->describe());
 		}
 	}
@@ -225,6 +267,12 @@ void LidarSensorModel::step(const UniqueId & id, const stPose & pose, const Worl
 		float t_min = mRangeMax;
 		for (const auto & shape : shapes) {
 			const float t = rayShape(ox, oy, dx, dy, shape, mRangeMin);
+			if (t < t_min) {
+				t_min = t;
+			}
+		}
+		if (world.mapGrid != nullptr && world.mapGrid->valid()) {
+			const float t = rayGrid(ox, oy, dx, dy, *world.mapGrid, mRangeMin, t_min);
 			if (t < t_min) {
 				t_min = t;
 			}

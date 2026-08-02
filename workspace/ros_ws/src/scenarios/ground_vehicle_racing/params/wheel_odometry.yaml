@@ -1,0 +1,27 @@
+/**/wheel_odometry_node: # matches any namespace + a node literally named "wheel_odometry_node"
+  ros__parameters:
+    publish_tf: false
+    odom_pub_rate: 50.0 #not used
+    tf_pub_rate: 50.0
+    odom_frame: "odom"
+    base_frame: "base_link"
+    raw_odom_pub_topic: "/ego_car/raw/odom"
+    raw_imu_pub_topic: "/raw/imu"  #not used
+    raw_lidar_pub_topic: "/raw/lidar" #not used
+    wheel_radius: 0.0590
+    wheel_base: 0.32
+    car_width: 0.2700
+    wheel_seperation: 0.2700 #ig
+    counts_per_rev: -1.0 # not using it, encoder is giving angles
+    conversation_ratio: 120.0
+    velocity_rolling_window_size: 5
+    exp_filter_alpha: 0.8
+    use_exp_filter: true
+    exp_tau: 0.02
+    sync_queue: 10
+    use_servo_cmd_to_calc_angular_velocity: false
+    left_encoder_sub_topic: "/autodrive/roboracer_1/left_encoder"
+    right_encoder_sub_topic: "/autodrive/roboracer_1/right_encoder"
+    imu_sub_topic: "/autodrive/roboracer_1/imu"
+    steering_sub_stopic: "autodrive/roboracer_1/steering"
+    throttle_sub_topic: "/autodrive/roboracer_1/throttle"

@@ -1,7 +1,7 @@
 /*
  * Author: Prajwal Thakur <prajwalthakur98@gmail.com>
  */
-
+// Adapted from the Autoware Foundation
 #pragma once
 #include "motion_model_base/dynamic_model/dynamic_model.hpp"
 #include "project_utils/main.hpp"
@@ -16,7 +16,61 @@
 #include <cmath>
 
 //////////////////////////////////////////////////////////////////////////
-
+/*
+ *    This is the master nonlinear plant model, in global frame, with a
+ *    linear (small-slip-angle) tire model. It is the model actually
+ *    integrated by xdot() below.
+ *
+ * x, y     : position (world frame)
+ * yaw      : heading (world frame)
+ * vx, vy   : body-frame longitudinal/lateral velocity
+ * yaw_rate : yaw rate
+ * steer    : front steering angle (state -- integrated from steering rate,
+ *            matching every other actuator interface in this codebase:
+ *            see DynamicModel::packAccelSteerRate())
+ * acc      : commanded longitudinal acceleration (input)
+ * sv       : commanded steering rate (input)
+ * m        : mass
+ * Iz       : yaw inertia
+ * lf, lr   : distance from CG to front/rear axle
+ * cf, cr   : front/rear tire cornering stiffness (linear tire model)
+ *
+ *    State & Input
+ * x = [x, y, yaw, vx, vy, yaw_rate, steer]^T
+ * u = [acc, sv]^T
+ *
+ *    Nonlinear dynamics
+ * af           = steer - atan2(vy + lf*yaw_rate, vx)   (front slip angle)
+ * ar           = -atan2(vy - lr*yaw_rate, vx)           (rear slip angle)
+ * Fyf          = cf * af,  Fyr = cr * ar                (linear tire forces)
+ * vx_dot       = acc + vy*yaw_rate
+ * vy_dot       = (Fyf*cos(steer) + Fyr)/m - vx*yaw_rate
+ * yaw_rate_dot = (lf*Fyf*cos(steer) - lr*Fyr) / Iz
+ * x_dot        = vx*cos(yaw) - vy*sin(yaw)
+ * y_dot        = vx*sin(yaw) + vy*cos(yaw)
+ * yaw_dot      = yaw_rate
+ * steer_dot    = sv
+ *
+ * Reference : Jarrod M. Snider, "Automatic Steering Methods for Autonomous Automobile Path
+ * Tracking", Robotics Institute, Carnegie Mellon University, February 2009.
+ *
+ *    A controller (e.g. LQR) that wants the reduced 4-state path-error form
+ *    below derives it by linearizing the above around a reference speed
+ *    vr and dropping the steer/sv actuator states -- that reduction is the
+ *    controller's own design-model concern, not this plant's.
+ *
+ * e, de, th, dth : lateral error, its rate, heading error, its rate
+ * k              : curvature on reference trajectory point
+ *
+ * x = [e, de, th, dth]^T,  u = steer (commanded directly, no rate state)
+ *
+ *          [0,                   1,                0,                        0]       [       0] [
+ * 0] dx/dt = [0,
+ * -(cf+cr)/m/vr,        (cf+cr)/m,       (lr*cr-lf*cf)/m/vr] * x + [    cf/m] * u +
+ * [(lr*cr-lf*cf)/m/vr*k - vr*k] [0, 0,                0,                        1]       [       0]
+ * [                          0] [0, (lr*cr-lf*cf)/Iz/vr, (lf*cf-lr*cr)/Iz,
+ * -(lf^2*cf+lr^2*cr)/Iz/vr]       [lf*cf/Iz]       [   -(lf^2*cf+lr^2*cr)/Iz/vr]
+ */
 struct StateStruct
 {
 	double x;
@@ -24,7 +78,9 @@ struct StateStruct
 	double z{0.0};
 	double yaw;
 	double vx;
-	double sf;
+	double vy;
+	double yaw_rate;
+	double steer;
 };
 
 //////////////////////////////////////////////////////////////////////////
@@ -88,11 +144,18 @@ class SingleTrackDynStateModel : public DynamicModel
 	double mInitXPose;
 	double mInitYPose;
 	double mInitYaw;
+	double mInitYawRate;
 	double mInitVx;
+	double mInitVy;
 	double mInitSf;
 	double mInitSv;
 	double mInitAcc;
-	double mVehWheelBase;
+	double mMass;
+	double mIz;
+	double mLf;
+	double mLr;
+	double mCf;
+	double mCr;
 	InputStruct mInputStruct;
 	StateStruct mStateStruct;
 	InputVector mInputVector;

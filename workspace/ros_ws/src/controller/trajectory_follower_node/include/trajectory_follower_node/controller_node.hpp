@@ -103,11 +103,10 @@ class Controller : public rclcpp::Node
 	// Publish the processing time
 	void publishProcessingTime(
 	    const double tMs, [[maybe_unused]] const rclcpp::Publisher<Float64Stamped>::SharedPtr pub);
-	
 
 	// create agent model
 	void createAgentModel();
-	
+
   private:
 	// logger
 	mpl::rclcpp_utils::Logger mLogger;
@@ -136,7 +135,7 @@ class Controller : public rclcpp::Node
 
 	// Subscriber
 	mpl_utils::InternalProcessPollingSubscriber<project_utils_msgs::msg::Trajectory> mSubRefPath{
-	    this, "~/input/reference_trajectory",rclcpp::QoS{1}.transient_local()};
+	    this, "~/input/reference_trajectory", rclcpp::QoS{1}.transient_local()};
 	mpl_utils::InternalProcessPollingSubscriber<nav_msgs::msg::Odometry> mSubOdometry{
 	    this, "~/input/current_odometry"};
 	mpl_utils::InternalProcessPollingSubscriber<project_utils_msgs::msg::SteeringReport>

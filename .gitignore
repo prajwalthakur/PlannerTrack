@@ -8,3 +8,11 @@ todo.md
 # pixi environments
 .pixi
 *.egg-info
+
+# not ready to push yet
+/workspace/ros_ws/src/trajectory_optimizer_base/
+/workspace/ros_ws/src/trajectory_optimizer_ground_vehicle/
+/workspace/ros_ws/src/velocity_smoother_ground_vehicle/
+/workspace/ros_ws/src/controller/lat_based_lqr_controller
+/workspace/ros_ws/src/controller/lqr_controller
+/workspace/ros_ws/src/controller/mpcc_controller

@@ -18,7 +18,8 @@ int main(int argc, char ** argv)
 {
 	rclcpp::init(argc, argv);
 
-	auto node = std::make_shared<mpl::control::trajectory_follower_node::Controller>();
+	auto node = std::make_shared<mpl::control::trajectory_follower_node::Controller>(
+	    rclcpp::NodeOptions());
 
 	rclcpp::spin(node);
 	rclcpp::shutdown();

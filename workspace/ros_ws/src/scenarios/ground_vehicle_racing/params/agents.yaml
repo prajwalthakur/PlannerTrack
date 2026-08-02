@@ -3,29 +3,31 @@
 # agent's UniqueId. Agent count is derived from this map's size, not
 # tracked separately anywhere.
 #
-# Each agent names four pluginlib lookup names (must match the bare
-# type="..." in that plugin's plugins.xml) plus that plugin's own param
-# block. VehicleModelFactory will load each plugin and call
-# initialize()/initialze() with only that plugin's *_params sub-node --
-# not the whole agent block -- matching how RectangularGeometry/
-# EllipseCollisionFootPrint already read their params (top-level keys of
-# whatever node they're handed).
-
 agents:
-
   agent_1:
     dynamics_plugin: SingleTrackDynStateModel
     dynamics_params:
-      numStates: 5
+      numStates: 7
       numControlInputs: 2
       initXPose: -1.0175      # on global_traj_wpnts_iqp, index 0 (start/finish)
       initYPose: -6.6550
       initYaw: -2.8359
+      initYawRate: 0.0
       initVx: 0.0
+      initVy: 0.0
       initSf: 0.0             # initial steering angle (rad)
       initAcc: 0.0
       initSv: 0.0              # initial steering velocity (rad/s)
-      vehWheelBase: 0.34
+      # F1TENTH-scale reference values (wheelbase/dims match this platform
+      # closely)
+      mass: 3.47                # kg
+      Iz: 0.04712                # yaw inertia, kg*m^2
+      lf: 0.17                   # CG-to-front-axle, m (half of wheelbase 0.34)
+      lr: 0.17                   # CG-to-rear-axle, m
+      cf: 4.718                  # front cornering stiffness, N/rad
+      cr: 5.4562                 # rear cornering stiffness, N/rad
+      vehWheelBase: 0.34          # lf + lr, m
+      steeringTimeConstant: 0.1   # first-order steering-actuator lag, s -- placeholder, tune to actual servo
       integration:
         integrationStepSize: 0.001   # rk4 integration step (s), independent of simTimeStep this is (model_dt)
 
@@ -46,20 +48,31 @@ agents:
       angle_max: 3.14159265
       range_min: 0.05
       range_max: 10.0
-
+    controller: "mppi_controller"
+ 
   agent_2:
     dynamics_plugin: SingleTrackDynStateModel
     dynamics_params:
-      numStates: 5
+      numStates: 7
       numControlInputs: 2
       initXPose: -2.0645      # on global_traj_wpnts_iqp, index ~1/3 around the lap
       initYPose: 0.8237
       initYaw: 1.9402
+      initYawRate: 0.0
       initVx: 0.0
+      initVy: 0.0
       initSf: 0.0
       initAcc: 0.0
       initSv: 0.0
-      vehWheelBase: 0.30        # deliberately different from agent_1, to prove params are per-agent
+      # F1TENTH-scale reference values -- placeholders until system-identified.
+      mass: 3.47
+      Iz: 0.04712
+      lf: 0.15                   # CG-to-front-axle, m (half of wheelbase 0.30, deliberately different from agent_1)
+      lr: 0.15
+      cf: 4.718
+      cr: 5.4562
+      vehWheelBase: 0.30      # lf + lr, m (deliberately different from agent_1)
+      steeringTimeConstant: 0.1
       integration:
         integrationStepSize: 0.001
 
@@ -80,20 +93,32 @@ agents:
       angle_max: 3.14159265
       range_min: 0.05
       range_max: 10.0
+    controller: "pure_pursuit"
 
+    
   agent_3:
     dynamics_plugin: SingleTrackDynStateModel
     dynamics_params:
-      numStates: 5
+      numStates: 7
       numControlInputs: 2
       initXPose: 0.9350       # on global_traj_wpnts_iqp, index ~2/3 around the lap
       initYPose: 1.8893
       initYaw: -1.6454
+      initYawRate: 0.0
       initVx: 0.0
+      initVy: 0.0
       initSf: 0.0
       initAcc: 0.0
       initSv: 0.0
-      vehWheelBase: 0.30        # deliberately different from agent_1, to prove params are per-agent
+      # F1TENTH-scale reference values -- placeholders until system-identified.
+      mass: 3.47
+      Iz: 0.04712
+      lf: 0.15                   # CG-to-front-axle, m (half of wheelbase 0.30, deliberately different from agent_1)
+      lr: 0.15
+      cf: 4.718
+      cr: 5.4562
+      vehWheelBase: 0.30      # lf + lr, m (deliberately different from agent_1)
+      steeringTimeConstant: 0.1
       integration:
         integrationStepSize: 0.001
 
@@ -114,3 +139,5 @@ agents:
       angle_max: 3.14159265
       range_min: 0.05
       range_max: 10.0
+    
+    controller: "pure_pursuit"

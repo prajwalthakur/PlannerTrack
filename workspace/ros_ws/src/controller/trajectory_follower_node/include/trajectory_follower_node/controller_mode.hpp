@@ -14,6 +14,7 @@
 #pragma once
 #include "dummy_lateral_controller/dummy_lateral_controller.hpp"
 #include "dummy_longitudinal_controller/dummy_longitudinal_controller.hpp"
+#include "mppi_controller/mppi_controller.hpp"
 #include "project_utils/common_utils.hpp"
 #include "regulated_pure_pursuit/regulated_pure_pursuit.hpp"
 #include "trajectory_follower_base/trajectory_follower_base_collection.h"
@@ -30,7 +31,9 @@ enum class LateralControllerMode {
 
 enum class LongitudinalControllerMode { INVALID = 0, DUMMY_LONGITUDINAL, PID, MPC };
 
-enum class HybridControllerMode { INVALID = 0, MPC, MPCC, REGULATED_PURE_PURSUIT };
+enum class HybridControllerMode { INVALID = 0, MPC, MPCC, REGULATED_PURE_PURSUIT, MPPI };
+
+//////////////////////////////////////////////////////////////////////////
 
 inline LateralControllerMode getLateralControllerMode(const std::string & mode)
 {
@@ -46,6 +49,8 @@ inline LateralControllerMode getLateralControllerMode(const std::string & mode)
 
 	return LateralControllerMode::INVALID;
 }
+
+//////////////////////////////////////////////////////////////////////////
 
 inline std::unique_ptr<trajectory_follower::LateralControllerBase> getLateralController(
     const std::string & mode, rclcpp::Node & node)
@@ -74,6 +79,8 @@ inline std::unique_ptr<trajectory_follower::LateralControllerBase> getLateralCon
 	return nullptr;
 }
 
+//////////////////////////////////////////////////////////////////////////
+
 inline LongitudinalControllerMode getLongitudinalControllerMode(const std::string & mode)
 {
 	if (isStringEqual(mode, "pid")) {
@@ -85,6 +92,8 @@ inline LongitudinalControllerMode getLongitudinalControllerMode(const std::strin
 
 	return LongitudinalControllerMode::INVALID;
 }
+
+//////////////////////////////////////////////////////////////////////////
 
 inline std::unique_ptr<trajectory_follower::LongitudinalControllerBase> getLongitudinalController(
     const std::string & mode, rclcpp::Node & node)
@@ -109,6 +118,8 @@ inline std::unique_ptr<trajectory_follower::LongitudinalControllerBase> getLongi
 	return nullptr;
 }
 
+//////////////////////////////////////////////////////////////////////////
+
 inline HybridControllerMode getHybridControllerMode(const std::string & mode)
 {
 	if (isStringEqual(mode, "mpc")) {
@@ -117,11 +128,14 @@ inline HybridControllerMode getHybridControllerMode(const std::string & mode)
 		return HybridControllerMode::MPCC;
 	} else if (isStringEqual(mode, "regulated_pp")) {
 		return HybridControllerMode::REGULATED_PURE_PURSUIT;
-
+	} else if (isStringEqual(mode, "mppi_controller")) {
+		return HybridControllerMode::MPPI;
 	} else {
 		return HybridControllerMode::INVALID;
 	}
 }
+
+//////////////////////////////////////////////////////////////////////////
 
 inline std::unique_ptr<trajectory_follower::HybridControllerBase> getHybridController(
     const std::string & mode, rclcpp::Node & node)
@@ -135,11 +149,15 @@ inline std::unique_ptr<trajectory_follower::HybridControllerBase> getHybridContr
 			break;
 		}
 		case HybridControllerMode::MPCC: {
-			//auto mHybridController = std::make_unique<mpcc_controller::MPCCController>(node);
+			// auto mHybridController = std::make_unique<mpcc_controller::MPCCController>(node);
 			return nullptr;
 		}
 		case HybridControllerMode::REGULATED_PURE_PURSUIT: {
 			auto hydridController = std::make_unique<regulatedpp_controller::RegulatedPP>(node);
+			return hydridController;
+		}
+		case HybridControllerMode::MPPI: {
+			auto hydridController = std::make_unique<controller::mppi_controller::MPPIController>(node);
 			return hydridController;
 		}
 		default: {

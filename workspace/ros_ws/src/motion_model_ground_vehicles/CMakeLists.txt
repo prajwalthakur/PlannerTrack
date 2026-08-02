@@ -20,6 +20,7 @@ find_package(yaml-cpp REQUIRED)
 
 add_library(motion_model_ground_vehicles SHARED
   src/singleTrackDynStateModel/SingleTrackDynStateModel.cpp
+  src/bicycleKinematicModel/BicycleKinematicModel.cpp
 )
 add_library(motion_model_ground_vehicles::motion_model_ground_vehicles ALIAS motion_model_ground_vehicles)
 target_compile_features(motion_model_ground_vehicles PUBLIC c_std_99 cxx_std_17)  # Require C99 and C++17

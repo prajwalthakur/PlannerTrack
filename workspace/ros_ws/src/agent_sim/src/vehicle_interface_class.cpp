@@ -33,6 +33,13 @@ void AgentInterface::onConfigure()
 	mTfBroadcaster = std::make_unique<tf2_ros::TransformBroadcaster>(*this);
 	mStaticTfBroadcaster = std::make_shared<tf2_ros::StaticTransformBroadcaster>(this);
 	mMarkerPub = create_publisher<visualization_msgs::msg::MarkerArray>("/agent_markers", 10);
+	// map_server publishes /map transient_local (latched) so this still
+	// picks up the map even though map_server's lifecycle activation can
+	// finish before or after this subscription is created.
+	rclcpp::QoS mapQos(1);
+	mapQos.transient_local().reliable();
+	mMapSub = create_subscription<nav_msgs::msg::OccupancyGrid>(
+	    "/map", mapQos, [this](nav_msgs::msg::OccupancyGrid::SharedPtr msg) { mapCallback(msg); });
 	mLogger = mpl::rclcpp_utils::Logger(get_logger(), "veh-interface-logger");
 	mVehicleFactory = std::make_unique<VehicleModelFactory>(mLogger);
 	auto get = mParameters->getParamGetter("");
@@ -134,14 +141,30 @@ void AgentInterface::addAgents()
 
 //////////////////////////////////////////////////////////////////////////
 
+void AgentInterface::mapCallback(nav_msgs::msg::OccupancyGrid::SharedPtr msg)
+{
+	mMapGrid.width = msg->info.width;
+	mMapGrid.height = msg->info.height;
+	mMapGrid.resolution = msg->info.resolution;
+	mMapGrid.originX = msg->info.origin.position.x;
+	mMapGrid.originY = msg->info.origin.position.y;
+	mMapGrid.data = msg->data;
+	mLogger.info("occupancy grid map received: %u x %u @ %.3f m/cell", mMapGrid.width,
+	    mMapGrid.height, mMapGrid.resolution);
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+
+//////////////////////////////////////////////////////////////////////////
+
 void AgentInterface::publishStaticTFs()
 {
 	std::vector<geometry_msgs::msg::TransformStamped> tfs;
 	for (int i = 1; i <= mNumAgents; ++i) {
 		geometry_msgs::msg::TransformStamped tf;
 		tf.header.stamp = now();
-		tf.header.frame_id = "agent_" + std::to_string(i) + "_base_link";
-		tf.child_frame_id = "agent_" + std::to_string(i) + "_lidar_link";
+		tf.header.frame_id = "agent_" + std::to_string(i) + "/base_link";
+		tf.child_frame_id = "agent_" + std::to_string(i) + "/lidar_link";
 		tf.transform.rotation.w = 1.0;
 		tfs.push_back(tf);
 	}
@@ -157,7 +180,7 @@ void AgentInterface::broadcastAgentTF(int agentNum, const stPose & pose)
 	geometry_msgs::msg::TransformStamped tf;
 	tf.header.stamp = now();
 	tf.header.frame_id = mFixedFrame;
-	tf.child_frame_id = "agent_" + std::to_string(agentNum) + "_base_link";
+	tf.child_frame_id = "agent_" + std::to_string(agentNum) + "/base_link";
 	tf.transform.translation.x = pose.xCoord;
 	tf.transform.translation.y = pose.yCoord;
 	tf.transform.translation.z = pose.zCoord;
@@ -185,6 +208,7 @@ void AgentInterface::stateUpdateTimerCallback()
 		}
 	}
 	worldSnapShot.staticObstacles = mObstacleCircles;
+	worldSnapShot.mapGrid = mMapGrid.valid() ? &mMapGrid : nullptr;
 
 	for (auto & ag : mAgents) {
 		if (ag.model) {
@@ -224,7 +248,7 @@ void AgentInterface::statePubTimerCallback()
 		if (desc.kind == ShapeDescriptor::Kind::Rectangle) {
 			visualization_msgs::msg::Marker marker;
 			marker.header.stamp = stamp;
-			marker.header.frame_id = "agent_" + std::to_string(agentNum) + "_base_link";
+			marker.header.frame_id = "agent_" + std::to_string(agentNum) + "/base_link";
 			marker.ns = "agents";
 			marker.id = agentNum;
 			marker.type = visualization_msgs::msg::Marker::CUBE;
@@ -248,7 +272,7 @@ void AgentInterface::statePubTimerCallback()
 		if (footprintDesc.kind == ShapeDescriptor::Kind::Ellipse) {
 			visualization_msgs::msg::Marker marker;
 			marker.header.stamp = stamp;
-			marker.header.frame_id = "agent_" + std::to_string(agentNum) + "_base_link";
+			marker.header.frame_id = "agent_" + std::to_string(agentNum) + "/base_link";
 			marker.ns = "agents_footprint";
 			marker.id = agentNum;
 			marker.type = visualization_msgs::msg::Marker::SPHERE;
@@ -284,7 +308,7 @@ void AgentInterface::lidarTimerCallback()
 
 		sensor_msgs::msg::LaserScan scan;
 		scan.header.stamp = stamp;
-		scan.header.frame_id = "agent_" + std::to_string(agentNum) + "_lidar_link";
+		scan.header.frame_id = "agent_" + std::to_string(agentNum) + "/lidar_link";
 		scan.angle_min = ag.lidarAngleMin;
 		scan.angle_max = ag.lidarAngleMax;
 		scan.angle_increment = (ranges.size() > 1)

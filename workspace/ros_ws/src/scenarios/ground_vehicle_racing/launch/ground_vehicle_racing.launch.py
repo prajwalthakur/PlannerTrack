@@ -1,5 +1,6 @@
 # Author Prajwal Thakur
 import os
+import sys
 
 import yaml
 
@@ -8,6 +9,12 @@ from launch.actions import DeclareLaunchArgument
 from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node
 from ament_index_python.packages import get_package_share_directory
+
+# ros2 launch loads this file by path, not as an installed Python package, so
+# sibling modules under controllers/ need this on sys.path to be importable.
+sys.path.append(os.path.dirname(__file__))
+from controllers.pure_pursuit import build_nodes as build_pure_pursuit_nodes 
+from controllers.mppi import build_nodes as build_mppi_nodes  
 
 
 def generate_launch_description():
@@ -20,14 +27,15 @@ def generate_launch_description():
     params_config = os.path.join(params_dir, 'params.yaml')
     agents_config = os.path.join(params_dir, 'agents.yaml')
     sim_config = os.path.join(params_dir, 'sim.yaml')
-    controller_config = os.path.join(params_dir, 'controller.yaml')
     rviz_config = os.path.join(params_dir, 'multi_rviz.rviz')
 
     # Read agents.yaml at launch-generation time (same file agent_sim itself
     # consumes at runtime) so the controller count/numbering can never drift
-    # from the actual agent count -- no hardcoded N here.
+    # from the actual agent count -- no hardcoded N here. Each agent's own
+    # "controller:" field picks which builder below runs for that agent.
     with open(agents_config) as f:
-        agent_names = list(yaml.safe_load(f)['agents'].keys())
+        agents_yaml = yaml.safe_load(f)['agents']
+    agent_names = list(agents_yaml.keys())
 
     default_map = os.path.join(scenario_dir, 'map', 'map.yaml')
     default_waypoints = os.path.join(scenario_dir, 'map', 'global_waypoints.json')
@@ -38,81 +46,27 @@ def generate_launch_description():
         description='Full path to the map yaml file to load with map_server'
     )
 
-    # One controller_node_exe per agent (which algorithm it actually runs --
-    # regulated_pp, dummy, mpcc -- is picked inside controller.yaml's
-    # hybrid_mode/lateral_controller_mode/longitudinal_controller_mode, not
-    # here). Namespaced per agent (name kept as "controller" in every
-    # namespace, not "controller_agent_N") so controller.yaml's single
-    # "controller:" ros__parameters key applies unmodified to every
-    # instance, and so each instance's ~/... private topics land under
-    # /agent_N/controller/... without needing explicit remaps.
-    #
-    # Remap split:
-    #   - global (same absolute topic for every instance): the shared
-    #     raceline from global_waypoints_publisher.
-    #   - per-agent (absolute, index-specific): this instance's own
-    #     odometry in, control command out.
-    # ~/output/control_cmd is still project_utils_msgs/Control; agent_sim's
-    # control subscriber expects EigenVector -- the remap below won't
-    # actually deliver data until that conversion lands on the controller
-    # side (separate, already-planned follow-up), but the topic wiring is
-    # forward-looking so nothing else needs to change once it does.
-    controller_nodes = [
-        Node(
-            package='trajectory_follower_node',
-            executable='controller_node_exe',
-            name='controller',
-            namespace=f'agent_{i}',
-            output='screen',
-            parameters=[
-                controller_config,
-                {
-                    'sim_config_file': sim_config,
-                    'agents_config_file': agents_config,
-                    'agent_number': i,
-                },
-            ],
-            remappings=[
-                ('~/input/reference_trajectory', '/global_planner/iqp_trajectory'),
-                ('~/input/current_odometry', f'/agent_{i}/odom'),
-                ('~/input/current_steering',f'/agent_{i}/steering_report'),
-                ('~/output/control_cmd', f'/agent_{i}/amr_control'),
-            ],
-        )
-        for i, _ in enumerate(agent_names, start=1)
-    ]
+    # Node/param wiring for each controller type lives in its own module
+    # under controllers/ (see build_nodes() there). To move an agent between
+    # controllers, edit its "controller:" field in agents.yaml -- nothing
+    # here needs to change. To add a new controller type, add one
+    # controllers/<name>.py with a build_nodes(i, sim_config, agents_config)
+    # and one entry below.
+    CONTROLLER_BUILDERS = {
+        'pure_pursuit': build_pure_pursuit_nodes,
+        'mppi_controller': build_mppi_nodes,
+    }
 
-    # One pid_controller_node_exe per agent, downstream of controller_node_exe.
-    # controller_node_exe now publishes its high-level velocity/steering-angle
-    # setpoint on /agent_N/amr_control (project_utils_msgs/Control) instead of
-    # /agent_N/control -- this node closes the loop against that setpoint and
-    # this agent's own odom/steering_report feedback, and is the one that
-    # actually owns /agent_N/control (project_utils_msgs/EigenVectorStamped),
-    # which is what agent_sim's control subscriber expects.
-    pid_controller_nodes = [
-        Node(
-            package='pid_controller',
-            executable='pid_controller_node_exe',
-            name='pid_controller',
-            namespace=f'agent_{i}',
-            output='screen',
-            parameters=[
-                controller_config,
-                {
-                    'sim_config_file': sim_config,
-                    'agents_config_file': agents_config,
-                    'agent_number': i,
-                },
-            ],
-            remappings=[
-                ('~/input/current_odometry', f'/agent_{i}/odom'),
-                ('~/input/current_steering', f'/agent_{i}/steering_report'),
-                ('~/input/control_cmd', f'/agent_{i}/amr_control'),
-                ('~/output/control_cmd', f'/agent_{i}/control'),
-            ],
-        )
-        for i, _ in enumerate(agent_names, start=1)
-    ]
+    controller_nodes = []
+    for i, agent_name in enumerate(agent_names, start=1):
+        controller_type = agents_yaml[agent_name].get('controller', 'pure_pursuit')
+        builder = CONTROLLER_BUILDERS.get(controller_type)
+        if builder is None:
+            raise ValueError(
+                f"{agent_name}: unknown controller '{controller_type}', "
+                f"expected one of {list(CONTROLLER_BUILDERS)}"
+            )
+        controller_nodes.extend(builder(i, sim_config, agents_config))
 
     return LaunchDescription([
         map_arg,
@@ -179,5 +133,4 @@ def generate_launch_description():
             output='screen'
         ),
         *controller_nodes,
-        *pid_controller_nodes,
     ])
