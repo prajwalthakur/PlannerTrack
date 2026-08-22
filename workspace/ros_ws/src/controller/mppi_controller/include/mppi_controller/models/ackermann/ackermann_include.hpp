@@ -1,5 +1,11 @@
-#pragma once 
+#pragma once
 
+/**
+ * \file
+ * \brief Umbrella header pulling in every \ref AckermannModel building
+ * block (state, trajectories, path, control sequence, constraints, noise
+ * generator) in one `#include`.
+ */
 #include "mppi_controller/models/model.hpp"
 #include "mppi_controller/models/ackermann/ackermann_constraints.hpp"
 #include "mppi_controller/models/ackermann/ackermann_control_sequence.hpp"

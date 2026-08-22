@@ -1,6 +1,10 @@
 #include "mppi_controller/critics/common/twirling_critic.hpp"
 #include "mppi_controller/utils/utils.hpp"
 
+/** \file
+ * \brief \c mppi_critic::TwirlingCritic "TwirlingCritic" implementation.
+ */
+
 void mppi_critic::TwirlingCritic::initialize()
 {
     auto getParam = mParameter->getParamGetter(mName);

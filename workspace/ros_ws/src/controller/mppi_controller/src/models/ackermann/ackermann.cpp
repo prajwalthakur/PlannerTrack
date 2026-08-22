@@ -3,6 +3,12 @@
 #include "mppi_controller/utils/common_utils.hpp"
 #include "mppi_controller/utils/geometry_utils.hpp"
 
+/** \file
+ * \brief \c models::AckermannModel "AckermannModel" implementation:
+ * configuration, kinematic integration, and control-sequence
+ * shift/constraint handling.
+ */
+
 //////////////////////////////////////////////////////////////////////////
 
 void models::AckermannModel::onConfigure(std::shared_ptr<Parameters> parameters,

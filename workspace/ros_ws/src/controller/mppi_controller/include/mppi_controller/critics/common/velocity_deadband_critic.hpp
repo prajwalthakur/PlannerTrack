@@ -7,8 +7,9 @@
 namespace controller::mppi_controller::critic
 {
     /**
-    * @class mppi::critics::VelocityDeadbandCritic
-    * @brief Critic objective function for enforcing feasible constraints
+    * @brief Penalizes commanding a linear/angular velocity below
+    * `mDeadbandVelocities`, i.e. inside a "dead zone" too small to
+    * physically move the vehicle (e.g. under motor stiction).
     */
     class VelocityDeadbandCritic : public CriticFunction
     {
@@ -16,11 +17,7 @@ namespace controller::mppi_controller::critic
             VelocityDeadbandCritic()=default;
             ~VelocityDeadbandCritic() override =default;
             void initialize() override;
-            /**
-            * @brief Evaluate cost related to trajectories path alignment
-            *
-            * @param costs [out] add reference cost values to this tensor
-            */
+            /// \brief Accumulate a time-integrated deadband-violation penalty into `data.costs`.
             void score(CriticData& data) override;
         protected:
             unsigned int mPower{0};

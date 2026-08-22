@@ -1,0 +1,69 @@
+/**:
+  ros__parameters:
+    ssc_map:
+      map_resolution:
+        x: 0.10   # s (longitudinal), m/cell
+        y: 0.05   # d (lateral), m/cell
+        z: 0.10   # t (time), s/cell
+
+      # Lateral bound source: one lane's width, not the full road. d is
+      # measured relative to the reference lane
+      lane_width: 0.50 #should be same as defined in params.yaml
+
+      # Longitudinal span source: generously covers a full arm-to-arm
+      # crossing (mapSizeX = ceil((2*arm_length + lane_width) / map_resolution.x)).
+      arm_length: 6.0
+
+      planning_horizon: 10.0
+
+      # Longitudinal back-margin: how far behind ego's current s the grid's
+      # s-origin starts (gives cube inflation room to grow backward too, not
+      # just forward). Mirrors EPSILON's SscMap::Config::s_back_len.
+      s_back_len: 0.20
+
+      # Dynamic bounds attached to each final cube
+      # (SscMap::getFinalGlobalMetricCubesList) -- the actual velocity/accel
+      # constraints the Bezier QP's control points get bounded by. Sourced
+      # from this scenario's real vehicle limits
+      # (scenarios/intersection/params/pure_pursuit_controller.yaml's
+      # vehicle: v_max=20.0 m/s, a_max=9.51 m/s^2 -- same F1TENTH-scale
+      # platform as agents.yaml's agent_1, identical cf/cr cornering-
+      # stiffness values) -- kept as a conservative fraction of that
+      # physical ceiling, not the ceiling itself, since these are planning-
+      # comfort bounds, not traction-limit bounds.
+      dynamic_bounds:
+        max_lon_vel: 2.0
+        min_lon_vel: 0.0
+        max_lon_acc: 2.0
+        max_lon_dec: -3.0
+        max_lat_vel: 1.0
+        max_lat_acc: 1.0
+
+      # Time-axis inflation cap per cube (SscMap::inflateCubeIn3dGrid) -- how
+      # many grid cells (of map_resolution.z each) one cube's time-extent may
+      # grow to before the chain must start a new cube. Mirrors EPSILON's
+      # kMaxNumOfGridAlongTime.
+      max_grids_along_time: 2
+
+      # Per-axis inflation step size (grid cells per inflateCubeIn3dGrid
+      # iteration). Mirrors EPSILON's Config::inflate_steps.
+      inflate_steps:
+        x_pos: 5
+        x_neg: 5
+        y_pos: 5
+        y_neg: 5
+        z_pos: 1
+        z_neg: 1
+
+      # Ego-footprint inflation mode for other agents' rasterized vertices
+      # (projectAgentsToFrenet()) -- mutually exclusive, first true one wins:
+      #   simple:     grow the other agent's length/width by ego's own
+      #               before computing its corners. Cheap, exact in the
+      #               sense of not being grid-quantized, but not a true
+      #               Minkowski sum of two arbitrarily-rotated rectangles --
+      #               see ssc_planner.cpp for the exact approximation.
+      #   minkowski:  true Minkowski-sum inflation. Not yet implemented.
+      # If neither is true, no inflation happens (other agents' raw
+      # footprint only).
+      if_ego_inflation_simple: true
+      if_ego_inflation_minkowski: false

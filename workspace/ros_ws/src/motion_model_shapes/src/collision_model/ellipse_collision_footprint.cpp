@@ -9,6 +9,12 @@
 #include <cmath>
 #include <iostream>
 
+/** \file
+ * \brief \ref EllipseCollisionFootPrint implementation. `PLUGINLIB_EXPORT_CLASS`
+ * at the bottom of this file registers the class with pluginlib at runtime
+ * -- see \ref plugin_architecture.
+ */
+
 //////////////////////////////////////////////////////////////////////////
 
 EllipseCollisionFootPrint::EllipseCollisionFootPrint(

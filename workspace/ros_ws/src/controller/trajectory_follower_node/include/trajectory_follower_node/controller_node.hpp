@@ -56,34 +56,42 @@ namespace trajectory_follower_node
 using project_utils_msgs::msg::ControlHorizon;
 namespace trajectory_follower = ::mpl::control::trajectory_follower;
 namespace mpl_utils = ::mpl_rclcpp_utils;
-//\classController
-/*
- * \brief The node class used for generating longitudinal control commands (velocity/acceleration)
- * and lateral control commands
+/**
+ * \brief The node that runs whichever lateral/longitudinal/hybrid
+ * controller its config names (see \ref controller_mode.hpp), on a fixed
+ * timer, and publishes the resulting \c Control command.
+ *
+ * Either \ref mLateralController + \ref mLongitudinalController (separate
+ * lateral/longitudinal controllers) or \ref mHybridController (a single
+ * combined controller, see \ref mHybridControllerMode) is used each cycle,
+ * never both.
  */
 class Controller : public rclcpp::Node
 {
   public:
-	// Constructor
 	explicit Controller(const rclcpp::NodeOptions & nodeOptions);
-	// Destructor
 	virtual ~Controller() {}
 
   private:
-	// compute control command, publish periodically
-	// compute the input data for the controller to work on.
+	/// \brief Build this cycle's \ref trajectory_follower::InputData "InputData" from the latest polled subscriber messages.
 	std::unique_ptr<trajectory_follower::InputData> createInputData(rclcpp::Clock & clock);
-	// Call the controller
+	/// \brief Control-timer callback: poll inputs, run the configured controller(s), publish the command.
 	void callbackTimerControl();
-	// Check if the node has all the data to run the controller, if not skip the call to compute the
-	// control and print the log message
+	/**
+	 * \brief Check if the node has all the data to run the controller.
+	 * \return False if any required input hasn't arrived yet -- in that
+	 * case the caller should skip this cycle's control computation and
+	 * log instead.
+	 */
 	bool processData(rclcpp::Clock & clock);
-	// Returns true if the computed control outputs are stale.
+	/// \brief Whether the separate lateral/longitudinal outputs are stale relative to \ref mCyclicMessageTimeoutThrSec.
 	bool isTimeOut(trajectory_follower::LongitudinalOutput & lonOut,
 	    trajectory_follower::LateralOutput & latOut);
+	/// \brief Whether the combined hybrid-controller output is stale relative to \ref mCyclicMessageTimeoutThrSec.
 	bool isTimeOut(trajectory_follower::HybridOutput & hybridOut);
 	// LateralControllerMode getLateralControllerMode(const std::string& algoName) const;
 	// LongitudinalControllerMode getLongitudinalControllerMode(const std::string& algoName) const;
+	/// \brief Publish RViz debug markers for the current input/lateral/longitudinal state.
 	void publishDebugMarker([[maybe_unused]] const trajectory_follower::InputData & inputData,
 	    [[maybe_unused]] const trajectory_follower::LateralOutput & latOut,
 	    [[maybe_unused]] const trajectory_follower::LongitudinalOutput & longOut) const;
@@ -100,11 +108,11 @@ class Controller : public rclcpp::Node
 	static std::optional<ControlHorizon> mergeLatLonHorizon(const LateralHorizon & lateralHorizon,
 	    const LongitudinalHorizon & longitudinalHorizon, const rclcpp::Time & timeStamp);
 
-	// Publish the processing time
+	/// \brief Publish \p tMs (this cycle's controller compute time, in ms) on \p pub.
 	void publishProcessingTime(
 	    const double tMs, [[maybe_unused]] const rclcpp::Publisher<Float64Stamped>::SharedPtr pub);
 
-	// create agent model
+	/// \brief Build this node's \ref AgentModel (via \c ControllerBase::createAgent) for the agent named by \ref mAgentNumber.
 	void createAgentModel();
 
   private:

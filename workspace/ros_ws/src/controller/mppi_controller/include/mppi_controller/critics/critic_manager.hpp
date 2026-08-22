@@ -13,19 +13,26 @@
 
 namespace controller::mppi_controller
 {
+/**
+ * \brief Owns and runs the active set of \c mppi_critic::CriticFunction
+ * "CriticFunction" plugins (loaded by name via \ref
+ * mppi_critics_utils::getCritic "critics_utils::getCritic") for \ref
+ * Optimizer::evalTrajectoriesScores.
+ */
 class CriticsManager
 {
   public:
-	// Constructor
 	CriticsManager(const rclcpp::Clock::SharedPtr & clock);
-	// Destructor
 	~CriticsManager() = default;
 
+	/// \brief Configure this manager and every loaded critic from ROS params/costmap.
 	void onConfigure(Parameters * parameter, const std::string & name,
 	    std::shared_ptr<CostMapRos> costMapRos, Logger logger);
 
+	/// \brief Run every enabled critic's \c score(data) in turn, accumulating into \p data's cost array.
 	void evalTrajectoriesScores(CriticData & data);
 
+	/// \brief Instantiate the configured list of critics by name (see \ref mppi_critics_utils::getCritic "critics_utils::getCritic").
 	void loadCritics();
 
   private:

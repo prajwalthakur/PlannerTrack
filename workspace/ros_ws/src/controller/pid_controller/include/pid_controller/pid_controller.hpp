@@ -37,13 +37,17 @@ namespace mpl::control::pid_controller
 {
 namespace mpl_utils = ::mpl_rclcpp_utils;
 
-// Low-level actuator tracking loop, independent of and downstream from
-// trajectory_follower_node::Controller. Controller publishes a target
-// velocity/steering-angle Control at ~controller_frequency (e.g. 50 Hz);
-// this node closes the loop against measured odometry/steering feedback at
-// its own, typically much higher, rate and publishes the resulting
-// acceleration/steering-rate actuator command that agent_sim (or real
-// hardware) actually consumes.
+/**
+ * \brief Low-level actuator tracking loop, independent of and downstream
+ * from `trajectory_follower_node::Controller`.
+ *
+ * `Controller` publishes a target velocity/steering-angle \c Control at
+ * ~`controller_frequency` (e.g. 50 Hz); this node closes the loop against
+ * measured odometry/steering feedback at its own, typically much higher,
+ * rate (two independent \ref PIDController instances, \ref mLonPid and
+ * \ref mLatPid) and publishes the resulting acceleration/steering-rate
+ * actuator command that `agent_sim` (or real hardware) actually consumes.
+ */
 class PidControllerNode : public rclcpp::Node
 {
   public:
@@ -51,17 +55,22 @@ class PidControllerNode : public rclcpp::Node
 	virtual ~PidControllerNode() {}
 
   private:
-	// Build this agent's vehicle model, purely so DynamicModel::
-	// packAccelSteerRate() (vehicle-specific input-vector layout) can be
-	// reused instead of hardcoded here.
+	/**
+	 * \brief Build this agent's \ref AgentModel, purely so
+	 * `DynamicModel::packAccelSteerRate()` (vehicle-specific input-vector
+	 * layout) can be reused instead of hardcoded here.
+	 */
 	void createAgentModel();
-	// Poll the three subscribers; returns true only once all three have
-	// delivered at least one message.
+	/// \brief Poll the three subscribers; returns true only once all three have delivered at least one message.
 	bool processData();
-	// True if the last received reference control is older than
-	// mTimeoutThrSec -- in that case we must not keep commanding a stale
-	// setpoint.
+	/**
+	 * \brief Whether the last received reference control is stale.
+	 * \return True if the last received reference control is older than
+	 * \ref mTimeoutThrSec -- in that case we must not keep commanding a
+	 * stale setpoint.
+	 */
 	bool isTimeOut() const;
+	/// \brief Control-timer callback: poll inputs, tick both PID loops, publish the actuator command.
 	void callbackTimerControl();
 
   private:

@@ -2,8 +2,11 @@
 #include <memory.h>
 #include "mppi_controller/critics/common/critic_collection.hpp"
 #include "mppi_controller/utils/utils.hpp"
-// list and initialize the critics
-// return unique pointers to critics
+/**
+ * \file
+ * \brief Name -> instance factory for \c mppi_critic::CriticFunction
+ * "CriticFunction" plugins, used by \ref CriticsManager::loadCritics.
+ */
 
 namespace controller::mppi_controller::critics_utils
 {
@@ -12,6 +15,12 @@ namespace controller::mppi_controller::critics_utils
     //     GoalCritic
     // };
 
+    /**
+     * \brief Construct the concrete critic named by \p criticName
+     * (case-insensitive), e.g. `"GoalCritic"`, `"PathAlignCritic"`.
+     * \return The critic instance, or `nullptr` if \p criticName doesn't
+     * match any known critic.
+     */
     inline std::unique_ptr<mppi_critic::CriticFunction> getCritic(const std::string& criticName)
     {
         // std::string criticName_ = criticName;

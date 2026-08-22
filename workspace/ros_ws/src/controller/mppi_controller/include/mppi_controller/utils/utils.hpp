@@ -10,9 +10,16 @@
 #include "mppi_controller/utils/ros_namespace.hpp"
 #include "mppi_controller/utils/pose2d.hpp"
 #include "mppi_controller/utils/geometry_utils.hpp"
+/**
+ * \file
+ * \brief Path/trajectory helpers used by the critics: furthest-reached
+ * path point, per-point costmap validity, and pose/yaw alignment against a
+ * target.
+ */
 namespace controller::mppi_controller::utils
 {
-    
+
+    /// \brief Case-insensitive string equality (used by \ref mppi_critics_utils::getCritic "critics_utils::getCritic").
     inline bool compareStringIgnoreCase(const std::string& a, const std::string& b)
     {
         return a.size() == b.size() &&

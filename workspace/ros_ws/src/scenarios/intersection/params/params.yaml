@@ -1,0 +1,179 @@
+/**:
+  ros__parameters:
+    sim_config_file: "/workspace/ros_ws/src/project_utils/config/sim.yaml"
+    agents_config_file: "/workspace/ros_ws/src/project_utils/config/agents.yaml"
+
+    agent_interface:
+      state_publisher_dt: 0.01  # odom/TF publish rate (s)
+      fixed_frame: "odom"
+      num_agents: 4  #should be same as defined in agents.yaml
+    lidar:
+      vis_dt: 0.1 #visualization update rate 
+    obstacles:
+      type: "circle"
+      num_obstacles: 0
+      obstacle_1:
+        position: [-4.0, 3.4, 0.0, -1.57]
+        radius: 0.4
+        color: [1.0, 0.0, 0.0, 1.0]
+
+      obstacle_2:
+        position: [-2.0, 3.0, 0.0, -1.57]
+        radius: 0.4
+        color: [1.0, 0.0, 0.0, 1.0]
+      
+      obstacle_3:
+        position: [0.0,  3.0, 0.0, -1.57]
+        radius: 0.4
+        color: [1.0, 0.0, 0.0, 1.0]
+
+      obstacle_4:
+        position: [3.0,  3.0, 0.0, -1.57]
+        radius: 0.4
+        color: [1.0, 0.0, 0.0, 1.0]
+      
+      obstacle_5:
+        position: [-7.0,  3.4, 0.0, -1.57]
+        radius: 0.4
+        color: [1.0, 0.0, 0.0, 1.0]
+
+      obstacle_6:
+        position: [-9.0,  3.4, 0.0, -1.57]
+        radius: 0.4
+        color: [1.0, 0.0, 0.0, 1.0]
+    
+    # Four-way crossroad: two roads (north-south, east-west) cross at a
+    # square intersection centered on the origin. Each road has two lanes
+    # (incoming toward the intersection, outgoing away from it).
+    #
+    # Sizing:
+    #   lane_width = veh_width + margin   (one vehicle + clearance per lane)
+    #   road_width = 2 * lane_width       (the "double vehicle width + margin"
+    #                                       requirement, one margin per lane)
+    #   half_road  = road_width / 2       -> the intersection square spans
+    #                                        [-half_road, +half_road] on both
+    #                                        axes, and is where each road's
+    #                                        curb lines start/stop.
+    # veh_length/veh_width match agents.yaml geometry_params (RC-car scale).
+    corridor:
+      veh_length: 0.58
+      veh_width: 0.31
+      margin: 0.19        # clearance added to veh_width per lane
+      lane_width: 0.50     # = veh_width + margin
+      road_width: 1.00     # = 2 * lane_width (one road's total paved width)
+      half_road: 0.50      # = road_width / 2 (intersection square half-extent)
+      arm_length: 6.0      # length of each road arm from the intersection edge outward
+
+      # Curb lines (obstacle-like: these ARE rasterized into the occupancy
+      # grid by map_generator). Two per arm (left/right curb), stopping at
+      # the intersection square's edge so the center stays open and
+      # drivable in every direction. Lane markings are intentionally NOT
+      # listed here -- see "Lanes" below -- so they are never treated as
+      # obstacles.
+      num_lines: 8
+
+      # North arm (x in [-0.5, 0.5], y in [0.5, 6.5])
+      line_1:   # west curb
+        start: [-0.5, 0.5]
+        end: [-0.5, 6.5]
+        width: 0.02
+        color: [0.0, 0.0, 0.0, 1.0]
+      line_2:   # east curb
+        start: [0.5, 0.5]
+        end: [0.5, 6.5]
+        width: 0.02
+        color: [0.0, 0.0, 0.0, 1.0]
+
+      # South arm (x in [-0.5, 0.5], y in [-6.5, -0.5])
+      line_3:   # west curb
+        start: [-0.5, -0.5]
+        end: [-0.5, -6.5]
+        width: 0.02
+        color: [0.0, 0.0, 0.0, 1.0]
+      line_4:   # east curb
+        start: [0.5, -0.5]
+        end: [0.5, -6.5]
+        width: 0.02
+        color: [0.0, 0.0, 0.0, 1.0]
+
+      # East arm (x in [0.5, 6.5], y in [-0.5, 0.5])
+      line_5:   # south curb
+        start: [0.5, -0.5]
+        end: [6.5, -0.5]
+        width: 0.02
+        color: [0.0, 0.0, 0.0, 1.0]
+      line_6:   # north curb
+        start: [0.5, 0.5]
+        end: [6.5, 0.5]
+        width: 0.02
+        color: [0.0, 0.0, 0.0, 1.0]
+
+      # West arm (x in [-6.5, -0.5], y in [-0.5, 0.5])
+      line_7:   # south curb
+        start: [-0.5, -0.5]
+        end: [-6.5, -0.5]
+        width: 0.02
+        color: [0.0, 0.0, 0.0, 1.0]
+      line_8:   # north curb
+        start: [-0.5, 0.5]
+        end: [-6.5, 0.5]
+        width: 0.02
+        color: [0.0, 0.0, 0.0, 1.0]
+
+    # Lane centerlines -- semantic reference paths only. map_generator does
+    # NOT rasterize this section (it only reads "corridor" above), so these
+    # never show up as occupied cells; they exist purely for the
+    # behavior/prediction/planning layers to reference. Right-hand-traffic
+    # convention: each "incoming" lane is offset to the right of the arm's
+    # centerline in its direction of travel, "outgoing" to the left.
+    Lanes:
+      num_lanes: 8
+      width: 0.50   # = corridor.lane_width, one lane, kept in sync manually
+
+      # North arm
+      lane_1:   # incoming, southbound, approaching the intersection
+        start: [-0.25, 6.5]
+        end: [-0.25, 0.5]
+        width: 0.50
+        color: [0.0, 0.0, 0.0, 1.0]
+      lane_2:   # outgoing, northbound, leaving the intersection
+        start: [0.25, 0.5]
+        end: [0.25, 6.5]
+        width: 0.50
+        color: [0.0, 0.0, 0.0, 1.0]
+
+      # South arm
+      lane_3:   # incoming, northbound, approaching the intersection
+        start: [0.25, -6.5]
+        end: [0.25, -0.5]
+        width: 0.50
+        color: [0.0, 0.0, 0.0, 1.0]
+      lane_4:   # outgoing, southbound, leaving the intersection
+        start: [-0.25, -0.5]
+        end: [-0.25, -6.5]
+        width: 0.50
+        color: [0.0, 0.0, 0.0, 1.0]
+
+      # East arm
+      lane_5:   # incoming, westbound, approaching the intersection
+        start: [6.5, 0.25]
+        end: [0.5, 0.25]
+        width: 0.50
+        color: [0.0, 0.0, 0.0, 1.0]
+      lane_6:   # outgoing, eastbound, leaving the intersection
+        start: [0.5, -0.25]
+        end: [6.5, -0.25]
+        width: 0.50
+        color: [0.0, 0.0, 0.0, 1.0]
+
+      # West arm
+      lane_7:   # incoming, eastbound, approaching the intersection
+        start: [-6.5, -0.25]
+        end: [-0.5, -0.25]
+        width: 0.50
+        color: [0.0, 0.0, 0.0, 1.0]
+      lane_8:   # outgoing, westbound, leaving the intersection
+        start: [-0.5, 0.25]
+        end: [-6.5, 0.25]
+        width: 0.50
+        color: [0.0, 0.0, 0.0, 1.0]

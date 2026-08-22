@@ -54,6 +54,7 @@ using project_utils_msgs::msg::TrajectoryPoint;
 namespace regulatedpp_controller::optimizer
 {
 
+/// \brief Debug-visualization state (e.g. the current pure-pursuit lookahead target).
 struct DebugData
 {
 	geometry_msgs::msg::Point next_target;
@@ -63,6 +64,7 @@ struct stAuxInput
 {
 };
 
+/// \brief Tunable parameters for \c Optimizer, loaded from ROS params under `<parentName>.optimizer`.
 struct stOptimParam
 {
 	float ld_velocity_ratio{1.2};
@@ -103,58 +105,81 @@ struct stOptimParam
 	float external_target_speed{0.5};
 };
 
+/// \brief One pure-pursuit solve's result: target curvature and the velocity it was computed against.
 struct PpOutput
 {
 	double curvature;
 	double velocity;
 };
 
+/**
+ * \brief Lateral (regulated pure-pursuit) + heuristic longitudinal speed
+ * command generator used by \ref regulatedpp_controller::RegulatedPP
+ * "RegulatedPP".
+ */
 class Optimizer
 {
   public:
-	// Constructor
 	Optimizer() = delete;
 	Optimizer(mpl::rclcpp_utils::Parameters * parameters, mpl::rclcpp_utils::Logger logger,
 	    const std::string & parentName, const std::string & name, rclcpp::Node & node);
-	// Destructor
 	~Optimizer() = default;
 
+	/// \brief Compute this cycle's combined lateral + longitudinal command into \p output_data.
 	bool optimize(const trajectory_follower::InputData & input_data,
 	    trajectory_follower::HybridOutput & output_data);
+	/// \brief Load \ref mOptimParam from ROS params and construct helper objects (spline interpolator, publishers).
 	void onConfigure();
+	/// \brief Reset internal state (previous command, interpolator).
 	void reset();
 	// void getInitialGuess(mpcc_controller::model::stState & xInit);
 
   private:
+	/// \brief Convert a waypoint array to plain geometry points.
 	void convertWptsToPoints(const project_utils_msgs::msg::WpntArray & wpts,
 	    std::vector<geometry_msgs::msg::Point> & geomPoints);
 	// void updateInitialGuess(mpcc_controller::model::stState & xInit);
 	// void generateInitialGuess(mpcc_controller::model::stState & xInit);
 	// void unwrapInitialGuess();
 	// void setResampledTrajectory();
+	/// \brief Run the pure-pursuit solve and pack the result into a \c Lateral command message.
 	Lateral generateLatControlCmd(const trajectory_follower::InputData & inputData);
 
+	/// \brief Pure-pursuit target curvature for the current pose/trajectory, or \c nullopt if no valid target was found.
 	std::optional<PpOutput> calcTargetCurvature(bool, const trajectory_follower::InputData &);
 
+	/// \brief Convert a target curvature into a \c Lateral steering command message.
 	Lateral generateCtrlCmdMsg(const double target_curvature);
 
+	/// \brief Speed/curvature/lateral-error-scaled lookahead distance for the pure-pursuit search.
 	double calcLookaheadDistance(const double lateral_error, const double curvature,
 	    const double velocity, const double min_ld, const bool is_control_cmd);
 
+	/// \brief Core pure-pursuit geometry solve: find the lookahead target on \p trajToFollow and its curvature.
+	/// \return `{success, curvature}`.
 	std::pair<bool, double> runPP(const geometry_msgs::msg::Pose & pose, double lookAheadDistance,
 	    project_utils_msgs::msg::Trajectory & trajToFollow);
 
+	/// \brief Index of the first waypoint at least \p lookAheadDistance ahead of \p currPose, searching from \p search_start_idx.
 	int32_t findNextPointIdx(const geometry_msgs::msg::Pose & currPose,
 	    std::vector<geometry_msgs::msg::Pose> & waypoints, double lookAheadDistance,
 	    int32_t search_start_idx);
 
+	/// \brief Linearly interpolate the exact lookahead-distance target point between waypoints.
+	/// \return `{success, target point}`.
 	std::pair<bool, geometry_msgs::msg::Point> lerpNextTarget(
 	    const geometry_msgs::msg::Pose & currPose,
 	    std::vector<geometry_msgs::msg::Pose> & waypoints, double lookAheadDistance,
 	    int32_t next_wp_idx);
 
-	// long speed command
+	/**
+	 * \brief Target speed for this cycle: either \ref stOptimParam::external_target_speed
+	 * "mOptimParam.external_target_speed" if externally overridden, or the
+	 * trajectory's speed at the closest waypoint, scaled down by
+	 * \ref speedAdjustLatError for curvature/lateral-error.
+	 */
 	float generateSpeedCommand(const trajectory_follower::InputData &);
+	/// \brief Scale down \p target_speed when curvature and lateral error are both high (cuts speed into corners while off-track).
 	float speedAdjustLatError(float kappa, float target_speed, float lateral_error);
 
   private:

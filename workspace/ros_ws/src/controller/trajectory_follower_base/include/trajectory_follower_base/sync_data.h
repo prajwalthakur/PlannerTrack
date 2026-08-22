@@ -13,13 +13,20 @@
 // limitations under the License.
 #pragma once
 
+/** \file
+ * \brief Cross-talk data exchanged between the lateral and longitudinal
+ * controllers each cycle (e.g. so longitudinal can hold off accelerating
+ * until steering has converged).
+ */
 namespace mpl::control::trajectory_follower
 {
 
+/// \brief Data the lateral controller reports to the longitudinal controller each cycle.
 struct LateralSyncData
 {
 	bool mIsSteerConverged{false};
 };
+/// \brief Data the longitudinal controller reports to the lateral controller each cycle (currently unused).
 struct LongitudinalSyncData
 {
 	// Not used

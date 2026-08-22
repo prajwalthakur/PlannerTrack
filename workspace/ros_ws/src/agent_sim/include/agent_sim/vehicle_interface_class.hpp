@@ -28,6 +28,7 @@
 #include <geometry_msgs/msg/transform_stamped.hpp>
 #include <nav_msgs/msg/occupancy_grid.hpp>
 #include <sensor_msgs/msg/laser_scan.hpp>
+#include <std_msgs/msg/empty.hpp>
 #include <visualization_msgs/msg/marker_array.hpp>
 
 #include <tf2/LinearMath/Quaternion.h>
@@ -36,6 +37,7 @@
 #include <yaml-cpp/yaml.h>
 
 #include <algorithm>
+#include <array>
 #include <memory>
 #include <string>
 #include <vector>
@@ -44,11 +46,41 @@ using EigenVector = project_utils_msgs::msg::EigenVector;
 using EigenVectorStamped = project_utils_msgs::msg::EigenVectorStamped;
 
 
+/**
+ * \brief ROS2 node that simulates every agent in the scenario (ego + scripted
+ * conflict agents) and publishes their state.
+ *
+ * Owns one \ref AgentModel plugin instance per agent (created via
+ * \c VehicleModelFactory from `agents.yaml`), steps them all on a fixed-rate
+ * timer, and publishes each agent's odometry/TF, lidar \c LaserScan, and
+ * RViz visualization markers (true-shape body + collision footprint). Also
+ * subscribes to `/map` to feed a shared \ref OccupancyGridMap into every
+ * agent's \ref WorldSnapshot each step.
+ *
+ * Configuration is two-phase (\ref onConfigure then \ref onActivate) rather
+ * than done in the constructor so that \c shared_from_this() is valid when
+ * agent models are constructed (see \ref addAgents).
+ */
 class AgentInterface : public rclcpp::Node
 {
   public:
 	AgentInterface();
+
+	/**
+	 * \brief Load parameters/YAML configs, set up publishers/subscriptions
+	 * and the static-obstacle list.
+	 *
+	 * Must run before \ref onActivate. Split out of the constructor because
+	 * it needs a fully-constructed node.
+	 */
 	void onConfigure();
+
+	/**
+	 * \brief Create all agents (\ref addAgents), publish static TFs, and
+	 * start the state-update/state-publish/lidar timers.
+	 *
+	 * Requires \ref onConfigure to have already run.
+	 */
 	void onActivate();
 
   private:
@@ -57,9 +89,17 @@ class AgentInterface : public rclcpp::Node
 		UniqueId id{"agent"};
 		ptSharedPtr<AgentModel> model;
 
+		// RGBA for this agent's true-shape CUBE marker, from agents.yaml's
+		// per-agent "color: [r, g, b, a]" (falls back to this default --
+		// the old hardcoded body color -- if an agent doesn't set one).
+		std::array<float, 4> color{0.1f, 0.6f, 1.0f, 0.8f};
 
         rclcpp::Subscription<EigenVectorStamped>::SharedPtr controlSub;
 		rclcpp::Publisher<sensor_msgs::msg::LaserScan>::SharedPtr scanPub;
+		// Respawns this agent at its configured init pose/velocity on
+		// receipt (e.g. from a watchdog like intersection/scripts/
+		// reset_state.py that trips when the agent leaves the scenario).
+		rclcpp::Subscription<std_msgs::msg::Empty>::SharedPtr resetSub;
 
 		// Cached from this agent's own sensor_params (YAML) for building
 		// LaserScan headers -- not queryable from SensorModel itself, since
@@ -71,18 +111,35 @@ class AgentInterface : public rclcpp::Node
 		float lidarRangeMax{10.0f};
 	};
 
+	/// \brief Declared but not yet defined/called; parameter loading currently
+	/// happens inline in \ref onConfigure instead.
 	void loadRosParams();
+
+	/**
+	 * \brief Instantiate one \ref AgentModel plugin (via \c VehicleModelFactory)
+	 * plus its ROS I/O (control subscription, scan publisher, reset
+	 * subscription) for every agent listed in `agents.yaml`.
+	 */
 	void addAgents();
 
-	void stateUpdateTimerCallback();  // step every agent's model, then refresh the world snapshot
-	void statePubTimerCallback();  // odom + TF
-	void lidarTimerCallback();  // LaserScan
+	/// \brief Timer callback: build this cycle's \ref WorldSnapshot and step every agent's model.
+	void stateUpdateTimerCallback();
+	/// \brief Timer callback: publish each agent's odometry/TF and RViz markers (body + collision footprint).
+	void statePubTimerCallback();
+	/// \brief Timer callback: publish each agent's simulated \c LaserScan.
+	void lidarTimerCallback();
 
+	/// \brief Broadcast the fixed lidar-link static transform for every agent.
 	void publishStaticTFs();
+	/// \brief Broadcast the fixed-frame -> agent base_link transform for one agent's current pose.
 	void broadcastAgentTF(int agentNum, const stPose & pose);
 
-	// Latched, so this fires once whenever map_server (re)publishes -- fills
-	// mMapGrid, which stays nullptr-guarded in WorldSnapshot until then.
+	/**
+	 * \brief Latched `/map` subscription callback; fills \ref mMapGrid.
+	 *
+	 * Fires once whenever map_server (re)publishes. \ref mMapGrid stays
+	 * nullptr-guarded in \ref WorldSnapshot until this has run at least once.
+	 */
 	void mapCallback(nav_msgs::msg::OccupancyGrid::SharedPtr msg);
 
   private:

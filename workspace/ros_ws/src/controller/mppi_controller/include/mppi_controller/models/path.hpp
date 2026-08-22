@@ -4,10 +4,18 @@
 
 namespace controller::mppi_controller::models
 {
+    /**
+     * \brief The reference path being tracked: raw (x, y, yaw) samples
+     * plus derived per-point geometry (\ref path_pose_2d, cumulative arc
+     * length in \ref path_integrated_distances) and per-point
+     * collision-validity (\ref path_pts_valid, filled lazily by critics via
+     * `mppi_utils::setPathCostsIfNotSet`).
+     */
     struct Path
     {
         virtual ~Path() = default;
 
+        /// \brief Resize all path arrays to \p size and clear derived-geometry/validity caches.
         virtual void reset(size_t size)
         {
             x.setZero(size);
@@ -18,8 +26,10 @@ namespace controller::mppi_controller::models
             path_pts_valid.reset();
             geom_path_initialized = false;
         }
+        /// \brief Fill \ref path_pose_2d and \ref path_integrated_distances from the raw \ref x / \ref y / \ref yaws arrays.
         void computePathGeometry();
 
+        /// \brief Compute derived path geometry and mark it initialized (idempotent guard is \ref geom_path_initialized).
         inline void setGeometricPath()
         {
             computePathGeometry();

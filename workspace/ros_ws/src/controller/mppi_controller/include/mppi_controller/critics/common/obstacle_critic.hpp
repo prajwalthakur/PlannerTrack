@@ -6,11 +6,13 @@
 namespace controller::mppi_controller::critic
 {
     /**
-    * @class mppi::critics::ObstacleCritic
-    * @brief Critic objective function for aligning to the path. Note:
-    * High settings of this will follow the path more precisely, but also makes it
-    * difficult (or impossible) to deviate in the presence of dynamic obstacles.
-    * This is an important critic to tune and consider in tandem with Obstacle.
+    * @brief Intended as an obstacle-proximity critic (name/member layout
+    * mirrors \ref PathAlignCritic), but not currently wired up:
+    * `obstacle_critic.cpp` is not listed in `CMakeLists.txt`'s
+    * `LIB_SOURCES`, and `"ObstacleCritic"` is not one of the names \ref
+    * mppi_critics_utils::getCritic "critics_utils::getCritic" recognizes,
+    * so this critic is never loaded. \ref CostCritic is what actually
+    * penalizes costmap obstacles today.
     */
     class ObstacleCritic: public CriticFunction
     {

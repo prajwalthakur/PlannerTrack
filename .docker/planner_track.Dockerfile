@@ -109,6 +109,8 @@ RUN pip3 install \
     tyro \
     viser
 
+RUN apt-install -y apt install libopencv-dev    
+
 RUN curl -1sLf 'https://dl.cloudsmith.io/public/mc-rtc/stable/setup.deb.sh' | bash
 RUN apt install -y libeigen-quadprog-dev \
                     libboost-test-dev

@@ -7,6 +7,10 @@
 #include "tf2/LinearMath/Quaternion.h"
 #include "tf2_geometry_msgs/tf2_geometry_msgs.hpp"
 
+/** \file
+ * \brief \c TrajectoryVisualizer implementation.
+ */
+
 namespace controller::mppi_controller
 {
 

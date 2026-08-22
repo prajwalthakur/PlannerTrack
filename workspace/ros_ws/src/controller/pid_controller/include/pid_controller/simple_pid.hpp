@@ -4,6 +4,20 @@
 #pragma once
 #include <functional>
 
+/**
+ * \brief Generic single-loop PID controller, templated on the
+ * feedback/output type \p T.
+ *
+ * Adapted from Nick Mosher's SimplePID library (see `simple_pid.cpp` for
+ * the original author's detailed PID background comment and full method
+ * documentation). Used in `pid_controller` as two independent instances --
+ * one longitudinal (velocity error -> acceleration), one lateral
+ * (steering-angle error -> steering rate).
+ *
+ * Supports optional input/output clamping, feedback wrapping (for angular
+ * feedback that crosses a +-pi/0-360 boundary), and either a registered
+ * system-time callback or an explicit per-call `dt` (see \ref tick(double)).
+ */
 template <class T>
 class PIDController
 {

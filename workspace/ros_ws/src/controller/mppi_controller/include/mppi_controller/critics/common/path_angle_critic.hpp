@@ -48,9 +48,10 @@ namespace controller::mppi_controller::critic
     }
 
     /**
-    * @class mppi::critics::PathAngleCritic
-    * @brief Critic objective function for aligning to path in cases of extreme misalignment
-    * or turning
+    * @brief Penalizes heading misalignment between each rollout's pose and
+    * the path direction near an offset ahead of the furthest reached path
+    * point, per \ref mMode (e.g. forward-only preference, no directional
+    * preference, or considering the path's own feasible orientations).
     */
     class PathAngleCritic: public CriticFunction
     {
@@ -58,11 +59,7 @@ namespace controller::mppi_controller::critic
             PathAngleCritic()=default;
             ~PathAngleCritic() override =default;
             void initialize() override;
-            /**
-            * @brief Evaluate cost related to trajectories path alignment
-            *
-            * @param costs [out] add reference cost values to this tensor
-            */
+            /// \brief Accumulate a path-heading-misalignment penalty into `data.costs`.
             void score(CriticData& data) override;
         protected:
             unsigned int mPower{0};

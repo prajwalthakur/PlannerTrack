@@ -25,16 +25,27 @@
 
 namespace mpl::control::trajectory_follower
 {
+/**
+ * \brief Common base for lateral/longitudinal/hybrid trajectory-follower
+ * controllers: readiness check plus an optional internal \ref AgentModel
+ * a controller can use for e.g. simulating/predicting its own vehicle.
+ */
 class ControllerBase
 {
   public:
 	ControllerBase() = default;
 	virtual ~ControllerBase() = default;
+	/// \brief Whether the controller has enough data/state to safely \c run this cycle.
 	virtual bool isReady(const InputData & inputData) = 0;
 
-	// creates agent model for the controller , notice
-	// the name of the agent is "controller_agent" + agentNumber, to distinguish
-	// against sim agents
+	/**
+	 * \brief Lazily create this controller's own \ref AgentModel from
+	 * YAML config, e.g. for internal simulation/prediction.
+	 *
+	 * The agent is named `"controller_agent" + agentNumber` to
+	 * distinguish it from `agent_sim`'s simulated agents.
+	 * \return Whether the agent was constructed successfully.
+	 */
 	bool createAgent(YAML::Node simConfig, const YAML::Node & agentConfig, int agentNumber)
 	{
 		if (!mVehicleFactory) {

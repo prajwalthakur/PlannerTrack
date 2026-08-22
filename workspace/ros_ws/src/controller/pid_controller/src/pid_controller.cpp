@@ -15,6 +15,12 @@
 // limitations under the License.
 #include "pid_controller/pid_controller.hpp"
 
+/** \file
+ * \brief \ref mpl::control::pid_controller::PidControllerNode "PidControllerNode"
+ * implementation: input polling, the two PID loops, and actuator-command
+ * publishing.
+ */
+
 ////////////////////////////////////////////////////////////////////////////////
 
 namespace mpl::control::pid_controller

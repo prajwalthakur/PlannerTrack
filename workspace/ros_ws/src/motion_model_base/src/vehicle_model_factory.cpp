@@ -3,6 +3,12 @@
  */
 #include "motion_model_base/vehicle_model_factory.hpp"
 
+/** \file
+ * \brief \ref VehicleModelFactory implementation -- the one place a
+ * concrete plugin name (a YAML string) gets resolved via `pluginlib`. See
+ * \ref plugin_architecture.
+ */
+
 //////////////////////////////////////////////////////////////////////////
 
 VehicleModelFactory::VehicleModelFactory(mpl::rclcpp_utils::Logger & logger)

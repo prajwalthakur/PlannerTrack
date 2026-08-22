@@ -10,7 +10,6 @@ namespace controller::mppi_controller::critic
 {
 
 /**
- * @class mppi::critics::CollisionCost
  * @brief Utility for storing cost information
  */
 struct CollisionCost
@@ -20,7 +19,6 @@ struct CollisionCost
 };
 
 /**
- * @class mppi::critics::CriticFunction
  * @brief Abstract critic objective function to score trajectories
  */
 class CriticFunction

@@ -3,10 +3,12 @@
 namespace controller::mppi_controller::models
 {
 
+    /// \brief \c Optimizer's tunable parameters (batch size, horizon length, MPPI temperature/gamma, retry limit, ...), loaded from ROS params.
     struct OptimizerSettings
     {
 
         public:
+            /// \brief Load every setting from ROS params under \p name, falling back to the defaults shown below.
             void onConfigure(Parameters& parameter, const std::string name)
             {
                 auto getParam = parameter.getParamGetter(name);

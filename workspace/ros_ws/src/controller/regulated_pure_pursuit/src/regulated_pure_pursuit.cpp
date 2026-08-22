@@ -14,6 +14,12 @@
 ///////////////////////////////////////////////////////////////////////////
 #include "regulated_pure_pursuit/regulated_pure_pursuit.hpp"
 
+/** \file
+ * \brief \ref regulatedpp_controller::RegulatedPP "RegulatedPP"
+ * implementation -- thin wrapper delegating to \ref
+ * regulatedpp_controller::optimizer::Optimizer "optimizer::Optimizer".
+ */
+
 namespace regulatedpp_controller
 {
 RegulatedPP::RegulatedPP([[maybe_unused]] rclcpp::Node & node)

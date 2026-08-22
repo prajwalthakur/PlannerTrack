@@ -9,6 +9,13 @@
 namespace controller::mppi_controller
 {
 // namespace models = ::controller::mppi_controller::models;
+/**
+ * \brief Per-cycle scratch state passed by reference to every \ref
+ * mppi_critic::CriticFunction "CriticFunction::score" call: the model
+ * (for rollout trajectories/state), the goal, the shared cost accumulator,
+ * and cross-critic signals (e.g. \ref furthest_reached_path_point) later
+ * critics in the same cycle can read.
+ */
 struct CriticData
 {
 	// Do not change order.

@@ -1,6 +1,9 @@
 #include "mppi_controller/critics/common/path_angle_critic.hpp"
 #include "mppi_controller/utils/utils.hpp"
 
+/** \file
+ * \brief \c mppi_critic::PathAngleCritic "PathAngleCritic" implementation.
+ */
 
 void mppi_critic::PathAngleCritic::initialize()
 {

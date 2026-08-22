@@ -14,6 +14,11 @@
 #include "rclcpp/rclcpp.hpp"
 #include "trajectory_follower_node/controller_node.hpp"
 
+/** \file
+ * \brief Entry point for `controller_node_exe`. Deliberately a plain
+ * executable rather than an `rclcpp_components`-generated one -- see
+ * \ref plugin_architecture (section 5).
+ */
 int main(int argc, char ** argv)
 {
 	rclcpp::init(argc, argv);

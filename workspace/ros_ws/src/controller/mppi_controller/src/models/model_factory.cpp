@@ -1,6 +1,9 @@
 
 #include "mppi_controller/models/model_factory.hpp"
 
+/** \file
+ * \brief Name -> \c models::Model "Model" factory implementation.
+ */
 
 namespace controller::mppi_controller::models
 {

@@ -1,0 +1,8 @@
+<!--
+Author: Prajwal Thakur <prajwalthakur98@gmail.com>
+-->
+<library path="ssc_planner">
+  <class type="SscPlanner" base_class_type="PlannerBase">
+    <description>Spatio-Temporal Semantic Corridor (SSC) planner: cube-inflation corridor generation + piecewise-Bezier QP trajectory optimization (Ding et al., RA-L 2019). Stub.</description>
+  </class>
+</library>

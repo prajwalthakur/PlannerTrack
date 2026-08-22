@@ -1,5 +1,11 @@
 #include "mppi_controller/vanilla_mppi_class.hpp"
 
+/** \file
+ * \brief \c Optimizer implementation: the sample/roll-out/score/update
+ * MPPI loop -- see \c Optimizer's class doc comment for the per-cycle
+ * call sequence.
+ */
+
 using namespace controller::mppi_controller;
 
 // Optimizer::Optimizer( std::shared_ptr<Parameters>  mppi_parameters , const std::string& name)

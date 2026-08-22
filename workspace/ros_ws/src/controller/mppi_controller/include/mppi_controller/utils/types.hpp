@@ -1,6 +1,13 @@
 #pragma once
 #include <Eigen/Dense>
 
+/**
+ * \file
+ * \brief Eigen type aliases (`mppi_mt::...`) used throughout `mppi_controller`
+ * for batched rollout arrays -- e.g. `ArrayXX` is the `[batch_size x
+ * time_steps]` shape used by \ref controller::mppi_controller::models::State
+ * "State"/\ref controller::mppi_controller::models::Trajectories "Trajectories".
+ */
 namespace controller::mppi_controller::math_types
 {
 

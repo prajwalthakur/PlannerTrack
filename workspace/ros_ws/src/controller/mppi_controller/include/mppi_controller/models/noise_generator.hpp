@@ -16,7 +16,6 @@ namespace controller::mppi_controller
     namespace models = ::controller::mppi_controller::models;
 
     /**
-    * @class mppi::NoiseGenerator
     * @brief Generates noise trajectories from optimal trajectory
     */
     class NoiseGenerator

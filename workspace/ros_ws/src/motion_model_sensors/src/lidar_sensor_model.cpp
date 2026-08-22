@@ -9,6 +9,13 @@
 #include <cmath>
 #include <limits>
 
+/** \file
+ * \brief \ref LidarSensorModel implementation: per-beam ray-shape/ray-grid
+ * intersection tests and the main scan loop. `PLUGINLIB_EXPORT_CLASS` at
+ * the bottom registers the class with pluginlib at runtime -- see
+ * \ref plugin_architecture.
+ */
+
 namespace
 {
 constexpr float kInf = std::numeric_limits<float>::infinity();

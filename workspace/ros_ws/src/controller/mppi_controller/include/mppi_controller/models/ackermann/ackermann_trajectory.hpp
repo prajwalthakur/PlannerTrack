@@ -4,6 +4,7 @@
 namespace controller::mppi_controller::models
 {
 
+    /// \brief \ref Trajectories for \ref AckermannModel, plus the per-point `{vx, wz}` velocities (\ref vx / \ref wz) that produced each rollout's pose.
     struct AckermannTrajectories: public Trajectories
     {
 

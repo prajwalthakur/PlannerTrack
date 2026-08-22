@@ -16,6 +16,15 @@
 #include "rclcpp/rclcpp.hpp"
 #include "pid_controller/pid_controller.hpp"
 
+/** \file
+ * \brief Not part of the build -- `CMakeLists.txt` only compiles
+ * `pid_controller.cpp`/`simple_pid.cpp` into `pid_controller_lib`, and the
+ * actual runnable executable (`pid_controller_node_exe`) is auto-generated
+ * by `rclcpp_components_register_node` (see \ref plugin_architecture,
+ * section 3), not by this `main()`. Also stale: \ref PidControllerNode's
+ * constructor now requires a `rclcpp::NodeOptions` argument this call
+ * doesn't pass.
+ */
 int main(int argc, char ** argv)
 {
 	rclcpp::init(argc, argv);

@@ -24,15 +24,22 @@
 #include "project_utils_msgs/msg/trajectory.hpp"
 #include "project_utils_msgs/msg/wpnt_array.hpp"
 
-// This file defines the input data structure for the trajectory follower
-// controllers.
-// It includes the current trajectory, odometry,
-// acceleration, and steering report of the vehicle.
-// The controllers will use this data to compute the control
-// commands to follow the trajectory.
-// This can also be used for path tracking controllers if needed.
+/**
+ * \file
+ * \brief Defines the shared input-data structure passed to every
+ * trajectory-follower controller (lateral, longitudinal, hybrid).
+ */
 namespace mpl::control::trajectory_follower
 {
+/**
+ * \brief Everything a controller derived from \ref ControllerBase needs to
+ * compute one control command: the trajectory to follow, current odometry,
+ * and current steering feedback.
+ *
+ * Shared by lateral, longitudinal, and hybrid controllers so all three see
+ * the same snapshot of vehicle state per control cycle. Can also be used
+ * for path tracking controllers if needed.
+ */
 struct InputData
 {
 	nav_msgs::msg::Odometry mCurrentOdometry;

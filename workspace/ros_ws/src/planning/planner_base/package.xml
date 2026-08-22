@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>planner_base</name>
+  <version>0.0.0</version>
+  <description>Plugin base interface for ego trajectory planners (e.g. ssc_planner). Stub.</description>
+  <maintainer email="prajwalthakur98@gmail.com">Prajwal Thakur</maintainer>
+  <license>Apache-2.0</license>
+
+  <buildtool_depend>ament_cmake_ros</buildtool_depend>
+
+  <depend>rclcpp</depend>
+  <depend>geometry_msgs</depend>
+  <depend>nav_msgs</depend>
+  <depend>project_utils</depend>
+  <depend>project_utils_msgs</depend>
+  <depend>mpl_route_planner</depend>
+  <depend>motion_model_base</depend>
+  <depend>pluginlib</depend>
+  <depend>yaml-cpp</depend>
+
+  <test_depend>ament_lint_auto</test_depend>
+  <test_depend>ament_lint_common</test_depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>

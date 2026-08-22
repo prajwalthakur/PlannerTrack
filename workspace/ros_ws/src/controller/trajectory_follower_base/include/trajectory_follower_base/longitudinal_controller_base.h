@@ -17,6 +17,7 @@
 namespace mpl::control::trajectory_follower
 {
 using project_utils_msgs::msg::Longitudinal;
+/// \brief One longitudinal controller cycle's output: the command itself, its horizon, and sync data for the lateral side.
 struct LongitudinalOutput
 {
 	Longitudinal mControlCmd;
@@ -24,14 +25,20 @@ struct LongitudinalOutput
 	LongitudinalSyncData mSyncData;
 };
 
+/**
+ * \brief Base for controllers that compute velocity/acceleration commands
+ * from an \ref InputData snapshot (e.g. \c DummyLongitudinalController,
+ * `pid_controller`).
+ */
 class LongitudinalControllerBase : public ControllerBase
 {
   public:
 	virtual bool isReady(const InputData & inputData) = 0;
+	/// \brief Compute this cycle's velocity/acceleration command from \p inputData.
 	virtual LongitudinalOutput run(InputData const & inputData) = 0;
+	/// \brief Receive the lateral controller's sync data (e.g. steering-converged state) for this cycle.
 	void sync(LateralSyncData const & lateralSyncData);
-	// NOTE: This reset function should be called when the trajectory is replanned by changing ego
-	// pose or goal pose.
+	/// \brief Reset internal controller state; call when the trajectory is replanned (ego/goal pose changed).
 	void reset();
 
   protected:

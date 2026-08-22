@@ -42,6 +42,15 @@ using project_utils_msgs::msg::TrajectoryPoint;
 namespace dummy_longitudinal_controller
 {
 
+    /**
+     * \brief Placeholder \c LongitudinalControllerBase implementation:
+     * always reports ready and always outputs a zero velocity/acceleration
+     * command.
+     *
+     * Stands in for a real longitudinal controller (e.g. `pid_controller`)
+     * when only the lateral side of a trajectory-following stack needs to
+     * be exercised.
+     */
     class DummyLongitudinalController : public LongitudinalControllerBase
     {
 
@@ -49,11 +58,10 @@ namespace dummy_longitudinal_controller
             /// \param node Reference to the node used only for the component and parameter initialization.
             explicit DummyLongitudinalController([[maybe_unused]] rclcpp::Node & node);
         private:
-            /**
-            * @brief compute control command for path follow with a constant control period
-            */
+            /// \brief Always ready -- this controller has no warm-up/data dependency.
             bool isReady([[maybe_unused]] const InputData & input_data) override;
 
+            /// \brief Always returns a zero velocity/acceleration command.
             LongitudinalOutput run(const InputData & input_data) override;
         private:
             rclcpp::Clock::SharedPtr mClock;

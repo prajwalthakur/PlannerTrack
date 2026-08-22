@@ -1,6 +1,10 @@
 #include "mppi_controller/critics/common/velocity_deadband_critic.hpp"
 #include "mppi_controller/utils/utils.hpp"
 
+/** \file
+ * \brief \c mppi_critic::VelocityDeadbandCritic "VelocityDeadbandCritic" implementation.
+ */
+
 void mppi_critic::VelocityDeadbandCritic::initialize()
 {
     auto getParam = mParameter->getParamGetter(mName);

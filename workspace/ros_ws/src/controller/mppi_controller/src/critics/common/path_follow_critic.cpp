@@ -1,6 +1,10 @@
 #include "mppi_controller/critics/common/path_follow_critic.hpp"
 #include "mppi_controller/utils/utils.hpp"
 
+/** \file
+ * \brief \c mppi_critic::PathFollowCritic "PathFollowCritic" implementation.
+ */
+
 void mppi_critic::PathFollowCritic::initialize()
 {
     auto getParam = mParameter->getParamGetter(mName);

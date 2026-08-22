@@ -1,0 +1,227 @@
+# Plain YAML, loaded directly via YAML::LoadFile() in agent_sim -- NOT a
+# ros__parameters file. Named keys (agent_1, agent_2, ...) become each
+# agent's UniqueId. Agent count is derived from this map's size, not
+# tracked separately anywhere.
+#
+agents:
+  agent_1:
+    dynamics_plugin: SingleTrackDynStateModel
+    dynamics_params:
+      numStates: 7
+      numControlInputs: 2
+      # Ego. South arm, incoming (lane_3 in params.yaml Lanes), heading
+      # north toward the intersection to execute the unprotected left turn
+      # (crosses agent_2's oncoming lane).
+      initXPose: 0.25
+      initYPose: -5.5
+      initYaw: 1.5708         # facing +y (north)
+      initYawRate: 0.0
+      initVx: 0.0
+      initVy: 0.0
+      initSf: 0.0             # initial steering angle (rad)
+      initAcc: 0.0
+      initSv: 0.0              # initial steering velocity (rad/s)
+      # F1TENTH-scale reference values (wheelbase/dims match this platform
+      # closely)
+      mass: 3.47                # kg
+      Iz: 0.04712                # yaw inertia, kg*m^2
+      lf: 0.17                   # CG-to-front-axle, m (half of wheelbase 0.34)
+      lr: 0.17                   # CG-to-rear-axle, m
+      cf: 4.718                  # front cornering stiffness, N/rad
+      cr: 5.4562                 # rear cornering stiffness, N/rad
+      vehWheelBase: 0.34          # lf + lr, m
+      steeringTimeConstant: 0.1   # first-order steering-actuator lag, s -- placeholder, tune to actual servo
+      integration:
+        integrationStepSize: 0.001   # rk4 integration step (s), independent of simTimeStep this is (model_dt)
+
+    geometry_plugin: RectangularGeometry
+    geometry_params:
+      length: 0.58
+      width: 0.31
+
+    color: [0.0, 1.0, 0.0, 0.8]   # green -- ego
+
+    collision_plugin: EllipseCollisionFootPrint
+    collision_params:
+      major_axis_length: 0.60
+      minor_axis_length: 0.34
+
+    sensor_plugin: LidarSensorModel
+    sensor_params:
+      num_beams: 360
+      angle_min: -3.14159265
+      angle_max: 3.14159265
+      range_min: 0.05
+      range_max: 10.0
+    controller: "pure_pursuit"
+    # South-incoming outer tip -> west-outgoing outer tip: the unprotected
+    # left turn, per route_graph.geojson node ids (see mpl_route_planner).
+    route:
+      start_id: 18
+      goal_id: 67
+ 
+  agent_2:
+    dynamics_plugin: SingleTrackDynStateModel
+    dynamics_params:
+      numStates: 7
+      numControlInputs: 2
+      # Encoded oncoming vehicle. North arm, incoming (lane_1), heading
+      # south toward the intersection -- the primary conflict agent for
+      # ego's unprotected left turn. Runs a scripted (pure_pursuit) path,
+      # not MPDM; its intent {yield, proceed, aggressive} is what the
+      # ego's behavior-prediction module must infer online.
+      initXPose: -0.25
+      initYPose: 5.5
+      initYaw: -1.5708        # facing -y (south)
+      initYawRate: 0.0
+      initVx: 0.0
+      initVy: 0.0
+      initSf: 0.0
+      initAcc: 0.0
+      initSv: 0.0
+      # F1TENTH-scale reference values -- placeholders until system-identified.
+      mass: 3.47
+      Iz: 0.04712
+      lf: 0.15                   # CG-to-front-axle, m (half of wheelbase 0.30, deliberately different from agent_1)
+      lr: 0.15
+      cf: 4.718
+      cr: 5.4562
+      vehWheelBase: 0.30      # lf + lr, m (deliberately different from agent_1)
+      steeringTimeConstant: 0.1
+      integration:
+        integrationStepSize: 0.001
+
+    geometry_plugin: RectangularGeometry
+    geometry_params:
+      length: 0.58
+      width: 0.31
+
+    color: [0.1, 0.6, 1.0, 0.8]   # blue -- encoded oncoming vehicle
+
+    collision_plugin: EllipseCollisionFootPrint
+    collision_params:
+      major_axis_length: 0.60
+      minor_axis_length: 0.34
+
+    sensor_plugin: LidarSensorModel
+    sensor_params:
+      num_beams: 360
+      angle_min: -3.14159265
+      angle_max: 3.14159265
+      range_min: 0.05
+      range_max: 10.0
+    controller: "pure_pursuit"
+    # North-incoming outer tip -> south-outgoing outer tip: straight through.
+    route:
+      start_id: 0
+      goal_id: 31
+
+
+  agent_3:
+    dynamics_plugin: SingleTrackDynStateModel
+    dynamics_params:
+      numStates: 7
+      numControlInputs: 2
+      # Encoded cross-traffic vehicle. East arm, incoming (lane_5), heading
+      # west toward the intersection. Secondary conflict agent (adds a
+      # second policy hypothesis the prediction module must track).
+      initXPose: 5.5
+      initYPose: 0.25
+      initYaw: 3.14159        # facing -x (west)
+      initYawRate: 0.0
+      initVx: 0.0
+      initVy: 0.0
+      initSf: 0.0
+      initAcc: 0.0
+      initSv: 0.0
+      # F1TENTH-scale reference values -- placeholders until system-identified.
+      mass: 3.47
+      Iz: 0.04712
+      lf: 0.15                   # CG-to-front-axle, m (half of wheelbase 0.30, deliberately different from agent_1)
+      lr: 0.15
+      cf: 4.718
+      cr: 5.4562
+      vehWheelBase: 0.30      # lf + lr, m (deliberately different from agent_1)
+      steeringTimeConstant: 0.1
+      integration:
+        integrationStepSize: 0.001
+
+    geometry_plugin: RectangularGeometry
+    geometry_params:
+      length: 0.58
+      width: 0.31
+
+    color: [0.1, 0.6, 1.0, 0.8]   # blue -- encoded cross-traffic vehicle
+
+    collision_plugin: EllipseCollisionFootPrint
+    collision_params:
+      major_axis_length: 0.60
+      minor_axis_length: 0.34
+
+    sensor_plugin: LidarSensorModel
+    sensor_params:
+      num_beams: 360
+      angle_min: -3.14159265
+      angle_max: 3.14159265
+      range_min: 0.05
+      range_max: 10.0
+    
+    controller: "pure_pursuit"
+    # East-incoming outer tip -> west-outgoing outer tip: straight through.
+    route:
+      start_id: 36
+      goal_id: 67
+
+  agent_4:
+    dynamics_plugin: SingleTrackDynStateModel
+    dynamics_params:
+      numStates: 7
+      numControlInputs: 2
+      # Encoded cross-traffic vehicle. West arm, incoming (lane_7), heading
+      # east toward the intersection -- the last remaining approach lane.
+      # Third conflict agent for ego's unprotected left turn.
+      initXPose: -5.5
+      initYPose: -0.25
+      initYaw: 0.0             # facing +x (east)
+      initYawRate: 0.0
+      initVx: 0.0
+      initVy: 0.0
+      initSf: 0.0
+      initAcc: 0.0
+      initSv: 0.0
+      # F1TENTH-scale reference values -- placeholders until system-identified.
+      mass: 3.47
+      Iz: 0.04712
+      lf: 0.15                   # CG-to-front-axle, m (half of wheelbase 0.30, deliberately different from agent_1)
+      lr: 0.15
+      cf: 4.718
+      cr: 5.4562
+      vehWheelBase: 0.30      # lf + lr, m (deliberately different from agent_1)
+      steeringTimeConstant: 0.1
+      integration:
+        integrationStepSize: 0.001
+
+    geometry_plugin: RectangularGeometry
+    geometry_params:
+      length: 0.58
+      width: 0.31
+
+    color: [0.1, 0.6, 1.0, 0.8]   # blue -- encoded cross-traffic vehicle
+
+    collision_plugin: EllipseCollisionFootPrint
+    collision_params:
+      major_axis_length: 0.60
+      minor_axis_length: 0.34
+
+    sensor_plugin: LidarSensorModel
+    sensor_params:
+      num_beams: 360
+      angle_min: -3.14159265
+      angle_max: 3.14159265
+      range_min: 0.05
+      range_max: 10.0
+    
+    controller: "pure_pursuit"    # West-incoming outer tip -> north-outgoing outer tip: left turn.
+    route:
+      start_id: 54
+      goal_id: 13

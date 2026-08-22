@@ -53,8 +53,18 @@ set(MSG_FILES
   "msg/f110/WpntArray.msg"
 )
 
+# =============================
+# Actions
+# =============================
+# ComputeAndTrackRoute.action left unregistered for now -- it needs live
+# route tracking (RouteTracker) which isn't built yet; see mpl_route_planner.
+set(ACTION_FILES
+  "msg/action/ComputeRoute.action"
+)
+
 rosidl_generate_interfaces(${PROJECT_NAME}
   ${MSG_FILES}
+  ${ACTION_FILES}
   DEPENDENCIES
     geometry_msgs
     std_msgs

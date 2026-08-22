@@ -6,10 +6,9 @@
 namespace controller::mppi_controller::critic
 {
     /**
-    * @class mppi::critics::ConstraintCritic
-    * @brief Critic objective function for following the path approximately
-    * To allow for deviation from path in case of dynamic obstacles. Path follow critic
-    * will promote the trajectories to follow short term goals 
+    * @brief Penalizes negative (reverse) longitudinal velocity, so
+    * rollouts are biased toward driving forward rather than backward when
+    * both are otherwise similarly costed.
     */
     class PreferForwardCritic: public CriticFunction
     {
@@ -17,11 +16,7 @@ namespace controller::mppi_controller::critic
             PreferForwardCritic()=default;
             ~PreferForwardCritic() override =default;
             void initialize() override;
-            /**
-            * @brief Evaluate cost related to trajectories path alignment
-            *
-            * @param costs [out] add reference cost values to this tensor
-            */
+            /// \brief Accumulate a time-integrated reverse-velocity penalty into `data.costs`.
             void score(CriticData& data) override;
         protected:
             unsigned int mPower{0};

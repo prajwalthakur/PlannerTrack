@@ -9,6 +9,13 @@
 
 namespace controller::mppi_controller
 {
+    /**
+     * \brief Per-cycle input to \c Optimizer::computeControl, distinct
+     * from the shared \c mpl::control::trajectory_follower::InputData --
+     * see \ref MPPIController::toMppiInputData for the conversion, and
+     * the `using HybridInputData = ...` alias in `mppi_controller.hpp` for
+     * why the two same-named types need disambiguating.
+     */
     struct InputData
     {
         

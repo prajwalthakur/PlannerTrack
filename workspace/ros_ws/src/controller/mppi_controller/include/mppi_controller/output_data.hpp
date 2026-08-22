@@ -5,6 +5,12 @@
 #include "mppi_controller/utils/types.hpp"
 namespace controller::mppi_controller
 {
+    /**
+     * \brief Per-cycle output of \c controller::mppi_controller::Optimizer::computeControl --
+     * the commanded twist plus the optimized trajectory (for visualization),
+     * converted back to the shared \c HybridOutput by
+     * \c MPPIController::toHybridOutput.
+     */
     struct OutputData
     {
         

@@ -44,6 +44,14 @@ using project_utils_msgs::msg::TrajectoryPoint;
 namespace dummy_lateral_controller
 {
 
+    /**
+     * \brief Placeholder \c LateralControllerBase implementation: always
+     * reports ready and always outputs a zero steering command.
+     *
+     * Stands in for a real lateral controller (e.g. \c lqr_controller,
+     * `lat_based_lqr_controller`) when only the longitudinal side of a
+     * trajectory-following stack needs to be exercised.
+     */
     class DummyLateralController : public LateralControllerBase
     {
 
@@ -52,11 +60,10 @@ namespace dummy_lateral_controller
             explicit DummyLateralController([[maybe_unused]] rclcpp::Node & node);
             ~DummyLateralController() override =default;
         private:
-            /**
-            * @brief compute control command for path follow with a constant control period
-            */
+            /// \brief Always ready -- this controller has no warm-up/data dependency.
             bool isReady([[maybe_unused]] const InputData & input_data) override;
 
+            /// \brief Always returns a zero steering angle/rate command.
             LateralOutput run(const InputData & input_data) override;
         private:
             rclcpp::Clock::SharedPtr mClock{nullptr};

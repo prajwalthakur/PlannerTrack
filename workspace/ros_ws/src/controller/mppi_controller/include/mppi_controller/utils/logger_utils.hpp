@@ -7,6 +7,15 @@
 
 namespace controller::mppi_controller
 {
+/**
+ * \brief `mppi_controller`'s own thin `rclcpp::Logger` wrapper (colored
+ * error/success output, parent/child logger construction).
+ *
+ * \note Distinct from \c mpl::rclcpp_utils::Logger used elsewhere in this
+ * codebase (`agent_sim`, `motion_model_base`, `pid_controller`, ...) --
+ * this package keeps its own copy rather than depending on `project_utils`,
+ * consistent with it being a self-contained port of nav2's mppi_controller.
+ */
 class Logger
 {
   public:

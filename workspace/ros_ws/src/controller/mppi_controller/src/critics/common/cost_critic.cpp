@@ -1,6 +1,10 @@
 #include "mppi_controller/critics/common/cost_critic.hpp"
 #include "mppi_controller/utils/utils.hpp"
 
+/** \file
+ * \brief \c mppi_critic::CostCritic "CostCritic" implementation.
+ */
+
 void mppi_critic::CostCritic::initialize()
 {
     auto getParam = mParameter->getParamGetter(mName);

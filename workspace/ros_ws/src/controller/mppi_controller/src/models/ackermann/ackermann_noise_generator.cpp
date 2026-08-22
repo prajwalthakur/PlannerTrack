@@ -1,5 +1,8 @@
 #include "mppi_controller/models/ackermann/ackermann_noise_generator.hpp"
 
+/** \file
+ * \brief \c models::AckermannNoiseGenerator "AckermannNoiseGenerator" implementation.
+ */
 
 models::AckermannNoiseGenerator::AckermannNoiseGenerator(
     const OptimizerSettings& optimizerSettings,

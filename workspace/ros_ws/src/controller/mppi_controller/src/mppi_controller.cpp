@@ -16,6 +16,11 @@
 ///////////////////////////////////////////////////////////////////////////
 #include "mppi_controller/mppi_controller.hpp"
 
+/** \file
+ * \brief \c MPPIController implementation: bridges the shared
+ * trajectory-follower types and the MPPI \c Optimizer.
+ */
+
 namespace controller::mppi_controller
 {
 

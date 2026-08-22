@@ -8,11 +8,18 @@
 namespace controller::mppi_controller::models
 {
    
+    /**
+     * \brief \ref NoiseGenerator for \ref AckermannModel -- samples
+     * independent Gaussian noise for `vx`/`wz` (\ref mNormalDistributionVx
+     * / \ref mNormalDistributionWz, scaled by \ref AckermannSamplingStd) on
+     * a background thread, ready for \ref setNoisedControls to apply to
+     * the next rollout batch.
+     */
     class AckermannNoiseGenerator: public NoiseGenerator
     {
         using BaseType = NoiseGenerator;
         public :
-            
+
             AckermannNoiseGenerator(
                 const models::OptimizerSettings& optimizerSettings, 
                 const models::ControlConstraints& controlConstraints,

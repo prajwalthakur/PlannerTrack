@@ -6,12 +6,18 @@
 namespace controller::mppi_controller::critic
 {
 
+    /**
+    * @brief Penalizes Euclidean distance from each rollout's mean pose to
+    * the final goal position, only once the robot is within
+    * `mThresholdToConsider` of the end of the local path.
+    */
     class GoalCritic: public CriticFunction
     {
         public:
             GoalCritic()=default;
             ~GoalCritic() override =default;
             void initialize() override;
+            /// \brief Accumulate a distance-to-goal penalty into `data.costs`.
             void score(CriticData& data) override;
         protected:
             bool mPathFollow{true};

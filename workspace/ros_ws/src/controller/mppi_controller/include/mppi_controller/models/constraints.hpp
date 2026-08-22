@@ -10,6 +10,7 @@ namespace controller::mppi_controller::models
     struct ControlConstraints
     {
         virtual ~ControlConstraints() = default;
+        /// \brief Load constraint bounds (e.g. max velocity, min turning radius) from ROS params under \p name.
         virtual void onConfigure(Parameters& parameters, const std::string& name)=0;
     };
 
@@ -20,6 +21,7 @@ namespace controller::mppi_controller::models
     struct SamplingStd
     {
         virtual ~SamplingStd()=default;
+        /// \brief Load per-control-dimension noise standard deviations from ROS params under \p name.
         virtual void onConfigure(Parameters& parameters, const std::string& name)=0;
 
         //virtual void setParameters(std::shared_ptr<Parameters> parameters)=0;

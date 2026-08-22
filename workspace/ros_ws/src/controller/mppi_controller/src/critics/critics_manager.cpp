@@ -1,5 +1,10 @@
 #include "mppi_controller/critics/critic_manager.hpp"
 
+/** \file
+ * \brief \c CriticsManager implementation: loading critics by name and
+ * running them all against a rollout batch.
+ */
+
 mppi::CriticsManager::CriticsManager(const rclcpp::Clock::SharedPtr & clock) : mClock{clock}
 {
 }

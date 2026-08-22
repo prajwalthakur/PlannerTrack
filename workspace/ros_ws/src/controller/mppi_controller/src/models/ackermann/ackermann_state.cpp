@@ -1,6 +1,8 @@
 #include "mppi_controller/models/ackermann/ackermann_state.hpp"
 
-
+/** \file
+ * \brief \c models::AckermannState "AckermannState" implementation.
+ */
 
 void model::AckermannState::reset(unsigned int batch_size, unsigned int time_steps)
 {

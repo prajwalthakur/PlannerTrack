@@ -6,10 +6,8 @@
 namespace controller::mppi_controller::critic
 {
     /**
-    * @class mppi::critics::ConstraintCritic
-    * @brief Critic objective function for following the path approximately
-    * To allow for deviation from path in case of dynamic obstacles. Path follow critic
-    * will promote the trajectories to follow short term goals 
+    * @brief Penalizes yaw-rate magnitude, discouraging rollouts that spin
+    * in place rather than making net positional progress.
     */
     class TwirlingCritic: public CriticFunction
     {
@@ -17,11 +15,7 @@ namespace controller::mppi_controller::critic
             TwirlingCritic()=default;
             ~TwirlingCritic() override =default;
             void initialize() override;
-            /**
-            * @brief Evaluate cost related to trajectories path alignment
-            *
-            * @param costs [out] add reference cost values to this tensor
-            */
+            /// \brief Accumulate a mean-|yaw-rate| penalty into `data.costs`.
             void score(CriticData& data) override;
         protected:
             unsigned int mPower{0};

@@ -20,18 +20,26 @@
 namespace mpl::control::trajectory_follower
 {
 using project_utils_msgs::msg::Control;
+/// \brief Combined lateral+longitudinal output of a \ref HybridControllerBase controller.
 struct HybridOutput
 {
   Control mControlCmd;
   ControlHorizon mControlCmdHorizon;
-}; 
+};
 
+/**
+ * \brief Base for controllers that compute both steering and
+ * velocity/acceleration commands together in a single \c run (as opposed
+ * to the separate \ref LateralControllerBase / \ref LongitudinalControllerBase
+ * split), e.g. for a coupled controller like `mppi_controller`.
+ */
 class HybridControllerBase : public ControllerBase
 {
 public:
   HybridControllerBase() = default;
   ~HybridControllerBase() override = default;
   virtual bool isReady(const InputData & inputData) = 0;
+  /// \brief Compute this cycle's combined steering + velocity/acceleration command from \p inputData.
   virtual HybridOutput run(InputData const & inputData) = 0;
 
 protected:

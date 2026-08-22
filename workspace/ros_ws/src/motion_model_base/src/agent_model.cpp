@@ -3,6 +3,11 @@
  */
 #include "motion_model_base/agent_model.hpp"
 
+/** \file
+ * \brief \ref AgentModel implementation: thin forwarding to the composed
+ * dynamics/geometry/collision/sensor plugins.
+ */
+
 //////////////////////////////////////////////////////////////////////////
 
 AgentModel::AgentModel(mpl::rclcpp_utils::Logger & logger, const UniqueId & id,
@@ -68,6 +73,13 @@ const StateVector & AgentModel::getState() const
 
 //////////////////////////////////////////////////////////////////////////
 
+void AgentModel::resetToInitialState()
+{
+	mDynamicModel->reset();
+}
+
+//////////////////////////////////////////////////////////////////////////
+
 void AgentModel::updateCommandedControl(const InputVector & u)
 {
 	mDynamicModel->updateCommandedControl(u);
@@ -75,13 +87,16 @@ void AgentModel::updateCommandedControl(const InputVector & u)
 
 //////////////////////////////////////////////////////////////////////////
 
-void AgentModel::step(const WorldSnapshot & world)
+void AgentModel::step(const WorldSnapshot & world,bool stepSensorModel)
 {
 	//mLogger.info("stepping agent, id: %d ", mId.value());
 	mDynamicModel->step();
 	auto pose = mDynamicModel->getStatePose();
 	mGeomModel->step(pose);
-	mSensorModel->step(mId, pose, world);
+	if(stepSensorModel)
+	{
+		mSensorModel->step(mId, pose, world);
+	}
 	mCollisionFootPrint->step(pose);
 }
 

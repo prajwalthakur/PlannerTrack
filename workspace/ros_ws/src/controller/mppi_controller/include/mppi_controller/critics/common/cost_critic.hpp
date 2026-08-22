@@ -6,11 +6,10 @@
 namespace controller::mppi_controller::critic
 {
     /**
-    * @class mppi::critics::CostCritic
-    * @brief Critic objective function for aligning to the path. Note:
-    * High settings of this will follow the path more precisely, but also makes it
-    * difficult (or impossible) to deviate in the presence of dynamic obstacles.
-    * This is an important critic to tune and consider in tandem with Obstacle.
+    * @brief Penalizes rollout points that land on occupied/high-cost
+    * costmap cells, using either the robot's full footprint or a simpler
+    * circular radius check depending on \ref mConsiderFootprint. This is
+    * the critic that actually keeps rollouts out of obstacles.
     */
     class CostCritic: public CriticFunction
     {
@@ -19,9 +18,10 @@ namespace controller::mppi_controller::critic
             ~CostCritic() override =default;
             void initialize() override;
             /**
-            * @brief Evaluate cost related to trajectories path alignment
+            * @brief Accumulate a cost for each rollout point that lands on
+            * an occupied/high-cost costmap cell (collision or near-collision).
             *
-            * @param costs [out] add reference cost values to this tensor
+            * @param data [in,out] critic data; collision cost is added to `data.costs`
             */
             void score(CriticData& data) override;
 

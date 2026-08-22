@@ -9,6 +9,7 @@ namespace controller::mppi_controller
 
 // using ParamValue = std::variant<int64_t, float, bool, std::string, std::vector<std::string>>;
 
+/// \brief Thin wrapper around an \c rclcpp::Node for declare-or-get ROS parameter access, prefixed per component.
 struct Parameters
 {
     // std::unordered_map<std::string, ParamValue> params;
@@ -17,6 +18,13 @@ struct Parameters
     {
     }
 
+    /**
+     * \brief Get a parameter-getter closure bound to \p prefix.
+     * \return A callable `getParam(value, name, default_val)` that
+     * declares `<prefix>.<name>` (or just `name` if \p prefix is empty)
+     * with \p default_val on first use, or reads its current value on
+     * subsequent calls, writing the result into \p value.
+     */
     auto getParamGetter(const std::string & prefix)
     {
         return [this, prefix](auto & value,
@@ -35,6 +43,12 @@ struct Parameters
         };
     }
 
+    /**
+     * \brief Register a callback for dynamic (runtime) parameter updates.
+     * \note Currently unused -- no caller registers a callback, and
+     * \ref get_param_callbacks_ is never invoked; only referenced from a
+     * commented-out call in `cost_critic.cpp`.
+     */
     template<typename T>
     void addParamCallback(const std::string & name, T && callback)
     {

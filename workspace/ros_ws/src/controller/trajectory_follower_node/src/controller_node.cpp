@@ -13,11 +13,18 @@
 // limitations under the License.
 #include "trajectory_follower_node/controller_node.hpp"
 
+/** \file
+ * \brief \ref mpl::control::trajectory_follower_node::Controller
+ * "Controller" implementation: input polling, controller dispatch, horizon
+ * merging/resampling, and debug/processing-time publishing.
+ */
+
 namespace
 {
 
 //////////////////////////////////////////////////////////////////////////
 
+/// \brief Upsample \p origHorizon from \p origTimeStepMs to \p newTimeStepMs by holding each command constant across the finer steps.
 template <typename T>
 std::vector<T> resampleHorizonByZeroOrderHold(
     const std::vector<T> & origHorizon, const double origTimeStepMs, const double newTimeStepMs)

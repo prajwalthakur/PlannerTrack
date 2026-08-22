@@ -12,6 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 #pragma once
+/** \file
+ * \brief Convenience umbrella header pulling in all of
+ * `trajectory_follower_base`'s types in one `#include`.
+ */
 #include "trajectory_follower_base/control_horizon.h"
 #include "trajectory_follower_base/controller_base.h"
 #include "trajectory_follower_base/hybrid_controller_base.h"

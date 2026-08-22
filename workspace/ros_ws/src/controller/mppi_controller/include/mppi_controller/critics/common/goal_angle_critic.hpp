@@ -6,6 +6,12 @@
 namespace controller::mppi_controller::critic
 {
 
+    /**
+    * @brief Penalizes heading error to the final goal orientation, only
+    * once the robot is within `mThresholdToConsider` of the end of the
+    * local path. If `mSymmetricYawTolerance` is set, the opposite
+    * (180-degree-flipped) orientation is treated as equally acceptable.
+    */
     class GoalAngleCritic: public CriticFunction
     {
         public:

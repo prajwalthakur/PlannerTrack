@@ -1,0 +1,1984 @@
+{
+    "crs": {
+        "properties": {
+            "name": "urn:ogc:def:crs:EPSG::3857"
+        },
+        "type": "name"
+    },
+    "features": [
+        {
+            "geometry": {
+                "coordinates": [
+                    -0.25,
+                    6.5
+                ],
+                "type": "Point"
+            },
+            "properties": {
+                "frame": "map",
+                "id": 0,
+                "metadata": {
+                    "arm": "north",
+                    "direction": "incoming",
+                    "lane": 1,
+                    "role": "terminal",
+                    "t": 0.0
+                }
+            },
+            "type": "Feature"
+        },
+        {
+            "geometry": {
+                "coordinates": [
+                    -0.25,
+                    5.0
+                ],
+                "type": "Point"
+            },
+            "properties": {
+                "frame": "map",
+                "id": 1,
+                "metadata": {
+                    "arm": "north",
+                    "direction": "incoming",
+                    "lane": 1,
+                    "role": "interior",
+                    "t": 0.25
+                }
+            },
+            "type": "Feature"
+        },
+        {
+            "geometry": {
+                "coordinates": [
+                    -0.25,
+                    3.5
+                ],
+                "type": "Point"
+            },
+            "properties": {
+                "frame": "map",
+                "id": 2,
+                "metadata": {
+                    "arm": "north",
+                    "direction": "incoming",
+                    "lane": 1,
+                    "role": "interior",
+                    "t": 0.5
+                }
+            },
+            "type": "Feature"
+        },
+        {
+            "geometry": {
+                "coordinates": [
+                    -0.25,
+                    2.0
+                ],
+                "type": "Point"
+            },
+            "properties": {
+                "frame": "map",
+                "id": 3,
+                "metadata": {
+                    "arm": "north",
+                    "direction": "incoming",
+                    "lane": 1,
+                    "role": "interior",
+                    "t": 0.75
+                }
+            },
+            "type": "Feature"
+        },
+        {
+            "geometry": {
+                "coordinates": [
+                    -0.25,
+                    0.5
+                ],
+                "type": "Point"
+            },
+            "properties": {
+                "frame": "map",
+                "id": 4,
+                "metadata": {
+                    "arm": "north",
+                    "direction": "incoming",
+                    "lane": 1,
+                    "role": "terminal",
+                    "t": 1.0
+                }
+            },
+            "type": "Feature"
+        },
+        {
+            "geometry": {
+                "coordinates": [
+                    0.25,
+                    0.5
+                ],
+                "type": "Point"
+            },
+            "properties": {
+                "frame": "map",
+                "id": 9,
+                "metadata": {
+                    "arm": "north",
+                    "direction": "outgoing",
+                    "lane": 2,
+                    "role": "terminal",
+                    "t": 0.0
+                }
+            },
+            "type": "Feature"
+        },
+        {
+            "geometry": {
+                "coordinates": [
+                    0.25,
+                    2.0
+                ],
+                "type": "Point"
+            },
+            "properties": {
+                "frame": "map",
+                "id": 10,
+                "metadata": {
+                    "arm": "north",
+                    "direction": "outgoing",
+                    "lane": 2,
+                    "role": "interior",
+                    "t": 0.25
+                }
+            },
+            "type": "Feature"
+        },
+        {
+            "geometry": {
+                "coordinates": [
+                    0.25,
+                    3.5
+                ],
+                "type": "Point"
+            },
+            "properties": {
+                "frame": "map",
+                "id": 11,
+                "metadata": {
+                    "arm": "north",
+                    "direction": "outgoing",
+                    "lane": 2,
+                    "role": "interior",
+                    "t": 0.5
+                }
+            },
+            "type": "Feature"
+        },
+        {
+            "geometry": {
+                "coordinates": [
+                    0.25,
+                    5.0
+                ],
+                "type": "Point"
+            },
+            "properties": {
+                "frame": "map",
+                "id": 12,
+                "metadata": {
+                    "arm": "north",
+                    "direction": "outgoing",
+                    "lane": 2,
+                    "role": "interior",
+                    "t": 0.75
+                }
+            },
+            "type": "Feature"
+        },
+        {
+            "geometry": {
+                "coordinates": [
+                    0.25,
+                    6.5
+                ],
+                "type": "Point"
+            },
+            "properties": {
+                "frame": "map",
+                "id": 13,
+                "metadata": {
+                    "arm": "north",
+                    "direction": "outgoing",
+                    "lane": 2,
+                    "role": "terminal",
+                    "t": 1.0
+                }
+            },
+            "type": "Feature"
+        },
+        {
+            "geometry": {
+                "coordinates": [
+                    0.25,
+                    -6.5
+                ],
+                "type": "Point"
+            },
+            "properties": {
+                "frame": "map",
+                "id": 18,
+                "metadata": {
+                    "arm": "south",
+                    "direction": "incoming",
+                    "lane": 3,
+                    "role": "terminal",
+                    "t": 0.0
+                }
+            },
+            "type": "Feature"
+        },
+        {
+            "geometry": {
+                "coordinates": [
+                    0.25,
+                    -5.0
+                ],
+                "type": "Point"
+            },
+            "properties": {
+                "frame": "map",
+                "id": 19,
+                "metadata": {
+                    "arm": "south",
+                    "direction": "incoming",
+                    "lane": 3,
+                    "role": "interior",
+                    "t": 0.25
+                }
+            },
+            "type": "Feature"
+        },
+        {
+            "geometry": {
+                "coordinates": [
+                    0.25,
+                    -3.5
+                ],
+                "type": "Point"
+            },
+            "properties": {
+                "frame": "map",
+                "id": 20,
+                "metadata": {
+                    "arm": "south",
+                    "direction": "incoming",
+                    "lane": 3,
+                    "role": "interior",
+                    "t": 0.5
+                }
+            },
+            "type": "Feature"
+        },
+        {
+            "geometry": {
+                "coordinates": [
+                    0.25,
+                    -2.0
+                ],
+                "type": "Point"
+            },
+            "properties": {
+                "frame": "map",
+                "id": 21,
+                "metadata": {
+                    "arm": "south",
+                    "direction": "incoming",
+                    "lane": 3,
+                    "role": "interior",
+                    "t": 0.75
+                }
+            },
+            "type": "Feature"
+        },
+        {
+            "geometry": {
+                "coordinates": [
+                    0.25,
+                    -0.5
+                ],
+                "type": "Point"
+            },
+            "properties": {
+                "frame": "map",
+                "id": 22,
+                "metadata": {
+                    "arm": "south",
+                    "direction": "incoming",
+                    "lane": 3,
+                    "role": "terminal",
+                    "t": 1.0
+                }
+            },
+            "type": "Feature"
+        },
+        {
+            "geometry": {
+                "coordinates": [
+                    -0.25,
+                    -0.5
+                ],
+                "type": "Point"
+            },
+            "properties": {
+                "frame": "map",
+                "id": 27,
+                "metadata": {
+                    "arm": "south",
+                    "direction": "outgoing",
+                    "lane": 4,
+                    "role": "terminal",
+                    "t": 0.0
+                }
+            },
+            "type": "Feature"
+        },
+        {
+            "geometry": {
+                "coordinates": [
+                    -0.25,
+                    -2.0
+                ],
+                "type": "Point"
+            },
+            "properties": {
+                "frame": "map",
+                "id": 28,
+                "metadata": {
+                    "arm": "south",
+                    "direction": "outgoing",
+                    "lane": 4,
+                    "role": "interior",
+                    "t": 0.25
+                }
+            },
+            "type": "Feature"
+        },
+        {
+            "geometry": {
+                "coordinates": [
+                    -0.25,
+                    -3.5
+                ],
+                "type": "Point"
+            },
+            "properties": {
+                "frame": "map",
+                "id": 29,
+                "metadata": {
+                    "arm": "south",
+                    "direction": "outgoing",
+                    "lane": 4,
+                    "role": "interior",
+                    "t": 0.5
+                }
+            },
+            "type": "Feature"
+        },
+        {
+            "geometry": {
+                "coordinates": [
+                    -0.25,
+                    -5.0
+                ],
+                "type": "Point"
+            },
+            "properties": {
+                "frame": "map",
+                "id": 30,
+                "metadata": {
+                    "arm": "south",
+                    "direction": "outgoing",
+                    "lane": 4,
+                    "role": "interior",
+                    "t": 0.75
+                }
+            },
+            "type": "Feature"
+        },
+        {
+            "geometry": {
+                "coordinates": [
+                    -0.25,
+                    -6.5
+                ],
+                "type": "Point"
+            },
+            "properties": {
+                "frame": "map",
+                "id": 31,
+                "metadata": {
+                    "arm": "south",
+                    "direction": "outgoing",
+                    "lane": 4,
+                    "role": "terminal",
+                    "t": 1.0
+                }
+            },
+            "type": "Feature"
+        },
+        {
+            "geometry": {
+                "coordinates": [
+                    6.5,
+                    0.25
+                ],
+                "type": "Point"
+            },
+            "properties": {
+                "frame": "map",
+                "id": 36,
+                "metadata": {
+                    "arm": "east",
+                    "direction": "incoming",
+                    "lane": 5,
+                    "role": "terminal",
+                    "t": 0.0
+                }
+            },
+            "type": "Feature"
+        },
+        {
+            "geometry": {
+                "coordinates": [
+                    5.0,
+                    0.25
+                ],
+                "type": "Point"
+            },
+            "properties": {
+                "frame": "map",
+                "id": 37,
+                "metadata": {
+                    "arm": "east",
+                    "direction": "incoming",
+                    "lane": 5,
+                    "role": "interior",
+                    "t": 0.25
+                }
+            },
+            "type": "Feature"
+        },
+        {
+            "geometry": {
+                "coordinates": [
+                    3.5,
+                    0.25
+                ],
+                "type": "Point"
+            },
+            "properties": {
+                "frame": "map",
+                "id": 38,
+                "metadata": {
+                    "arm": "east",
+                    "direction": "incoming",
+                    "lane": 5,
+                    "role": "interior",
+                    "t": 0.5
+                }
+            },
+            "type": "Feature"
+        },
+        {
+            "geometry": {
+                "coordinates": [
+                    2.0,
+                    0.25
+                ],
+                "type": "Point"
+            },
+            "properties": {
+                "frame": "map",
+                "id": 39,
+                "metadata": {
+                    "arm": "east",
+                    "direction": "incoming",
+                    "lane": 5,
+                    "role": "interior",
+                    "t": 0.75
+                }
+            },
+            "type": "Feature"
+        },
+        {
+            "geometry": {
+                "coordinates": [
+                    0.5,
+                    0.25
+                ],
+                "type": "Point"
+            },
+            "properties": {
+                "frame": "map",
+                "id": 40,
+                "metadata": {
+                    "arm": "east",
+                    "direction": "incoming",
+                    "lane": 5,
+                    "role": "terminal",
+                    "t": 1.0
+                }
+            },
+            "type": "Feature"
+        },
+        {
+            "geometry": {
+                "coordinates": [
+                    0.5,
+                    -0.25
+                ],
+                "type": "Point"
+            },
+            "properties": {
+                "frame": "map",
+                "id": 45,
+                "metadata": {
+                    "arm": "east",
+                    "direction": "outgoing",
+                    "lane": 6,
+                    "role": "terminal",
+                    "t": 0.0
+                }
+            },
+            "type": "Feature"
+        },
+        {
+            "geometry": {
+                "coordinates": [
+                    2.0,
+                    -0.25
+                ],
+                "type": "Point"
+            },
+            "properties": {
+                "frame": "map",
+                "id": 46,
+                "metadata": {
+                    "arm": "east",
+                    "direction": "outgoing",
+                    "lane": 6,
+                    "role": "interior",
+                    "t": 0.25
+                }
+            },
+            "type": "Feature"
+        },
+        {
+            "geometry": {
+                "coordinates": [
+                    3.5,
+                    -0.25
+                ],
+                "type": "Point"
+            },
+            "properties": {
+                "frame": "map",
+                "id": 47,
+                "metadata": {
+                    "arm": "east",
+                    "direction": "outgoing",
+                    "lane": 6,
+                    "role": "interior",
+                    "t": 0.5
+                }
+            },
+            "type": "Feature"
+        },
+        {
+            "geometry": {
+                "coordinates": [
+                    5.0,
+                    -0.25
+                ],
+                "type": "Point"
+            },
+            "properties": {
+                "frame": "map",
+                "id": 48,
+                "metadata": {
+                    "arm": "east",
+                    "direction": "outgoing",
+                    "lane": 6,
+                    "role": "interior",
+                    "t": 0.75
+                }
+            },
+            "type": "Feature"
+        },
+        {
+            "geometry": {
+                "coordinates": [
+                    6.5,
+                    -0.25
+                ],
+                "type": "Point"
+            },
+            "properties": {
+                "frame": "map",
+                "id": 49,
+                "metadata": {
+                    "arm": "east",
+                    "direction": "outgoing",
+                    "lane": 6,
+                    "role": "terminal",
+                    "t": 1.0
+                }
+            },
+            "type": "Feature"
+        },
+        {
+            "geometry": {
+                "coordinates": [
+                    -6.5,
+                    -0.25
+                ],
+                "type": "Point"
+            },
+            "properties": {
+                "frame": "map",
+                "id": 54,
+                "metadata": {
+                    "arm": "west",
+                    "direction": "incoming",
+                    "lane": 7,
+                    "role": "terminal",
+                    "t": 0.0
+                }
+            },
+            "type": "Feature"
+        },
+        {
+            "geometry": {
+                "coordinates": [
+                    -5.0,
+                    -0.25
+                ],
+                "type": "Point"
+            },
+            "properties": {
+                "frame": "map",
+                "id": 55,
+                "metadata": {
+                    "arm": "west",
+                    "direction": "incoming",
+                    "lane": 7,
+                    "role": "interior",
+                    "t": 0.25
+                }
+            },
+            "type": "Feature"
+        },
+        {
+            "geometry": {
+                "coordinates": [
+                    -3.5,
+                    -0.25
+                ],
+                "type": "Point"
+            },
+            "properties": {
+                "frame": "map",
+                "id": 56,
+                "metadata": {
+                    "arm": "west",
+                    "direction": "incoming",
+                    "lane": 7,
+                    "role": "interior",
+                    "t": 0.5
+                }
+            },
+            "type": "Feature"
+        },
+        {
+            "geometry": {
+                "coordinates": [
+                    -2.0,
+                    -0.25
+                ],
+                "type": "Point"
+            },
+            "properties": {
+                "frame": "map",
+                "id": 57,
+                "metadata": {
+                    "arm": "west",
+                    "direction": "incoming",
+                    "lane": 7,
+                    "role": "interior",
+                    "t": 0.75
+                }
+            },
+            "type": "Feature"
+        },
+        {
+            "geometry": {
+                "coordinates": [
+                    -0.5,
+                    -0.25
+                ],
+                "type": "Point"
+            },
+            "properties": {
+                "frame": "map",
+                "id": 58,
+                "metadata": {
+                    "arm": "west",
+                    "direction": "incoming",
+                    "lane": 7,
+                    "role": "terminal",
+                    "t": 1.0
+                }
+            },
+            "type": "Feature"
+        },
+        {
+            "geometry": {
+                "coordinates": [
+                    -0.5,
+                    0.25
+                ],
+                "type": "Point"
+            },
+            "properties": {
+                "frame": "map",
+                "id": 63,
+                "metadata": {
+                    "arm": "west",
+                    "direction": "outgoing",
+                    "lane": 8,
+                    "role": "terminal",
+                    "t": 0.0
+                }
+            },
+            "type": "Feature"
+        },
+        {
+            "geometry": {
+                "coordinates": [
+                    -2.0,
+                    0.25
+                ],
+                "type": "Point"
+            },
+            "properties": {
+                "frame": "map",
+                "id": 64,
+                "metadata": {
+                    "arm": "west",
+                    "direction": "outgoing",
+                    "lane": 8,
+                    "role": "interior",
+                    "t": 0.25
+                }
+            },
+            "type": "Feature"
+        },
+        {
+            "geometry": {
+                "coordinates": [
+                    -3.5,
+                    0.25
+                ],
+                "type": "Point"
+            },
+            "properties": {
+                "frame": "map",
+                "id": 65,
+                "metadata": {
+                    "arm": "west",
+                    "direction": "outgoing",
+                    "lane": 8,
+                    "role": "interior",
+                    "t": 0.5
+                }
+            },
+            "type": "Feature"
+        },
+        {
+            "geometry": {
+                "coordinates": [
+                    -5.0,
+                    0.25
+                ],
+                "type": "Point"
+            },
+            "properties": {
+                "frame": "map",
+                "id": 66,
+                "metadata": {
+                    "arm": "west",
+                    "direction": "outgoing",
+                    "lane": 8,
+                    "role": "interior",
+                    "t": 0.75
+                }
+            },
+            "type": "Feature"
+        },
+        {
+            "geometry": {
+                "coordinates": [
+                    -6.5,
+                    0.25
+                ],
+                "type": "Point"
+            },
+            "properties": {
+                "frame": "map",
+                "id": 67,
+                "metadata": {
+                    "arm": "west",
+                    "direction": "outgoing",
+                    "lane": 8,
+                    "role": "terminal",
+                    "t": 1.0
+                }
+            },
+            "type": "Feature"
+        },
+        {
+            "geometry": {
+                "coordinates": [
+                    0.11318200081586838,
+                    0.07592400163412094
+                ],
+                "type": "Point"
+            },
+            "properties": {
+                "frame": "map",
+                "id": 107,
+                "metadata": {
+                    "class": "left_turn",
+                    "connector": "west_to_north"
+                }
+            },
+            "type": "Feature"
+        },
+        {
+            "geometry": {
+                "coordinates": [
+                    -0.10252899676561356,
+                    0.08924400061368942
+                ],
+                "type": "Point"
+            },
+            "properties": {
+                "frame": "map",
+                "id": 110,
+                "metadata": {
+                    "class": "left_turn",
+                    "connector": "south_to_west"
+                }
+            },
+            "type": "Feature"
+        },
+        {
+            "geometry": {
+                "coordinates": [
+                    -0.06872999668121338,
+                    -0.14150899648666382
+                ],
+                "type": "Point"
+            },
+            "properties": {
+                "frame": "map",
+                "id": 113,
+                "metadata": {
+                    "class": "left_turn",
+                    "connector": "east_to_south"
+                }
+            },
+            "type": "Feature"
+        },
+        {
+            "geometry": {
+                "coordinates": [
+                    0.15262900292873383,
+                    -0.13987499475479126
+                ],
+                "type": "Point"
+            },
+            "properties": {
+                "frame": "map",
+                "id": 116,
+                "metadata": {
+                    "class": "left_turn",
+                    "connector": "north_to_east"
+                }
+            },
+            "type": "Feature"
+        },
+        {
+            "geometry": {
+                "coordinates": [
+                    -0.32318899035453796,
+                    0.32620298862457275
+                ],
+                "type": "Point"
+            },
+            "properties": {
+                "frame": "map",
+                "id": 126,
+                "metadata": {
+                    "class": "right_turn",
+                    "connector": "north_to_west"
+                }
+            },
+            "type": "Feature"
+        },
+        {
+            "geometry": {
+                "coordinates": [
+                    0.3439210057258606,
+                    -0.33862200379371643
+                ],
+                "type": "Point"
+            },
+            "properties": {
+                "frame": "map",
+                "id": 129,
+                "metadata": {
+                    "class": "right_turn",
+                    "connector": "south_to_east"
+                }
+            },
+            "type": "Feature"
+        },
+        {
+            "geometry": {
+                "coordinates": [
+                    0.34060099720954895,
+                    0.33654698729515076
+                ],
+                "type": "Point"
+            },
+            "properties": {
+                "frame": "map",
+                "id": 132,
+                "metadata": {
+                    "class": "right_turn",
+                    "connector": "east_to_north"
+                }
+            },
+            "type": "Feature"
+        },
+        {
+            "geometry": {
+                "coordinates": [
+                    -0.326539009809494,
+                    -0.33484798669815063
+                ],
+                "type": "Point"
+            },
+            "properties": {
+                "frame": "map",
+                "id": 135,
+                "metadata": {
+                    "class": "right_turn",
+                    "connector": "west_to_south"
+                }
+            },
+            "type": "Feature"
+        },
+        {
+            "geometry": {
+                "type": "MultiLineString"
+            },
+            "properties": {
+                "cost": 0.0,
+                "endid": 1,
+                "id": 5,
+                "metadata": {
+                    "arm": "north",
+                    "class": "approach",
+                    "lane": 1,
+                    "speed_limit": 100.0
+                },
+                "overridable": true,
+                "startid": 0
+            },
+            "type": "Feature"
+        },
+        {
+            "geometry": {
+                "type": "MultiLineString"
+            },
+            "properties": {
+                "cost": 0.0,
+                "endid": 2,
+                "id": 6,
+                "metadata": {
+                    "arm": "north",
+                    "class": "approach",
+                    "lane": 1,
+                    "speed_limit": 100.0
+                },
+                "overridable": true,
+                "startid": 1
+            },
+            "type": "Feature"
+        },
+        {
+            "geometry": {
+                "type": "MultiLineString"
+            },
+            "properties": {
+                "cost": 0.0,
+                "endid": 3,
+                "id": 7,
+                "metadata": {
+                    "arm": "north",
+                    "class": "approach",
+                    "lane": 1,
+                    "speed_limit": 100.0
+                },
+                "overridable": true,
+                "startid": 2
+            },
+            "type": "Feature"
+        },
+        {
+            "geometry": {
+                "type": "MultiLineString"
+            },
+            "properties": {
+                "cost": 0.0,
+                "endid": 4,
+                "id": 8,
+                "metadata": {
+                    "arm": "north",
+                    "class": "approach",
+                    "lane": 1,
+                    "speed_limit": 100.0
+                },
+                "overridable": true,
+                "startid": 3
+            },
+            "type": "Feature"
+        },
+        {
+            "geometry": {
+                "type": "MultiLineString"
+            },
+            "properties": {
+                "cost": 0.0,
+                "endid": 116,
+                "id": 117,
+                "metadata": {
+                    "class": "left_turn",
+                    "from_arm": "north",
+                    "speed_limit": 40.0,
+                    "to_arm": "east"
+                },
+                "overridable": true,
+                "startid": 4
+            },
+            "type": "Feature"
+        },
+        {
+            "geometry": {
+                "type": "MultiLineString"
+            },
+            "properties": {
+                "cost": 0.0,
+                "endid": 27,
+                "id": 119,
+                "metadata": {
+                    "class": "straight_through",
+                    "from_arm": "north",
+                    "speed_limit": 100.0,
+                    "to_arm": "south"
+                },
+                "overridable": true,
+                "startid": 4
+            },
+            "type": "Feature"
+        },
+        {
+            "geometry": {
+                "type": "MultiLineString"
+            },
+            "properties": {
+                "cost": 0.0,
+                "endid": 126,
+                "id": 127,
+                "metadata": {
+                    "class": "right_turn",
+                    "from_arm": "north",
+                    "speed_limit": 40.0,
+                    "to_arm": "west"
+                },
+                "overridable": true,
+                "startid": 4
+            },
+            "type": "Feature"
+        },
+        {
+            "geometry": {
+                "type": "MultiLineString"
+            },
+            "properties": {
+                "cost": 0.0,
+                "endid": 10,
+                "id": 14,
+                "metadata": {
+                    "arm": "north",
+                    "class": "departure",
+                    "lane": 2,
+                    "speed_limit": 100.0
+                },
+                "overridable": true,
+                "startid": 9
+            },
+            "type": "Feature"
+        },
+        {
+            "geometry": {
+                "type": "MultiLineString"
+            },
+            "properties": {
+                "cost": 0.0,
+                "endid": 11,
+                "id": 15,
+                "metadata": {
+                    "arm": "north",
+                    "class": "departure",
+                    "lane": 2,
+                    "speed_limit": 100.0
+                },
+                "overridable": true,
+                "startid": 10
+            },
+            "type": "Feature"
+        },
+        {
+            "geometry": {
+                "type": "MultiLineString"
+            },
+            "properties": {
+                "cost": 0.0,
+                "endid": 12,
+                "id": 16,
+                "metadata": {
+                    "arm": "north",
+                    "class": "departure",
+                    "lane": 2,
+                    "speed_limit": 100.0
+                },
+                "overridable": true,
+                "startid": 11
+            },
+            "type": "Feature"
+        },
+        {
+            "geometry": {
+                "type": "MultiLineString"
+            },
+            "properties": {
+                "cost": 0.0,
+                "endid": 13,
+                "id": 17,
+                "metadata": {
+                    "arm": "north",
+                    "class": "departure",
+                    "lane": 2,
+                    "speed_limit": 100.0
+                },
+                "overridable": true,
+                "startid": 12
+            },
+            "type": "Feature"
+        },
+        {
+            "geometry": {
+                "type": "MultiLineString"
+            },
+            "properties": {
+                "cost": 0.0,
+                "endid": 19,
+                "id": 23,
+                "metadata": {
+                    "arm": "south",
+                    "class": "approach",
+                    "lane": 3,
+                    "speed_limit": 100.0
+                },
+                "overridable": true,
+                "startid": 18
+            },
+            "type": "Feature"
+        },
+        {
+            "geometry": {
+                "type": "MultiLineString"
+            },
+            "properties": {
+                "cost": 0.0,
+                "endid": 20,
+                "id": 24,
+                "metadata": {
+                    "arm": "south",
+                    "class": "approach",
+                    "lane": 3,
+                    "speed_limit": 100.0
+                },
+                "overridable": true,
+                "startid": 19
+            },
+            "type": "Feature"
+        },
+        {
+            "geometry": {
+                "type": "MultiLineString"
+            },
+            "properties": {
+                "cost": 0.0,
+                "endid": 21,
+                "id": 25,
+                "metadata": {
+                    "arm": "south",
+                    "class": "approach",
+                    "lane": 3,
+                    "speed_limit": 100.0
+                },
+                "overridable": true,
+                "startid": 20
+            },
+            "type": "Feature"
+        },
+        {
+            "geometry": {
+                "type": "MultiLineString"
+            },
+            "properties": {
+                "cost": 0.0,
+                "endid": 22,
+                "id": 26,
+                "metadata": {
+                    "arm": "south",
+                    "class": "approach",
+                    "lane": 3,
+                    "speed_limit": 100.0
+                },
+                "overridable": true,
+                "startid": 21
+            },
+            "type": "Feature"
+        },
+        {
+            "geometry": {
+                "type": "MultiLineString"
+            },
+            "properties": {
+                "cost": 0.0,
+                "endid": 110,
+                "id": 111,
+                "metadata": {
+                    "class": "left_turn",
+                    "from_arm": "south",
+                    "speed_limit": 40.0,
+                    "to_arm": "west"
+                },
+                "overridable": true,
+                "startid": 22
+            },
+            "type": "Feature"
+        },
+        {
+            "geometry": {
+                "type": "MultiLineString"
+            },
+            "properties": {
+                "cost": 0.0,
+                "endid": 9,
+                "id": 121,
+                "metadata": {
+                    "class": "straight_through",
+                    "from_arm": "south",
+                    "speed_limit": 100.0,
+                    "to_arm": "north"
+                },
+                "overridable": true,
+                "startid": 22
+            },
+            "type": "Feature"
+        },
+        {
+            "geometry": {
+                "type": "MultiLineString"
+            },
+            "properties": {
+                "cost": 0.0,
+                "endid": 129,
+                "id": 130,
+                "metadata": {
+                    "class": "right_turn",
+                    "from_arm": "south",
+                    "speed_limit": 40.0,
+                    "to_arm": "east"
+                },
+                "overridable": true,
+                "startid": 22
+            },
+            "type": "Feature"
+        },
+        {
+            "geometry": {
+                "type": "MultiLineString"
+            },
+            "properties": {
+                "cost": 0.0,
+                "endid": 28,
+                "id": 32,
+                "metadata": {
+                    "arm": "south",
+                    "class": "departure",
+                    "lane": 4,
+                    "speed_limit": 100.0
+                },
+                "overridable": true,
+                "startid": 27
+            },
+            "type": "Feature"
+        },
+        {
+            "geometry": {
+                "type": "MultiLineString"
+            },
+            "properties": {
+                "cost": 0.0,
+                "endid": 29,
+                "id": 33,
+                "metadata": {
+                    "arm": "south",
+                    "class": "departure",
+                    "lane": 4,
+                    "speed_limit": 100.0
+                },
+                "overridable": true,
+                "startid": 28
+            },
+            "type": "Feature"
+        },
+        {
+            "geometry": {
+                "type": "MultiLineString"
+            },
+            "properties": {
+                "cost": 0.0,
+                "endid": 30,
+                "id": 34,
+                "metadata": {
+                    "arm": "south",
+                    "class": "departure",
+                    "lane": 4,
+                    "speed_limit": 100.0
+                },
+                "overridable": true,
+                "startid": 29
+            },
+            "type": "Feature"
+        },
+        {
+            "geometry": {
+                "type": "MultiLineString"
+            },
+            "properties": {
+                "cost": 0.0,
+                "endid": 31,
+                "id": 35,
+                "metadata": {
+                    "arm": "south",
+                    "class": "departure",
+                    "lane": 4,
+                    "speed_limit": 100.0
+                },
+                "overridable": true,
+                "startid": 30
+            },
+            "type": "Feature"
+        },
+        {
+            "geometry": {
+                "type": "MultiLineString"
+            },
+            "properties": {
+                "cost": 0.0,
+                "endid": 37,
+                "id": 41,
+                "metadata": {
+                    "arm": "east",
+                    "class": "approach",
+                    "lane": 5,
+                    "speed_limit": 100.0
+                },
+                "overridable": true,
+                "startid": 36
+            },
+            "type": "Feature"
+        },
+        {
+            "geometry": {
+                "type": "MultiLineString"
+            },
+            "properties": {
+                "cost": 0.0,
+                "endid": 38,
+                "id": 42,
+                "metadata": {
+                    "arm": "east",
+                    "class": "approach",
+                    "lane": 5,
+                    "speed_limit": 100.0
+                },
+                "overridable": true,
+                "startid": 37
+            },
+            "type": "Feature"
+        },
+        {
+            "geometry": {
+                "type": "MultiLineString"
+            },
+            "properties": {
+                "cost": 0.0,
+                "endid": 39,
+                "id": 43,
+                "metadata": {
+                    "arm": "east",
+                    "class": "approach",
+                    "lane": 5,
+                    "speed_limit": 100.0
+                },
+                "overridable": true,
+                "startid": 38
+            },
+            "type": "Feature"
+        },
+        {
+            "geometry": {
+                "type": "MultiLineString"
+            },
+            "properties": {
+                "cost": 0.0,
+                "endid": 40,
+                "id": 44,
+                "metadata": {
+                    "arm": "east",
+                    "class": "approach",
+                    "lane": 5,
+                    "speed_limit": 100.0
+                },
+                "overridable": true,
+                "startid": 39
+            },
+            "type": "Feature"
+        },
+        {
+            "geometry": {
+                "type": "MultiLineString"
+            },
+            "properties": {
+                "cost": 0.0,
+                "endid": 113,
+                "id": 114,
+                "metadata": {
+                    "class": "left_turn",
+                    "from_arm": "east",
+                    "speed_limit": 40.0,
+                    "to_arm": "south"
+                },
+                "overridable": true,
+                "startid": 40
+            },
+            "type": "Feature"
+        },
+        {
+            "geometry": {
+                "type": "MultiLineString"
+            },
+            "properties": {
+                "cost": 0.0,
+                "endid": 63,
+                "id": 120,
+                "metadata": {
+                    "class": "straight_through",
+                    "from_arm": "east",
+                    "speed_limit": 100.0,
+                    "to_arm": "west"
+                },
+                "overridable": true,
+                "startid": 40
+            },
+            "type": "Feature"
+        },
+        {
+            "geometry": {
+                "type": "MultiLineString"
+            },
+            "properties": {
+                "cost": 0.0,
+                "endid": 132,
+                "id": 133,
+                "metadata": {
+                    "class": "right_turn",
+                    "from_arm": "east",
+                    "speed_limit": 40.0,
+                    "to_arm": "north"
+                },
+                "overridable": true,
+                "startid": 40
+            },
+            "type": "Feature"
+        },
+        {
+            "geometry": {
+                "type": "MultiLineString"
+            },
+            "properties": {
+                "cost": 0.0,
+                "endid": 46,
+                "id": 50,
+                "metadata": {
+                    "arm": "east",
+                    "class": "departure",
+                    "lane": 6,
+                    "speed_limit": 100.0
+                },
+                "overridable": true,
+                "startid": 45
+            },
+            "type": "Feature"
+        },
+        {
+            "geometry": {
+                "type": "MultiLineString"
+            },
+            "properties": {
+                "cost": 0.0,
+                "endid": 47,
+                "id": 51,
+                "metadata": {
+                    "arm": "east",
+                    "class": "departure",
+                    "lane": 6,
+                    "speed_limit": 100.0
+                },
+                "overridable": true,
+                "startid": 46
+            },
+            "type": "Feature"
+        },
+        {
+            "geometry": {
+                "type": "MultiLineString"
+            },
+            "properties": {
+                "cost": 0.0,
+                "endid": 48,
+                "id": 52,
+                "metadata": {
+                    "arm": "east",
+                    "class": "departure",
+                    "lane": 6,
+                    "speed_limit": 100.0
+                },
+                "overridable": true,
+                "startid": 47
+            },
+            "type": "Feature"
+        },
+        {
+            "geometry": {
+                "type": "MultiLineString"
+            },
+            "properties": {
+                "cost": 0.0,
+                "endid": 49,
+                "id": 53,
+                "metadata": {
+                    "arm": "east",
+                    "class": "departure",
+                    "lane": 6,
+                    "speed_limit": 100.0
+                },
+                "overridable": true,
+                "startid": 48
+            },
+            "type": "Feature"
+        },
+        {
+            "geometry": {
+                "type": "MultiLineString"
+            },
+            "properties": {
+                "cost": 0.0,
+                "endid": 55,
+                "id": 59,
+                "metadata": {
+                    "arm": "west",
+                    "class": "approach",
+                    "lane": 7,
+                    "speed_limit": 100.0
+                },
+                "overridable": true,
+                "startid": 54
+            },
+            "type": "Feature"
+        },
+        {
+            "geometry": {
+                "type": "MultiLineString"
+            },
+            "properties": {
+                "cost": 0.0,
+                "endid": 56,
+                "id": 60,
+                "metadata": {
+                    "arm": "west",
+                    "class": "approach",
+                    "lane": 7,
+                    "speed_limit": 100.0
+                },
+                "overridable": true,
+                "startid": 55
+            },
+            "type": "Feature"
+        },
+        {
+            "geometry": {
+                "type": "MultiLineString"
+            },
+            "properties": {
+                "cost": 0.0,
+                "endid": 57,
+                "id": 61,
+                "metadata": {
+                    "arm": "west",
+                    "class": "approach",
+                    "lane": 7,
+                    "speed_limit": 100.0
+                },
+                "overridable": true,
+                "startid": 56
+            },
+            "type": "Feature"
+        },
+        {
+            "geometry": {
+                "type": "MultiLineString"
+            },
+            "properties": {
+                "cost": 0.0,
+                "endid": 58,
+                "id": 62,
+                "metadata": {
+                    "arm": "west",
+                    "class": "approach",
+                    "lane": 7,
+                    "speed_limit": 100.0
+                },
+                "overridable": true,
+                "startid": 57
+            },
+            "type": "Feature"
+        },
+        {
+            "geometry": {
+                "type": "MultiLineString"
+            },
+            "properties": {
+                "cost": 0.0,
+                "endid": 107,
+                "id": 108,
+                "metadata": {
+                    "class": "left_turn",
+                    "from_arm": "west",
+                    "speed_limit": 40.0,
+                    "to_arm": "north"
+                },
+                "overridable": true,
+                "startid": 58
+            },
+            "type": "Feature"
+        },
+        {
+            "geometry": {
+                "type": "MultiLineString"
+            },
+            "properties": {
+                "cost": 0.0,
+                "endid": 135,
+                "id": 136,
+                "metadata": {
+                    "class": "right_turn",
+                    "from_arm": "west",
+                    "speed_limit": 40.0,
+                    "to_arm": "south"
+                },
+                "overridable": true,
+                "startid": 58
+            },
+            "type": "Feature"
+        },
+        {
+            "geometry": {
+                "type": "MultiLineString"
+            },
+            "properties": {
+                "cost": 0.0,
+                "endid": 45,
+                "id": 138,
+                "metadata": {
+                    "class": "straight_through",
+                    "from_arm": "west",
+                    "speed_limit": 100.0,
+                    "to_arm": "east"
+                },
+                "overridable": true,
+                "startid": 58
+            },
+            "type": "Feature"
+        },
+        {
+            "geometry": {
+                "type": "MultiLineString"
+            },
+            "properties": {
+                "cost": 0.0,
+                "endid": 64,
+                "id": 68,
+                "metadata": {
+                    "arm": "west",
+                    "class": "departure",
+                    "lane": 8,
+                    "speed_limit": 100.0
+                },
+                "overridable": true,
+                "startid": 63
+            },
+            "type": "Feature"
+        },
+        {
+            "geometry": {
+                "type": "MultiLineString"
+            },
+            "properties": {
+                "cost": 0.0,
+                "endid": 65,
+                "id": 69,
+                "metadata": {
+                    "arm": "west",
+                    "class": "departure",
+                    "lane": 8,
+                    "speed_limit": 100.0
+                },
+                "overridable": true,
+                "startid": 64
+            },
+            "type": "Feature"
+        },
+        {
+            "geometry": {
+                "type": "MultiLineString"
+            },
+            "properties": {
+                "cost": 0.0,
+                "endid": 66,
+                "id": 70,
+                "metadata": {
+                    "arm": "west",
+                    "class": "departure",
+                    "lane": 8,
+                    "speed_limit": 100.0
+                },
+                "overridable": true,
+                "startid": 65
+            },
+            "type": "Feature"
+        },
+        {
+            "geometry": {
+                "type": "MultiLineString"
+            },
+            "properties": {
+                "cost": 0.0,
+                "endid": 67,
+                "id": 71,
+                "metadata": {
+                    "arm": "west",
+                    "class": "departure",
+                    "lane": 8,
+                    "speed_limit": 100.0
+                },
+                "overridable": true,
+                "startid": 66
+            },
+            "type": "Feature"
+        },
+        {
+            "geometry": {
+                "type": "MultiLineString"
+            },
+            "properties": {
+                "cost": 0.0,
+                "endid": 9,
+                "id": 109,
+                "metadata": {
+                    "class": "left_turn",
+                    "from_arm": "west",
+                    "speed_limit": 40.0,
+                    "to_arm": "north"
+                },
+                "overridable": true,
+                "startid": 107
+            },
+            "type": "Feature"
+        },
+        {
+            "geometry": {
+                "type": "MultiLineString"
+            },
+            "properties": {
+                "cost": 0.0,
+                "endid": 63,
+                "id": 112,
+                "metadata": {
+                    "class": "left_turn",
+                    "from_arm": "south",
+                    "speed_limit": 40.0,
+                    "to_arm": "west"
+                },
+                "overridable": true,
+                "startid": 110
+            },
+            "type": "Feature"
+        },
+        {
+            "geometry": {
+                "type": "MultiLineString"
+            },
+            "properties": {
+                "cost": 0.0,
+                "endid": 27,
+                "id": 115,
+                "metadata": {
+                    "class": "left_turn",
+                    "from_arm": "east",
+                    "speed_limit": 40.0,
+                    "to_arm": "south"
+                },
+                "overridable": true,
+                "startid": 113
+            },
+            "type": "Feature"
+        },
+        {
+            "geometry": {
+                "type": "MultiLineString"
+            },
+            "properties": {
+                "cost": 0.0,
+                "endid": 45,
+                "id": 118,
+                "metadata": {
+                    "class": "left_turn",
+                    "from_arm": "north",
+                    "speed_limit": 40.0,
+                    "to_arm": "east"
+                },
+                "overridable": true,
+                "startid": 116
+            },
+            "type": "Feature"
+        },
+        {
+            "geometry": {
+                "type": "MultiLineString"
+            },
+            "properties": {
+                "cost": 0.0,
+                "endid": 63,
+                "id": 128,
+                "metadata": {
+                    "class": "right_turn",
+                    "from_arm": "north",
+                    "speed_limit": 40.0,
+                    "to_arm": "west"
+                },
+                "overridable": true,
+                "startid": 126
+            },
+            "type": "Feature"
+        },
+        {
+            "geometry": {
+                "type": "MultiLineString"
+            },
+            "properties": {
+                "cost": 0.0,
+                "endid": 45,
+                "id": 131,
+                "metadata": {
+                    "class": "right_turn",
+                    "from_arm": "south",
+                    "speed_limit": 40.0,
+                    "to_arm": "east"
+                },
+                "overridable": true,
+                "startid": 129
+            },
+            "type": "Feature"
+        },
+        {
+            "geometry": {
+                "type": "MultiLineString"
+            },
+            "properties": {
+                "cost": 0.0,
+                "endid": 9,
+                "id": 134,
+                "metadata": {
+                    "class": "right_turn",
+                    "from_arm": "east",
+                    "speed_limit": 40.0,
+                    "to_arm": "north"
+                },
+                "overridable": true,
+                "startid": 132
+            },
+            "type": "Feature"
+        },
+        {
+            "geometry": {
+                "type": "MultiLineString"
+            },
+            "properties": {
+                "cost": 0.0,
+                "endid": 27,
+                "id": 137,
+                "metadata": {
+                    "class": "right_turn",
+                    "from_arm": "west",
+                    "speed_limit": 40.0,
+                    "to_arm": "south"
+                },
+                "overridable": true,
+                "startid": 135
+            },
+            "type": "Feature"
+        }
+    ],
+    "name": "graph",
+    "type": "FeatureCollection"
+}

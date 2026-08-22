@@ -6,11 +6,12 @@
 namespace controller::mppi_controller::critic
 {
     /**
-    * @class mppi::critics::PathAlignCritic
-    * @brief Critic objective function for aligning to the path. Note:
-    * High settings of this will follow the path more precisely, but also makes it
-    * difficult (or impossible) to deviate in the presence of dynamic obstacles.
-    * This is an important critic to tune and consider in tandem with Obstacle.
+    * @brief Penalizes each rollout's lateral distance from the reference
+    * path near the furthest reached path point. High settings follow the
+    * path more precisely, but also make it difficult (or impossible) to
+    * deviate in the presence of dynamic obstacles. Skipped when too large
+    * a fraction of the local path is occupied (`mMaxPathOccupancyRatio`),
+    * so it doesn't fight the obstacle-avoidance critics.
     */
     class PathAlignCritic: public CriticFunction
     {
@@ -18,11 +19,7 @@ namespace controller::mppi_controller::critic
             PathAlignCritic()=default;
             ~PathAlignCritic() override =default;
             void initialize() override;
-            /**
-            * @brief Evaluate cost related to trajectories path alignment
-            *
-            * @param costs [out] add reference cost values to this tensor
-            */
+            /// \brief Accumulate a path-lateral-deviation penalty into `data.costs`.
             void score(CriticData& data) override;
         protected:
             unsigned int mPower{0};

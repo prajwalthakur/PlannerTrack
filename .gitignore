@@ -16,3 +16,5 @@ todo.md
 /workspace/ros_ws/src/controller/lat_based_lqr_controller
 /workspace/ros_ws/src/controller/lqr_controller
 /workspace/ros_ws/src/controller/mpcc_controller
+/workspace/ros_ws/src/papers
+/workspace/ros_ws/src/map_generator

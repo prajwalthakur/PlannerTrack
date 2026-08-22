@@ -1,6 +1,10 @@
 #include "mppi_controller/critics/common/constraint_critic.hpp"
 #include "mppi_controller/utils/utils.hpp"
 
+/** \file
+ * \brief \c mppi_critic::ConstraintCritic "ConstraintCritic" implementation.
+ */
+
 void mppi_critic::ConstraintCritic::initialize()
 {
     auto getParam = mParameter->getParamGetter(mName);

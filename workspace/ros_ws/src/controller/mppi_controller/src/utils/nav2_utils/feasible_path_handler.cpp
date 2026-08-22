@@ -1,4 +1,10 @@
 #include "mppi_controller/utils/nav2_utils/feasible_path_handler.hpp"
+
+/** \file
+ * \brief \ref FeasiblePathHandler implementation: plan clipping/pruning,
+ * frame transforms, and the racing/looping-lap lookahead window.
+ */
+
 namespace controller::mppi_controller::utils
 {
 

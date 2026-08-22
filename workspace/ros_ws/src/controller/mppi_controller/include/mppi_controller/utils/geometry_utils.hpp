@@ -24,6 +24,12 @@
 #define M_PIF 3.141592653589793238462643383279502884e+00F
 #define M_PIF_2 1.5707963267948966e+00F
 
+/**
+ * \file
+ * \brief Free-function geometry helpers (distances, angle normalization,
+ * `Twist` construction, path length) shared across the critics and
+ * \c Optimizer.
+ */
 namespace controller::mppi_controller::utils
 {
 

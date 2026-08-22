@@ -2,7 +2,7 @@
 
 namespace controller::mppi_controller::utils
 {
-    // A struct to hold pose data in floating point resolution
+    /// \brief A lightweight float 2D pose, used for \ref controller::mppi_controller::models::Path::path_pose_2d "Path::path_pose_2d".
     struct Pose2D
     {
         float x, y, theta;

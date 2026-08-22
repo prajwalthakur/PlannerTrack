@@ -1,6 +1,10 @@
 #include "mppi_controller/critics/common/prefer_forward_critic.hpp"
 #include "mppi_controller/utils/utils.hpp"
 
+/** \file
+ * \brief \c mppi_critic::PreferForwardCritic "PreferForwardCritic" implementation.
+ */
+
 void mppi_critic::PreferForwardCritic::initialize()
 {
     auto getParam = mParameter->getParamGetter(mName);

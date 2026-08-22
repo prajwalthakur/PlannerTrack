@@ -1,5 +1,9 @@
 #include "mppi_controller/models/ackermann/ackermann_constraints.hpp"
 
+/** \file
+ * \brief \c models::AckermannControlConstraints "AckermannControlConstraints"
+ * / \c models::AckermannSamplingStd "AckermannSamplingStd" implementation.
+ */
 
 void models::AckermannControlConstraints::onConfigure(Parameters& parameters, const std::string& name)
 {

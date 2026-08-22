@@ -6,6 +6,12 @@
 
 #include <pluginlib/class_list_macros.hpp>
 
+/** \file
+ * \brief \ref RectangularGeometry implementation. `PLUGINLIB_EXPORT_CLASS`
+ * at the bottom of this file registers the class with pluginlib at runtime
+ * -- see \ref plugin_architecture.
+ */
+
 //////////////////////////////////////////////////////////////////////////
 
 RectangularGeometry::RectangularGeometry(const double length, const double width)

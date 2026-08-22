@@ -18,6 +18,10 @@
 #include <cmath>
 #include <memory>
 #include "mppi_controller/utils/nav2_utils/robot_utils.hpp"
+
+/** \file
+ * \brief `Twist` validation and TF pose-lookup/transform helpers implementation.
+ */
 #include "tf2/convert.hpp"
 #include "tf2/utils.hpp"
 #include "tf2_geometry_msgs/tf2_geometry_msgs.hpp"

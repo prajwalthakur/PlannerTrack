@@ -6,12 +6,15 @@
 #include "motion_model_base/occupancy_grid_map.hpp"
 #include <vector>
 
-// Per-tick, read-only view of everything a sensor might ray-cast against:
-// other agents' true (rendered) shapes, static obstacles, and (optionally)
-// a map-derived occupancy grid. Built once per lidar tick by the simulator
-// and shared across all agents' SensorModel::step() calls -- O(N) to build,
-// not the O(N^2) it would be if every agent rebuilt its own obstacle list
-// from scratch.
+/**
+ * \brief Per-tick, read-only view of everything a sensor might ray-cast
+ * against: other agents' true (rendered) shapes, static obstacles, and
+ * (optionally) a map-derived occupancy grid.
+ *
+ * Built once per lidar tick by the simulator and shared across all agents'
+ * \c SensorModel::step() calls -- O(N) to build, not the O(N^2) it would be
+ * if every agent rebuilt its own obstacle list from scratch.
+ */
 struct WorldSnapshot
 {
 	std::vector<const GeometricModel *> agents;

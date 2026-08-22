@@ -22,6 +22,17 @@
 #include <algorithm>
 #include <stdexcept>
 #include <string>
+
+/**
+ * \file
+ * \brief Maps a controller-name string (from ROS params) to the matching
+ * `LateralControllerBase`/`LongitudinalControllerBase`/`HybridControllerBase`
+ * instance, so \c Controller can construct whichever controller its
+ * `agents_config_file` names without a compile-time dependency on every
+ * possible controller (only the ones actually `#include`d above).
+ */
+
+/// \brief Which concrete \c LateralControllerBase to construct.
 enum class LateralControllerMode {
 	INVALID = 0,
 	DUMMY_LATERAL,
@@ -29,12 +40,15 @@ enum class LateralControllerMode {
 	MPC,
 };
 
+/// \brief Which concrete \c LongitudinalControllerBase to construct.
 enum class LongitudinalControllerMode { INVALID = 0, DUMMY_LONGITUDINAL, PID, MPC };
 
+/// \brief Which concrete \c HybridControllerBase to construct.
 enum class HybridControllerMode { INVALID = 0, MPC, MPCC, REGULATED_PURE_PURSUIT, MPPI };
 
 //////////////////////////////////////////////////////////////////////////
 
+/// \brief Parse a `LateralControllerMode` from its ROS-param name (e.g. `"pure_pursuit"`).
 inline LateralControllerMode getLateralControllerMode(const std::string & mode)
 {
 	if (isStringEqual(mode, "mpc")) {
@@ -52,6 +66,11 @@ inline LateralControllerMode getLateralControllerMode(const std::string & mode)
 
 //////////////////////////////////////////////////////////////////////////
 
+/**
+ * \brief Construct the concrete lateral controller named by \p mode.
+ * \return `nullptr` for `INVALID`, `MPC`, and `PURE_PURSUIT` (not yet wired
+ * in here); a \c DummyLateralController for `DUMMY_LATERAL`.
+ */
 inline std::unique_ptr<trajectory_follower::LateralControllerBase> getLateralController(
     const std::string & mode, rclcpp::Node & node)
 {
@@ -81,6 +100,7 @@ inline std::unique_ptr<trajectory_follower::LateralControllerBase> getLateralCon
 
 //////////////////////////////////////////////////////////////////////////
 
+/// \brief Parse a `LongitudinalControllerMode` from its ROS-param name (e.g. `"pid"`).
 inline LongitudinalControllerMode getLongitudinalControllerMode(const std::string & mode)
 {
 	if (isStringEqual(mode, "pid")) {
@@ -95,6 +115,11 @@ inline LongitudinalControllerMode getLongitudinalControllerMode(const std::strin
 
 //////////////////////////////////////////////////////////////////////////
 
+/**
+ * \brief Construct the concrete longitudinal controller named by \p mode.
+ * \return `nullptr` for `INVALID` and `PID` (not yet wired in here); a
+ * \c DummyLongitudinalController for `DUMMY_LONGITUDINAL`.
+ */
 inline std::unique_ptr<trajectory_follower::LongitudinalControllerBase> getLongitudinalController(
     const std::string & mode, rclcpp::Node & node)
 {
@@ -120,6 +145,7 @@ inline std::unique_ptr<trajectory_follower::LongitudinalControllerBase> getLongi
 
 //////////////////////////////////////////////////////////////////////////
 
+/// \brief Parse a `HybridControllerMode` from its ROS-param name (e.g. `"mppi_controller"`).
 inline HybridControllerMode getHybridControllerMode(const std::string & mode)
 {
 	if (isStringEqual(mode, "mpc")) {
@@ -137,6 +163,12 @@ inline HybridControllerMode getHybridControllerMode(const std::string & mode)
 
 //////////////////////////////////////////////////////////////////////////
 
+/**
+ * \brief Construct the concrete hybrid controller named by \p mode.
+ * \return `nullptr` for `INVALID`, `MPC`, and `MPCC` (not yet wired in
+ * here); a \c RegulatedPP for `REGULATED_PURE_PURSUIT`; an
+ * \c MPPIController for `MPPI`.
+ */
 inline std::unique_ptr<trajectory_follower::HybridControllerBase> getHybridController(
     const std::string & mode, rclcpp::Node & node)
 {

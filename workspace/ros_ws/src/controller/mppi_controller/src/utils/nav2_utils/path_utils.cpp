@@ -1,9 +1,13 @@
 
 #include "mppi_controller/utils/nav2_utils/path_utils.hpp"
 
+/** \file
+ * \brief Path-inversion/in-place-rotation detection helpers implementation.
+ */
+
 namespace controller::mppi_controller::utils
 {
-    size_t removePosesAfterFirstConstraint(nav_msgs::msg::Path& path, 
+    size_t removePosesAfterFirstConstraint(nav_msgs::msg::Path& path,
         bool enforcePathInversion, 
         float rotationThreshold)
     {

@@ -28,6 +28,8 @@ namespace controller::mppi_controller::utils
      */
     size_t removePosesAfterFirstConstraint(nav_msgs::msg::Path& path, bool enforcePathInversion, float rotationThreshold);
 
+    /// \brief Locate the first inversion/in-place-rotation point in \p path without modifying it (see \ref removePosesAfterFirstConstraint).
+    /// \return Index of the constraint, or 0 if none exists.
     size_t findFirstPathConstraint(
     nav_msgs::msg::Path & path,
     bool enforce_path_inversion,

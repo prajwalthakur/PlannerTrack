@@ -16,6 +16,14 @@
 
 #include "project_utils/planning_utils.hpp"
 #include "regulated_pure_pursuit/optimizer.hpp"
+
+/** \file
+ * \brief \ref regulatedpp_controller::optimizer::Optimizer "Optimizer"
+ * implementation: per-cycle trajectory resampling, the pure-pursuit
+ * lookahead-target search, and the curvature/lateral-error-regulated
+ * speed command.
+ */
+
 namespace regulatedpp_controller::optimizer
 {
 

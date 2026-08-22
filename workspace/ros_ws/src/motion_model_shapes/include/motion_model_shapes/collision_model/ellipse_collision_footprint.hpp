@@ -8,28 +8,32 @@
 
 #include <utility>
 
+/**
+ * \brief \ref CollisionFootPrint plugin representing an agent's
+ * safety-margin footprint as an ellipse (major/minor axis lengths).
+ */
 class EllipseCollisionFootPrint : public CollisionFootPrint
 {
   public:
-	// Default constructor (required so pluginlib can instantiate this plugin)
+	/// \brief Default constructor, required so pluginlib can instantiate this plugin.
 	EllipseCollisionFootPrint() = default;
-	// Constructor
 	EllipseCollisionFootPrint(const double majorAxisLength, const double minorAxisLength);
-	// Destructor
 	~EllipseCollisionFootPrint() = default;
-	// Configure a default-constructed (pluginlib-created) instance from YAML params.
-	// Expects params["major_axis_length"] and params["minor_axis_length"].
+	/**
+	 * \brief Configure a default-constructed (pluginlib-created) instance from YAML params.
+	 * \param params Expects `params["major_axis_length"]` and `params["minor_axis_length"]`.
+	 */
 	void initialize(const YAML::Node & params) override;
-	// Get the ellipise collision foot print model.
+	/// \brief Get the 2x2 matrix form of the ellipse footprint (for quadratic-form containment/collision checks).
 	Eigen::Matrix2f getEllipseMatrix() const;
-	// Get the ceneter of the ellipse.
+	/// \brief Get the center of the ellipse.
 	Eigen::Vector2f getCenter();
-	// Detect the collision between two ellipse shaped collision foot print model.
+	/// \brief Detect collision between two ellipse-shaped collision footprints.
+	/// \return `{penetration/distance metric, colliding}`.
 	std::pair<double, bool> detectCollision(const std::shared_ptr<CollisionFootPrint> object1,
 	    const std::shared_ptr<CollisionFootPrint> object2);
-	// Check if the pose is within the ellipse.
+	/// \brief Check whether \p pose lies within the ellipse.
 	bool contains(const std::shared_ptr<stPose> & pose) const;
-	// Update collision foot print model
 	void step(const stPose & pose) override;
 	ShapeDescriptor describe() const override;
 

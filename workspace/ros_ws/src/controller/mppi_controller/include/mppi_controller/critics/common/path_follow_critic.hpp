@@ -6,10 +6,11 @@
 namespace controller::mppi_controller::critic
 {
     /**
-    * @class mppi::critics::ConstraintCritic
-    * @brief Critic objective function for following the path approximately
-    * To allow for deviation from path in case of dynamic obstacles. Path follow critic
-    * will promote the trajectories to follow short term goals 
+    * @brief Penalizes each rollout for falling short of the furthest
+    * collision-free ("valid") point reached on the local path, promoting
+    * progress toward that short-term goal rather than exact path alignment
+    * -- this is what lets rollouts deviate around dynamic obstacles while
+    * still making forward progress.
     */
     class PathFollowCritic: public CriticFunction
     {
@@ -17,11 +18,7 @@ namespace controller::mppi_controller::critic
             PathFollowCritic()=default;
             ~PathFollowCritic() override =default;
             void initialize() override;
-            /**
-            * @brief Evaluate cost related to trajectories path alignment
-            *
-            * @param costs [out] add reference cost values to this tensor
-            */
+            /// \brief Accumulate a distance-to-short-term-goal penalty into `data.costs`.
             void score(CriticData& data) override;
         protected:
             unsigned int mPower{0};

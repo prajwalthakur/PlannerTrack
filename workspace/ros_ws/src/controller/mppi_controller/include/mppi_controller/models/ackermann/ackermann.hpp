@@ -10,19 +10,30 @@ namespace controller::mppi_controller::models
     class AckermannTrajectories;
     class AckermannState;
     class AckermannNoiseGenerator;
+    /**
+     * \brief \ref Model implementation for an Ackermann-steered (bicycle)
+     * vehicle: a `{vx, wz}` control per rollout/timestep, integrated
+     * kinematically into `(x, y, yaw)` rollout trajectories.
+     *
+     * Composes the Ackermann-specific state/trajectories/path/control-
+     * sequence/constraints/noise-generator pieces (see the forward
+     * declarations above and `ackermann_include.hpp`) behind the abstract
+     * \ref Model interface, mirroring the base/plugin split of \ref
+     * plugin_architecture (this codebase's only current \ref Model, but
+     * kept behind the interface so \c Optimizer stays model-agnostic).
+     */
     class AckermannModel : public Model
     {
 
         public:
-            // Constructor 
             AckermannModel()=default;
-            // Destructor 
             ~AckermannModel() override =default;
 
             void onConfigure(std::shared_ptr<Parameters> parameters, std::shared_ptr<OptimizerSettings> settings, const std::string& name, Logger logger) final;
-            
+
             void integrateStateVelocities() final;
-            
+
+            /// \brief Integrate one rollout's `{vx, wz}` \p sequence into an `(x, y, yaw)` \p trajectory via the bicycle kinematics.
             void integrateStateVelocities(mppi_mt::ArrayX3& trajectory, const mppi_mt::ArrayX2& sequence) const;
 
             void setParameters(Parameters& parameters) final;
@@ -58,14 +69,19 @@ namespace controller::mppi_controller::models
 
             void shiftControlSequence() final;
 
+            /// \brief This vehicle's minimum turning radius (see \ref AckermannControlConstraints).
             float getMinTurningRadius();
-            
+
+            /// \brief Clamp the noised control sequence to \ref AckermannControlConstraints bounds.
             void applyConstraints();
 
 
         private:
+            /// \brief Construct \ref mControlConstraints / \ref mSamplingStdPtr / \ref mPath / \ref mTrajectories / \ref mState / \ref mNoiseGenerator / \ref mControlSequence from settings.
             void configure(std::shared_ptr<Parameters> parameters, std::shared_ptr<OptimizerSettings> settings);
+            /// \brief Convert a \c nav_msgs::msg::Path into \ref mPath's tensor form.
             void toTensor(const nav_msgs::msg::Path& path);
+            /// \brief Apply \ref applyConstraints to the current control sequence.
             void applyControlSequenceConstraints();
 
             /**

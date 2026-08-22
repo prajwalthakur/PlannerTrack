@@ -1,6 +1,14 @@
 #include "mppi_controller/critics/common/path_align_critic.hpp"
 #include "mppi_controller/utils/utils.hpp"
 
+/** \file
+ * \brief \c mppi_critic::ObstacleCritic "ObstacleCritic" implementation.
+ * \warning Not part of the build (see the class doc comment) -- and even
+ * includes the wrong header (`path_align_critic.hpp`, which does not
+ * declare `ObstacleCritic`), so this file would not compile as-is if added
+ * to `CMakeLists.txt`.
+ */
+
 void mppi_critic::ObstacleCritic::initialize()
 {
     auto getParam = mParameter->getParamGetter(mName);

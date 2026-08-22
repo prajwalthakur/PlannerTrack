@@ -27,16 +27,8 @@ target_include_directories(pid_controller_lib PUBLIC
 )
 
 # Deliberately does NOT depend on motion_model_ground_vehicles (or any other
-# concrete plugin package): this node only ever talks to DynamicModel's base
-# interface (AgentModel::dynamicModel().packAccelSteerRate()), same as
-# VehicleModelFactory itself, so pluginlib remains the only thing that
-# actually loads whichever concrete .so a given agent's YAML names. Directly
-# linking a concrete plugin package here would break pluginlib's own runtime
-# loading of it (see git history/PR discussion if this changes again: the OS
-# loader would map the plugin .so eagerly at process startup, before
-# pluginlib::ClassLoader::loadLibrary() runs, so its later dlopen() becomes a
-# no-op refcount bump and the plugin's factory never gets associated with
-# that ClassLoader instance).
+# concrete plugin package) -- see docs/pages/plugin_architecture.md (\ref
+# plugin_architecture, section 4) for why.
 ament_target_dependencies(pid_controller_lib
   rclcpp
   rclcpp_components

@@ -48,6 +48,16 @@ namespace regulatedpp_controller
 // {
 // };
 
+/**
+ * \brief \c HybridControllerBase regulated-pure-pursuit controller: a
+ * geometric pure-pursuit lateral tracker (\ref
+ * regulatedpp_controller::optimizer::Optimizer "optimizer::Optimizer")
+ * whose lookahead distance and target speed are "regulated" down for high
+ * curvature/lateral error.
+ *
+ * Registered via `rclcpp_components_register_node` as
+ * `regulatedpp_controller_exe` -- see \ref plugin_architecture (section 3).
+ */
 class RegulatedPP : public HybridControllerBase
 {
   public:
@@ -56,11 +66,10 @@ class RegulatedPP : public HybridControllerBase
 	~RegulatedPP() = default;
 
   private:
-	/**
-	 * @brief compute control command for path follow with a constant control period
-	 */
+	/// \brief Always ready -- this controller has no warm-up/data dependency.
 	bool isReady([[maybe_unused]] const InputData & input_data) override;
 
+	/// \brief Compute this cycle's combined steering + speed command via \ref mOptimizer.
 	HybridOutput run(const InputData & input_data) override;
 
   private:

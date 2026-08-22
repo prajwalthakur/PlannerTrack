@@ -28,14 +28,19 @@
 namespace controller::mppi_controller::utils
 {
 
+    /// \brief Check that \p msg contains no NaN/Inf components.
     bool validateTwist(const geometry_msgs::msg::Twist & msg);
 
+    /// \brief Look up the robot's current pose (\p robot_frame -> \p global_frame) via TF, at \p stamp.
+    /// \return Whether the lookup succeeded within \p transform_timeout.
     bool getCurrentPose(
     geometry_msgs::msg::PoseStamped & global_pose,
     tf2_ros::Buffer & tf_buffer, const std::string global_frame,
     const std::string robot_frame, const double transform_timeout,
     const rclcpp::Time stamp, Logger& logger);
-        
+
+    /// \brief Transform \p input_pose into \p target_frame via TF.
+    /// \return Whether the transform succeeded within \p transform_timeout.
     bool transformPoseInTargetFrame(
     const geometry_msgs::msg::PoseStamped & input_pose,
     geometry_msgs::msg::PoseStamped & transformed_pose,

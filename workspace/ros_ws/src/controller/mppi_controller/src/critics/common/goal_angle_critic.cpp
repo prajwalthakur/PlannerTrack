@@ -1,5 +1,9 @@
 #include "mppi_controller/critics/common/goal_angle_critic.hpp"
 
+/** \file
+ * \brief \c mppi_critic::GoalAngleCritic "GoalAngleCritic" implementation.
+ */
+
 void mppi_critic::GoalAngleCritic::initialize()
 {
 

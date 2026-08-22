@@ -18,28 +18,32 @@
 
 #include <vector>
 
+/** \file
+ * \brief Multi-step-ahead control command sequences, alongside each
+ * controller's single-step output -- for consumers that want a short
+ * horizon of upcoming commands rather than just the next one.
+ */
 namespace mpl::control::trajectory_follower
 {
 using project_utils_msgs::msg::Float64Stamped;
 using project_utils_msgs::msg::Lateral;
 using project_utils_msgs::msg::Longitudinal;
 
+/// \brief A sequence of upcoming lateral control commands, spaced \ref mTimeStepMs apart.
 struct LateralHorizon
 {
-	// time step to send control commands.
 	double mTimeStepMs;
-	// Lateral Control commands.
 	std::vector<Lateral> mControls;
 };
 
+/// \brief A sequence of upcoming longitudinal control commands, spaced \ref mTimeStepMs apart.
 struct LongitudinalHorizon
 {
-	// time step to send control commands.
 	double mTimeStepMs;
-	// Longitudinal Control commands.
 	std::vector<Longitudinal> mControls;
 };
 
+/// \brief Combined lateral + longitudinal command horizon.
 struct ControlHorizon
 {
 	LateralHorizon mLateralHorizon;

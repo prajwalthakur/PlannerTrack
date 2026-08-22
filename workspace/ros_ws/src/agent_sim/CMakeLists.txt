@@ -13,6 +13,7 @@ set(THIS_PACKAGE_INCLUDE_DEPENDS
     nav_msgs
     sensor_msgs
     geometry_msgs
+    std_msgs
     tf2
     tf2_ros
     tf2_geometry_msgs

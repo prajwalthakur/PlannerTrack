@@ -3,11 +3,14 @@
 #include <tf2_ros/transform_listener.h>
 #include <tf2_ros/buffer.h>
 
-#include <rclcpp/rclcpp.hpp>
-#include <nav2_costmap_2d/costmap_2d_ros.hpp>
-#include <tf2_ros/transform_listener.h>
-#include <tf2_ros/buffer.h>
-
+/**
+ * \file
+ * \brief Standalone scratch node for exercising a bare
+ * `nav2_costmap_2d::Costmap2DROS` in isolation (manually driving its
+ * lifecycle transitions, without a lifecycle manager). Not listed in
+ * `CMakeLists.txt`'s `LIB_SOURCES` -- not part of the build; `mppi_controller`
+ * gets its own `Costmap2DROS` from \c MPPIController instead.
+ */
 class CostmapNode : public rclcpp::Node
 {
 public:

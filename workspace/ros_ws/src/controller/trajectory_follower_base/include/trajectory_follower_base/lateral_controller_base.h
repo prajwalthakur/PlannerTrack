@@ -17,6 +17,7 @@
 namespace mpl::control::trajectory_follower
 {
 using project_utils_msgs::msg::Lateral;
+/// \brief One lateral controller cycle's output: the command itself, its horizon, and sync data for the longitudinal side.
 struct LateralOutput
 {
 	Lateral mControlCmd;
@@ -24,6 +25,10 @@ struct LateralOutput
 	LateralSyncData mSyncData;
 };
 
+/**
+ * \brief Base for controllers that compute steering commands from an
+ * \ref InputData snapshot (e.g. \c DummyLateralController, \c lqr_controller).
+ */
 class LateralControllerBase : public ControllerBase
 {
   public:
@@ -31,7 +36,9 @@ class LateralControllerBase : public ControllerBase
 	~LateralControllerBase() override = default;
 
 	virtual bool isReady(const InputData & inputData) = 0;
+	/// \brief Compute this cycle's steering command from \p inputData.
 	virtual LateralOutput run(InputData const & inputData) = 0;
+	/// \brief Receive the longitudinal controller's sync data (e.g. convergence state) for this cycle.
 	void sync(LongitudinalSyncData const & longitudinalSyncData);
 
   protected:

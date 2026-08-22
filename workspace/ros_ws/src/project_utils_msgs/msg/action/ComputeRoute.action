@@ -1,0 +1,23 @@
+# Route between two graph nodes, specified by their route-graph file ids
+# (see mpl_route_planner's GraphToIDMap). Pose-based start/goal (snapping an
+# arbitrary pose to the nearest graph node) isn't implemented yet -- only
+# explicit node ids -- so unlike nav2_route's ComputeRoute, there is no
+# start/goal Pose or use_poses/use_start field here.
+uint16 start_id
+uint16 goal_id
+---
+#result definition
+
+# Error codes
+uint16 NONE=0
+uint16 UNKNOWN=400
+uint16 NO_VALID_GRAPH=402
+uint16 INDETERMINANT_NODES_ON_GRAPH=403
+uint16 NO_VALID_ROUTE=405
+
+builtin_interfaces/Duration planning_time
+nav_msgs/Path path
+uint16 error_code 0
+string error_msg
+---
+#feedback definition

@@ -4,6 +4,7 @@
 namespace controller::mppi_controller::models
 {
 
+    /// \brief \ref Path for \ref AckermannModel (no additional fields beyond the base).
     struct AckermannPath: public Path
     {
 

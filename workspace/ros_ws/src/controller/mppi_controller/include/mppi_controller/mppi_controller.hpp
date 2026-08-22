@@ -54,6 +54,18 @@ using HybridInputData = mpl::control::trajectory_follower::InputData;
 namespace controller::mppi_controller
 {
 
+/**
+ * \brief \c HybridControllerBase adapter around the MPPI \c Optimizer
+ * (adapted from nav2's `mppi_controller`).
+ *
+ * Bridges this codebase's shared trajectory-follower \c InputData/
+ * \c HybridOutput types and the MPPI-internal \ref
+ * controller::mppi_controller::InputData "InputData"/\ref
+ * controller::mppi_controller::OutputData "OutputData" types (see
+ * \ref toMppiInputData, \ref toHybridOutput), and owns the
+ * `nav2_costmap_2d::Costmap2DROS` + path handler the optimizer's obstacle
+ * critics need.
+ */
 class MPPIController : public HybridControllerBase
 {
   public:
@@ -62,20 +74,31 @@ class MPPIController : public HybridControllerBase
 	~MPPIController() override = default;
 
   private:
+	/// \brief Always ready -- this controller has no warm-up/data dependency.
 	bool isReady([[maybe_unused]] const HybridInputData & input_data) override;
 
+	/// \brief Compute this cycle's combined steering + speed command by running \ref mOptimizer.
 	HybridOutput run(const HybridInputData & input_data) override;
 
-	// Converts the shared trajectory-follower InputData into the MPPI optimizer's own
-	// InputData: robot pose/speed come from odometry, and the path-to-follow is
-	// rebuilt from the reference trajectory and pushed into the path handler only
-	// when its timestamp changes (see mLastPathTimestamp) -- not on every cycle.
+	/**
+	 * \brief Convert the shared trajectory-follower \c InputData into the
+	 * MPPI optimizer's own \ref controller::mppi_controller::InputData "InputData".
+	 *
+	 * Robot pose/speed come from odometry; the path-to-follow is rebuilt
+	 * from the reference trajectory and pushed into the path handler only
+	 * when its timestamp changes (see \ref mLastPathTimestamp) -- not on
+	 * every cycle.
+	 */
 	controller::mppi_controller::InputData toMppiInputData(const HybridInputData & input_data);
 
-	// Converts the optimizer's OutputData back into the shared HybridOutput.
-	// The model still only produces a diff-drive (vx, wz) command, so wz is converted
-	// into an equivalent bicycle-model steering angle via steering = atan(L * wz / vx),
-	// using mWheelBase as L.
+	/**
+	 * \brief Convert the optimizer's \ref controller::mppi_controller::OutputData
+	 * "OutputData" back into the shared \c HybridOutput.
+	 *
+	 * The model still only produces a diff-drive `(vx, wz)` command, so
+	 * `wz` is converted into an equivalent bicycle-model steering angle via
+	 * `steering = atan(L * wz / vx)`, using \ref mWheelBase as `L`.
+	 */
 	HybridOutput toHybridOutput(const controller::mppi_controller::OutputData & output_data) const;
 
   private:

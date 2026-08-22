@@ -1,5 +1,9 @@
 #include "mppi_controller/critics/common/goal_critic.hpp"
 
+/** \file
+ * \brief \c mppi_critic::GoalCritic "GoalCritic" implementation.
+ */
+
 void mppi_critic::GoalCritic::initialize()
 {
 

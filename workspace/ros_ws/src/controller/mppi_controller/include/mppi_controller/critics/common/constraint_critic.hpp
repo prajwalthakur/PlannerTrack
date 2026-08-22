@@ -8,22 +8,23 @@
 namespace controller::mppi_controller::critic
 {
     /**
-    * @class mppi::critics::ConstraintCritic
-    * @brief Critic objective function for following the path approximately
-    * To allow for deviation from path in case of dynamic obstacles. Path follow critic
-    * will promote the trajectories to follow short term goals 
+    * @brief Penalizes rollouts that violate this vehicle's kinodynamic
+    * constraints: longitudinal velocity outside `[mMinVelX, mMaxVelX]`, and
+    * a turning radius (`|vx|/|wz|`) tighter than the model's minimum
+    * turning radius.
     */
     class ConstraintCritic: public CriticFunction
     {
         public:
             ConstraintCritic()=default;
             ~ConstraintCritic() override =default;
-            
+
             void initialize() override;
             /**
-            * @brief Evaluate cost related to trajectories path alignment
+            * @brief Accumulate a time-integrated penalty for velocity-bound
+            * and minimum-turning-radius violations over each rollout.
             *
-            * @param costs [out] add reference cost values to this tensor
+            * @param data [in,out] critic data; violation cost is added to `data.costs`
             */
             void score(CriticData& data) override;
 

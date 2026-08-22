@@ -5,6 +5,7 @@
 namespace controller::mppi_controller::models
 {
     class State;
+    /// \brief \ref State for \ref AckermannModel (no additional fields beyond the base -- Ackermann is fully described by `{vx, wz}`).
     struct AckermannState : public State
     {
         ~AckermannState() override=default;

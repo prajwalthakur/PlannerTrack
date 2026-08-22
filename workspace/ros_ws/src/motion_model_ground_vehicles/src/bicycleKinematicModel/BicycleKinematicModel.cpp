@@ -7,6 +7,12 @@
 
 #include <pluginlib/class_list_macros.hpp>
 
+/** \file
+ * \brief \ref BicycleKinematicModel implementation. `PLUGINLIB_EXPORT_CLASS`
+ * at the bottom of this file is what actually registers the class with
+ * pluginlib at runtime -- see \ref plugin_architecture.
+ */
+
 //////////////////////////////////////////////////////////////////////////
 
 void BicycleKinematicModel::initialze(

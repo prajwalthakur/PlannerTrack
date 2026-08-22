@@ -1,6 +1,10 @@
 #include "mppi_controller/critics/common/path_align_critic.hpp"
 #include "mppi_controller/utils/utils.hpp"
 
+/** \file
+ * \brief \c mppi_critic::PathAlignCritic "PathAlignCritic" implementation.
+ */
+
 void mppi_critic::PathAlignCritic::initialize()
 {
     auto getParam = mParameter->getParamGetter(mName);

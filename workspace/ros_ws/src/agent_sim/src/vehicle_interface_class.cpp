@@ -16,6 +16,12 @@
 
 #include "project_utils/geometry_utils.hpp"
 
+/** \file
+ * \brief \ref AgentInterface implementation: agent construction, the
+ * fixed-rate simulation/publish/lidar timers, and TF/marker/scan
+ * publishing.
+ */
+
 //////////////////////////////////////////////////////////////////////////
 
 AgentInterface::AgentInterface() : rclcpp::Node("vehicle_interface_node")
@@ -127,11 +133,24 @@ void AgentInterface::addAgents()
 		agent.scanPub = create_publisher<sensor_msgs::msg::LaserScan>(
 		    "/agent_" + std::to_string(i) + "/scan", 10);
 
+		agent.resetSub = create_subscription<std_msgs::msg::Empty>(
+		    "/agent_" + std::to_string(i) + "/reset", 1,
+		    [this, idx = i](std_msgs::msg::Empty::SharedPtr) {
+			    mAgents[idx].model->resetToInitialState();
+		    });
+
 		const YAML::Node sensorParams = agentNode["sensor_params"];
 		if (sensorParams["angle_min"]) agent.lidarAngleMin = sensorParams["angle_min"].as<float>();
 		if (sensorParams["angle_max"]) agent.lidarAngleMax = sensorParams["angle_max"].as<float>();
 		if (sensorParams["range_min"]) agent.lidarRangeMin = sensorParams["range_min"].as<float>();
 		if (sensorParams["range_max"]) agent.lidarRangeMax = sensorParams["range_max"].as<float>();
+
+		if (agentNode["color"]) {
+			const auto rgba = agentNode["color"].as<std::vector<float>>();
+			for (size_t c = 0; c < agent.color.size() && c < rgba.size(); ++c) {
+				agent.color[c] = rgba[c];
+			}
+		}
 
 		i++;
 	}
@@ -257,10 +276,10 @@ void AgentInterface::statePubTimerCallback()
 			marker.scale.x = desc.rect.length;
 			marker.scale.y = desc.rect.width;
 			marker.scale.z = 0.2;
-			marker.color.r = 0.1f;
-			marker.color.g = 0.6f;
-			marker.color.b = 1.0f;
-			marker.color.a = 0.8f;
+			marker.color.r = ag.color[0];
+			marker.color.g = ag.color[1];
+			marker.color.b = ag.color[2];
+			marker.color.a = ag.color[3];
 			markers.markers.push_back(marker);
 		}
 
