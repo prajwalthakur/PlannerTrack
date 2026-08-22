@@ -120,8 +120,8 @@ visualization_msgs::msg::MarkerArray buildCorridorMarkersCartesian(
 	outlineMarker.pose.orientation.w = 1.0;
 	outlineMarker.scale.x = 0.01;
 	outlineMarker.color.r = 1.0f;
-	outlineMarker.color.g = 1.0f;
-	outlineMarker.color.b = 1.0f;
+	outlineMarker.color.g = 0.0f;
+	outlineMarker.color.b = 0.0f;
 	outlineMarker.color.a = 0.6f;
 
 	// SSC cubes deliberately overlap heavily in s (generous overlap keeps

@@ -16,6 +16,26 @@ plugin architecture designed to support multiple vehicle types (ground
 vehicles, aerial vehicles planned) without hardcoding vehicle-specific
 simulation code.
 
+## Updates — 2026-08-22
+
+![PlannerTrack intersection](images/plannertrack_intersection.gif)
+
+*4 agents crossing a simulated unprotected left-turn intersection.*
+
+- **Route generation via a nav2-based route planner** — a lifecycle-managed
+  `route_server` (+ `map_server`) computes each agent's route through the
+  intersection's road-graph from a start/goal node pair, publishing it as a
+  reference path/trajectory that downstream planning consumes.
+
+## Ongoing — Spatio-Temporal Semantic Corridors
+
+![Safe corridor](images/safe_corridor.png)
+
+Reproducing the SSC (Spatio-Temporal Semantic Corridor) planner:
+**detect other agents' behavior → inflate a safe spatio-temporal corridor**
+around the ego route (`(s, d, t)` cubes, pictured) **→ fit a safe Bezier
+trajectory** inside that corridor (in progress).
+
 ## Updates — 2026-08-03
 
 - **Dynamic (nonlinear) single-track bicycle model** added to the vehicle
