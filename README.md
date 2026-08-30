@@ -35,7 +35,7 @@ Reproducing the SSC (Spatio-Temporal Semantic Corridor) planner:
 **detect other agents' behavior → inflate a safe spatio-temporal corridor**
 around the ego route (`(s, d, t)` cubes, pictured) **→ fit a safe Bezier
 trajectory** inside that corridor. See
-[planning/ssc_planner/readme.md](planning/ssc_planner/readme.md) for a pass/fail
+[planning/ssc_planner/readme.md](workspace/ros_ws/src/planning/ssc_planner/readme.md) for a pass/fail
 comparison and why the failure case is an architectural limitation (missing
 multi-policy decision layer).
 

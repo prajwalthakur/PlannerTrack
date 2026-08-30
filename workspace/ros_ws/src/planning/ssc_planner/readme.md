@@ -2,14 +2,14 @@
 
 ## Pass case
 
-![Safe corridor](../../images/ssc_pass.gif)
+![Safe corridor](../../../../../images/ssc_pass.gif)
 
 
 Four Agents, other three agents are in rest condition. Ego agent is able to create a safe cooridor and trajectory through qp optimization. 
 
 ## Failure case
 
-![Safe corridor](../../images/ssc_failure.png)
+![Safe corridor](../../../../../images/ssc_failure.png)
 
 ### Why it fails
 
