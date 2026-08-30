@@ -1,27 +1,22 @@
 # Author Prajwal Thakur
 #
-# Standalone debug/demo launch for the SSC corridor pipeline -- deliberately
-# separate from intersection.launch.py (computeBezierTrajectory() is still a
-# stub, so this planner isn't production-ready yet). Ego (agent_1) stays
-# static: no controller nodes are launched for any agent, since
-# SscPlanner::projectAgentsToFrenet() reads only published reference
-# trajectories, never live odom-stepped poses (see ssc_planner.cpp -- the
-# geomModel->step(...) calls in both the ego and other-agent odom callbacks
-# are commented out). That makes this the minimal real exercise of the
-# corridor code path.
-#
-# Also brings up the same visual-context nodes intersection.launch.py uses
-# (lane markers, route graph markers, map<->odom static transform) so the
-# corridor (published on both an abstract debug frame and, via
-# buildCorridorMarkersCartesian, overlaid in "map") can be seen alongside
-# the real scene -- not just verified in isolation.
 import os
+import sys
+
+import yaml
 
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument
 from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node
 from ament_index_python.packages import get_package_share_directory
+
+sys.path.append(os.path.join(os.path.dirname(__file__)))
+from controllers.pure_pursuit import build_nodes as build_pure_pursuit_nodes
+from controllers.mppi import build_nodes as build_mppi_nodes
+
+EGO_AGENT_NUMBER = 1
+EGO_TRAJECTORY_TOPIC = f'/agent_{EGO_AGENT_NUMBER}/planner/ssc/bezier_trajectory'
 
 
 def generate_launch_description():
@@ -46,10 +41,36 @@ def generate_launch_description():
         description='Full path to the map yaml file to load with map_server'
     )
 
+    with open(agents_config) as f:
+        agents_yaml = yaml.safe_load(f)['agents']
+    agent_names = list(agents_yaml.keys())
+
+    CONTROLLER_BUILDERS = {
+        'pure_pursuit': build_pure_pursuit_nodes,
+        'mppi_controller': build_mppi_nodes,
+    }
+
+    controller_nodes = []
+    for i, agent_name in enumerate(agent_names, start=1):
+        controller_type = agents_yaml[agent_name].get('controller', 'pure_pursuit')
+        builder = CONTROLLER_BUILDERS.get(controller_type)
+        if builder is None:
+            raise ValueError(
+                f"{agent_name}: unknown controller '{controller_type}', "
+                f"expected one of {list(CONTROLLER_BUILDERS)}"
+            )
+        if i == EGO_AGENT_NUMBER:
+            controller_nodes.extend(
+                builder(i, sim_config, agents_config,
+                        reference_trajectory_topic=EGO_TRAJECTORY_TOPIC,
+                        controller_param_overrides={
+                            'regulated_pp.optimizer.set_external_target_speed': False,
+                        }))
+        else:
+            controller_nodes.extend(builder(i, sim_config, agents_config))
+
     return LaunchDescription([
         map_arg,
-        # Spawns odom/TF for every agent in agents.yaml unconditionally --
-        # needed here only for agent_1's own odom (InputData::mEgoPose).
         Node(
             package='agent_sim',
             executable='vehicle_interface_node',
@@ -63,9 +84,6 @@ def generate_launch_description():
                 },
             ]
         ),
-        # map_server/route_server are lifecycle nodes; route_server is a
-        # hard dependency of global_waypoints_publisher's ComputeRoute
-        # action call below.
         Node(
             package='nav2_map_server',
             executable='map_server',
@@ -95,16 +113,9 @@ def generate_launch_description():
             parameters=[{
                 'autostart': True,
                 'node_names': ['map_server', 'route_server'],
-                # See intersection.launch.py's own comment on this same
-                # param -- route_server never creates a bond heartbeat, so
-                # bond monitoring must be disabled or bringup times out.
                 'bond_timeout': 0.0,
             }]
         ),
-        # agent_sim publishes everything relative to "odom"; map_server
-        # publishes in "map". No localization node corrects one against the
-        # other, so bridge them as coincident frames -- needed here since
-        # the Cartesian corridor overlay is published in "map".
         Node(
             package='tf2_ros',
             executable='static_transform_publisher',
@@ -129,12 +140,17 @@ def generate_launch_description():
                 'frame_id': 'map',
             }]
         ),
-        # Calls route_server's ComputeRoute action once per agent, publishes
-        # both /agent_<i>/reference_path and /agent_<i>/reference_trajectory,
-        # latched, for every agent -- including agent_1/ego, which feeds
-        # PlannerNode's InputData::mEgoPath/mEgoInitTraj below, and every
-        # other agent, which feeds SscPlanner's own internal occupancy
-        # subscriptions (receivePredictedTrajectoryStatic()).
+        # Every agent's reference_trajectory publishes immediately, ego
+        # included. SscPlanner subscribes to every OTHER agent's
+        # reference_trajectory as its own occupancy/corridor-construction
+        # input, not just as something a controller tracks -- an earlier
+        # version of this launch gated non-ego agents' publish behind ego's
+        # own SSC output (to keep other agents' scripted routes from
+        # finishing before ego's ~15s-to-solve trajectory was even ready),
+        # but that starved SSC of other agents' data at the exact moment it
+        # needed it ("[SscMap]: Trajectory is empty", "wrong status for
+        # vehicle id N") -- confirmed live, a "solved" Bezier trajectory
+        # drove straight through another agent it never saw. Removed.
         Node(
             package='scenarios',
             executable='intersection_global_waypoints_publisher.py',
@@ -144,13 +160,9 @@ def generate_launch_description():
                 'agents_config_file': agents_config,
                 'frame_id': 'map',
                 'cruise_speed_mps': 0.4,
-                'decel_distance_m': 0.5,
+                'decel_distance_m': 0.6,
             }]
         ),
-        # The SSC corridor generator itself, ego (agent_1) only -- SscMap's
-        # corridor is a single-vehicle, single-route structure (one seed
-        # trajectory -> one corridor, no per-behavior loop), so no other
-        # agent needs its own planner instance.
         Node(
             package='planner_base',
             executable='planner_node_exe',
@@ -178,4 +190,5 @@ def generate_launch_description():
             arguments=['-d', rviz_config],
             output='screen'
         ),
+        *controller_nodes,
     ])

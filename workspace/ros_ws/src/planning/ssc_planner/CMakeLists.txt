@@ -21,6 +21,8 @@ find_package(motion_model_base REQUIRED)
 find_package(yaml-cpp REQUIRED)
 find_package(OpenCV REQUIRED)
 find_package(visualization_msgs REQUIRED)
+find_package(mpl_qp_interface REQUIRED)
+find_package(eigen-quadprog REQUIRED)
 
 add_library(ssc_planner SHARED
   src/ssc_planner.cpp
@@ -29,6 +31,7 @@ add_library(ssc_planner SHARED
   src/ssc_grid.cpp
   src/ssc_map.cpp
   src/ssc_visualizer.cpp
+  src/bezier_traj_gen/bezier_curve.cpp
 )
 add_library(ssc_planner::ssc_planner ALIAS ssc_planner)
 target_compile_features(ssc_planner PUBLIC c_std_99 cxx_std_17)  # Require C99 and C++17
@@ -49,8 +52,9 @@ ament_target_dependencies(
   "interpolation_utils"
   "motion_model_base"
   "visualization_msgs"
+  "mpl_qp_interface"
 )
-target_link_libraries(ssc_planner yaml-cpp::yaml-cpp ${OpenCV_LIBS})
+target_link_libraries(ssc_planner yaml-cpp::yaml-cpp ${OpenCV_LIBS} eigen-quadprog::eigen-quadprog)
 
 pluginlib_export_plugin_description_file(planner_base plugins.xml)
 

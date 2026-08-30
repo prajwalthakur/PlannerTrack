@@ -12,9 +12,17 @@ from nav2_common.launch import RewrittenYaml
 # loop against this agent's own odom/steering_report feedback and is the one
 # that actually owns /agent_N/control (EigenVectorStamped), which is what
 # agent_sim's control subscriber expects -- same pattern as pure_pursuit.py.
-def build_nodes(i, sim_config, agents_config):
+def build_nodes(i, sim_config, agents_config, reference_trajectory_topic=None):
+    """reference_trajectory_topic overrides what this agent's controller
+    tracks -- see pure_pursuit.py's build_nodes for the same parameter."""
+    if reference_trajectory_topic is None:
+        reference_trajectory_topic = f'/agent_{i}/reference_trajectory'
+
+    # This scenario's own params dir, not ground_vehicle_racing's -- see
+    # pure_pursuit.py's build_nodes for why (same copy-paste-origin bug,
+    # fixed there first).
     params_dir = os.path.join(
-        get_package_share_directory('scenarios'), 'ground_vehicle_racing', 'params')
+        get_package_share_directory('scenarios'), 'intersection', 'params')
     mppi_config = os.path.join(params_dir, 'mppi_controller.yaml')
     pid_controller_config = os.path.join(params_dir, 'pid_controller.yaml')
 
@@ -46,7 +54,7 @@ def build_nodes(i, sim_config, agents_config):
                 },
             ],
             remappings=[
-                ('~/input/reference_trajectory', f'/agent_{i}/reference_trajectory'),
+                ('~/input/reference_trajectory', reference_trajectory_topic),
                 ('~/input/current_odometry', f'/agent_{i}/odom'),
                 ('~/input/current_steering', f'/agent_{i}/steering_report'),
                 ('~/output/control_cmd', f'/agent_{i}/amr_control'),

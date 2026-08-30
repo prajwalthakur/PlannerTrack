@@ -113,8 +113,8 @@ agents:
     controller: "pure_pursuit"
     # North-incoming outer tip -> south-outgoing outer tip: straight through.
     route:
-      start_id: 0
-      goal_id: 31
+      start_id: -100 #0
+      goal_id:  -100 #31
 
 
   agent_3:
@@ -169,8 +169,8 @@ agents:
     controller: "pure_pursuit"
     # East-incoming outer tip -> west-outgoing outer tip: straight through.
     route:
-      start_id: 36
-      goal_id: 67
+      start_id: -100 #36
+      goal_id: -100 #67
 
   agent_4:
     dynamics_plugin: SingleTrackDynStateModel
@@ -223,5 +223,5 @@ agents:
     
     controller: "pure_pursuit"    # West-incoming outer tip -> north-outgoing outer tip: left turn.
     route:
-      start_id: 54
-      goal_id: 13
+      start_id: -100 #54
+      goal_id: -100 #13

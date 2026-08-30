@@ -10,32 +10,21 @@
       # measured relative to the reference lane
       lane_width: 0.50 #should be same as defined in params.yaml
 
-      # Longitudinal span source: generously covers a full arm-to-arm
-      # crossing (mapSizeX = ceil((2*arm_length + lane_width) / map_resolution.x)).
-      arm_length: 6.0
 
-      planning_horizon: 10.0
+      arm_length: 8.0
+
+      planning_horizon: 40.0
 
       # Longitudinal back-margin: how far behind ego's current s the grid's
       # s-origin starts (gives cube inflation room to grow backward too, not
       # just forward). Mirrors EPSILON's SscMap::Config::s_back_len.
       s_back_len: 0.20
 
-      # Dynamic bounds attached to each final cube
-      # (SscMap::getFinalGlobalMetricCubesList) -- the actual velocity/accel
-      # constraints the Bezier QP's control points get bounded by. Sourced
-      # from this scenario's real vehicle limits
-      # (scenarios/intersection/params/pure_pursuit_controller.yaml's
-      # vehicle: v_max=20.0 m/s, a_max=9.51 m/s^2 -- same F1TENTH-scale
-      # platform as agents.yaml's agent_1, identical cf/cr cornering-
-      # stiffness values) -- kept as a conservative fraction of that
-      # physical ceiling, not the ceiling itself, since these are planning-
-      # comfort bounds, not traction-limit bounds.
       dynamic_bounds:
-        max_lon_vel: 2.0
+        max_lon_vel: 0.8
         min_lon_vel: 0.0
-        max_lon_acc: 2.0
-        max_lon_dec: -3.0
+        max_lon_acc: 0.5
+        max_lon_dec: -1.0
         max_lat_vel: 1.0
         max_lat_acc: 1.0
 
@@ -43,7 +32,13 @@
       # many grid cells (of map_resolution.z each) one cube's time-extent may
       # grow to before the chain must start a new cube. Mirrors EPSILON's
       # kMaxNumOfGridAlongTime.
-      max_grids_along_time: 2
+      # 2 (-> 0.2s cubes) badly conditions the Bezier QP's jerk-cost
+      # Hessian (scales as duration^-3) -- confirmed live via OSQP's own
+      # verbose output ("solved inaccurate", oscillating residuals, hit
+      # max_iter without converging), the same root cause diagnosed earlier
+      # (see project_docs/ssc_planner_status.md). 5 (-> 0.5s cubes) cuts
+      # that scaling by (0.5/0.2)^3 ~ 15.6x.
+      max_grids_along_time: 5
 
       # Per-axis inflation step size (grid cells per inflateCubeIn3dGrid
       # iteration). Mirrors EPSILON's Config::inflate_steps.

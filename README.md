@@ -27,14 +27,17 @@ simulation code.
   intersection's road-graph from a start/goal node pair, publishing it as a
   reference path/trajectory that downstream planning consumes.
 
-## Ongoing — Spatio-Temporal Semantic Corridors
+## Spatio-Temporal Semantic Corridors
 
-![Safe corridor](images/safe_corridor.png)
+![Safe corridor](images/ssc_pass.gif)
 
 Reproducing the SSC (Spatio-Temporal Semantic Corridor) planner:
 **detect other agents' behavior → inflate a safe spatio-temporal corridor**
 around the ego route (`(s, d, t)` cubes, pictured) **→ fit a safe Bezier
-trajectory** inside that corridor (in progress).
+trajectory** inside that corridor. See
+[planning/ssc_planner/readme.md](planning/ssc_planner/readme.md) for a pass/fail
+comparison and why the failure case is an architectural limitation (missing
+multi-policy decision layer).
 
 ## Updates — 2026-08-03
 

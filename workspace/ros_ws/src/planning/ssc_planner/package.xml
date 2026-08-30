@@ -22,6 +22,8 @@
   <depend>yaml-cpp</depend>
   <depend>libopencv-dev</depend>
   <depend>visualization_msgs</depend>
+  <depend>mpl_qp_interface</depend>
+  <depend>libeigen-quadprog-dev</depend>
 
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>

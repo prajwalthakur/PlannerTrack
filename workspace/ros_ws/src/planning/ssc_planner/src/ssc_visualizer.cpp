@@ -63,8 +63,6 @@ visualization_msgs::msg::MarkerArray buildCorridorMarkers(
 	return markerArray;
 }
 
-namespace
-{
 geometry_msgs::msg::Point toCartesian(
     const mpl::interpolation::SplineInterpolationPoints2d & refLane, double s, double d,
     double z)
@@ -88,7 +86,6 @@ geometry_msgs::msg::Point toCartesian(
 	out.z = z;
 	return out;
 }
-}  // namespace
 
 visualization_msgs::msg::MarkerArray buildCorridorMarkersCartesian(
     const mt::vec_E<mt::vec_E<SpatioTemporalSemanticCubeNd<2>>> & finalCorridor,
@@ -208,6 +205,47 @@ visualization_msgs::msg::MarkerArray buildCorridorMarkersCartesian(
 	visualization_msgs::msg::MarkerArray markerArray;
 	markerArray.markers.push_back(fillMarker);
 	markerArray.markers.push_back(outlineMarker);
+	return markerArray;
+}
+
+visualization_msgs::msg::MarkerArray buildBezierTrajectoryMarker(
+    const project_utils_msgs::msg::Trajectory & trajectory, const std::string & frameId,
+    const rclcpp::Time & stamp)
+{
+	// Above the corridor ribbon's own kZOffset (buildCorridorMarkersCartesian,
+	// 0.05) so this doesn't z-fight with it -- this line is the actual
+	// deliverable of the Bezier stage, meant to read as the most prominent
+	// thing on screen.
+	constexpr double kZOffset = 0.10;
+
+	visualization_msgs::msg::Marker marker;
+	marker.header.frame_id = frameId;
+	marker.header.stamp = stamp;
+	marker.ns = "ssc_bezier_trajectory";
+	marker.id = 0;
+	marker.type = visualization_msgs::msg::Marker::LINE_STRIP;
+	marker.action = visualization_msgs::msg::Marker::ADD;
+	marker.pose.orientation.w = 1.0;
+	// Thicker than the corridor outline (0.01) -- this should read as the
+	// primary line, not a thin overlay.
+	marker.scale.x = 0.03;
+	// Yellow -- distinct from the corridor's blue fill / red outline.
+	marker.color.r = 1.0f;
+	marker.color.g = 1.0f;
+	marker.color.b = 0.0f;
+	marker.color.a = 0.9f;
+
+	marker.points.reserve(trajectory.points.size());
+	for (const auto & pt : trajectory.points) {
+		geometry_msgs::msg::Point p;
+		p.x = pt.pose.position.x;
+		p.y = pt.pose.position.y;
+		p.z = kZOffset;
+		marker.points.push_back(p);
+	}
+
+	visualization_msgs::msg::MarkerArray markerArray;
+	markerArray.markers.push_back(marker);
 	return markerArray;
 }
 

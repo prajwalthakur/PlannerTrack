@@ -7,6 +7,7 @@
 #include "motion_model_base/geometric_model/geometric_model.hpp"
 #include "planner_base/planner_base.hpp"
 #include "project_utils/types.hpp"
+#include "ssc_planner/bezier_traj_gen/bezier_curve.hpp"
 #include "ssc_planner/reference_lane_gen.hpp"
 #include "ssc_planner/ssc_map.hpp"
 #include "ssc_planner/ssc_map_config.hpp"
@@ -65,8 +66,11 @@ class SscPlanner : public PlannerBase
 	// this trajectory arrives fresh via computeTrajectory()'s argument, not
 	// through a persistent subscription like the other agents'.
 	void projectEgoToFrenet(const InputData & inputData);
-	void computeSSCCorridor();
-	void computeBezierTrajectory();
+	ssc_planner::ErrorType computeSSCCorridor();
+	// corridorStatus: computeSSCCorridor()'s own result -- skips solving
+	// entirely (logs, returns) rather than handing a possibly-empty/invalid
+	// corridor to the Bezier QP.
+	void computeBezierTrajectory(ssc_planner::ErrorType corridorStatus);
 	// mStartTime is the one shared time origin every agent's trajectory gets
 	// re-based against -- set once per planning cycle (ego's own "now",
 	// e.g. mNode->now())
@@ -111,6 +115,16 @@ class SscPlanner : public PlannerBase
 	// corridor's (s,d) footprint through mRefLane, for showing alongside the
 	// real scene (map/agents/routes) instead of the abstract debug view.
 	rclcpp::Publisher<visualization_msgs::msg::MarkerArray>::SharedPtr mCorridorMarkerCartesianPub;
+	// Result of computeBezierTrajectory()'s solve -- only meaningful when
+	// mBezierSplineValid is true (SolveBezierSpline() succeeded).
+	BezierSpline<kBezierOrder, kBezierDim> mBezierSpline;
+	bool mBezierSplineValid{false};
+	// The solved spline, sampled and published as waypoints -- see
+	// computeBezierTrajectory()'s own comment for the sampling scheme.
+	rclcpp::Publisher<project_utils_msgs::msg::Trajectory>::SharedPtr mBezierTrajectoryPub;
+	// RViz LINE_STRIP of the same waypoints -- own publisher/topic so it can
+	// be toggled independently of the corridor markers.
+	rclcpp::Publisher<visualization_msgs::msg::MarkerArray>::SharedPtr mBezierTrajectoryMarkerPub;
 };
 
 //////////////////////////////////////////////////////////////////////////

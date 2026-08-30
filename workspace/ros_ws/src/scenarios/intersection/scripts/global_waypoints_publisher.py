@@ -18,9 +18,15 @@ from rclpy.node import Node
 from rclpy.qos import QoSDurabilityPolicy, QoSProfile, QoSReliabilityPolicy
 
 from builtin_interfaces.msg import Duration
+from geometry_msgs.msg import PoseStamped, Quaternion
 from nav_msgs.msg import Path
 from project_utils_msgs.action import ComputeRoute
 from project_utils_msgs.msg import Trajectory, TrajectoryPoint
+
+# Sentinel route (start_id, goal_id) meaning "stationary, don't call
+# route_server at all" -- e.g. a parked/blocking vehicle the SSC corridor
+# should route around rather than an agent with somewhere to go.
+STATIONARY_ROUTE_ID = -100
 
 
 def path_to_trajectory(path: Path, cruise_speed_mps: float, decel_distance_m: float) -> Trajectory:
@@ -66,6 +72,60 @@ def path_to_trajectory(path: Path, cruise_speed_mps: float, decel_distance_m: fl
     return traj
 
 
+def stationary_path_and_trajectory(
+        x: float, y: float, yaw: float, frame_id: str, stamp,
+        duration_s: float = 15.0, dt_s: float = 0.1) -> tuple[Path, Trajectory]:
+    """A frozen-in-place Path/Trajectory pair for a stationary agent -- the
+    same fixed pose repeated at dt_s spacing out to duration_s, instead of
+    anything computed via route_server.
+
+    This project doesn't rasterize static obstacles directly (SscMap has no
+    FillStaticPart equivalent -- see ssc_map.hpp's own header comment on
+    why); occupancy only ever comes from *published reference
+    trajectories*. A stationary agent still needs one, just synthesized
+    from its own fixed pose instead of a route.
+
+    Must be densely sampled, not just a start/end pair:
+    SscMap::fillMapWithFsVehicleTraj rasterizes one occupancy-grid
+    time-slice PER trajectory point, so a sparse trajectory would leave
+    most of the grid's time-slices with no occupancy entry at all and the
+    corridor would inflate straight through this vehicle undetected. dt_s
+    matches ssc_planner.yaml's map_resolution.z (0.10) so every time-slice
+    the grid actually has gets covered.
+    """
+    quat = Quaternion(z=math.sin(yaw / 2.0), w=math.cos(yaw / 2.0))
+    num_points = int(duration_s / dt_s) + 1
+
+    path = Path()
+    path.header.frame_id = frame_id
+    path.header.stamp = stamp
+
+    traj = Trajectory()
+    traj.header.frame_id = frame_id
+    traj.header.stamp = stamp
+
+    for i in range(num_points):
+        t = i * dt_s
+
+        pose = PoseStamped()
+        pose.header.frame_id = frame_id
+        pose.header.stamp = stamp
+        pose.pose.position.x = x
+        pose.pose.position.y = y
+        pose.pose.orientation = quat
+        path.poses.append(pose)
+
+        pt = TrajectoryPoint()
+        pt.pose.position.x = x
+        pt.pose.position.y = y
+        pt.pose.orientation = quat
+        pt.longitudinal_velocity_mps = 0.0
+        pt.time_from_start = Duration(sec=int(t), nanosec=int(round((t % 1.0) * 1e9)))
+        traj.points.append(pt)
+
+    return path, traj
+
+
 class GlobalWaypointsPublisher(Node):
     def __init__(self):
         super().__init__('global_waypoints_publisher')
@@ -86,39 +146,76 @@ class GlobalWaypointsPublisher(Node):
             agents_yaml = yaml.safe_load(f)['agents']
 
         self._routes_needed = []
+        self._stationary_agents = []
         for i, (name, agent) in enumerate(agents_yaml.items(), start=1):
             route = agent.get('route')
             if route is None:
                 self.get_logger().warn(f'{name} has no "route" field -- skipping')
                 continue
-            self._routes_needed.append((i, name, route['start_id'], route['goal_id']))
+            start_id, goal_id = route['start_id'], route['goal_id']
+            if start_id == STATIONARY_ROUTE_ID and goal_id == STATIONARY_ROUTE_ID:
+                dyn = agent.get('dynamics_params', {})
+                # float(...) explicitly -- YAML parses e.g. "-3" (no decimal
+                # point) as a Python int, and assigning an int straight into
+                # a geometry_msgs float64 field passes Python-side but
+                # aborts the whole process at publish time (C-level
+                # PyFloat_Check assertion in the rosidl-generated
+                # converter) -- crashed this entire node, not just the
+                # stationary agent, since this runs before anything else in
+                # run().
+                self._stationary_agents.append((
+                    i, name,
+                    float(dyn.get('initXPose', 0.0)), float(dyn.get('initYPose', 0.0)),
+                    float(dyn.get('initYaw', 0.0))))
+                continue
+            self._routes_needed.append((i, name, start_id, goal_id))
 
         latched_qos = QoSProfile(
             depth=1,
             durability=QoSDurabilityPolicy.TRANSIENT_LOCAL,
             reliability=QoSReliabilityPolicy.RELIABLE,
         )
+        all_agent_ids = [i for i, *_ in self._routes_needed] + [i for i, *_ in self._stationary_agents]
         self._traj_pubs = {
             i: self.create_publisher(Trajectory, f'/agent_{i}/reference_trajectory', latched_qos)
-            for i, _, _, _ in self._routes_needed
+            for i in all_agent_ids
         }
         # Same dense path route_server already computed, published as-is
         # (no trajectory/velocity fields) for a plain RViz Path display --
         # nothing downstream is meant to subscribe to this, it's viz-only.
         self._path_pubs = {
             i: self.create_publisher(Path, f'/agent_{i}/reference_path', latched_qos)
-            for i, _, _, _ in self._routes_needed
+            for i in all_agent_ids
         }
 
         self._action_client = ActionClient(self, ComputeRoute, '/compute_route')
 
     def run(self):
+        # No route_server dependency at all -- publish these first so they
+        # aren't held up by (or lost to) the wait below.
+        self._publish_stationary(self._stationary_agents)
+
+        if not self._routes_needed:
+            return
+
         self.get_logger().info('Waiting for /compute_route action server...')
         if not self._action_client.wait_for_server(timeout_sec=30.0):
             self.get_logger().error('/compute_route action server not available, giving up')
             return
+        self._publish_routed(self._routes_needed)
 
-        for i, name, start_id, goal_id in self._routes_needed:
+    def _publish_stationary(self, agents):
+        for i, name, x, y, yaw in agents:
+            path, traj = stationary_path_and_trajectory(x, y, yaw, self.frame_id, self.get_clock().now().to_msg())
+            self._path_pubs[i].publish(path)
+            self._traj_pubs[i].publish(traj)
+            self.get_logger().info(
+                f'{name}: published stationary {len(traj.points)}-point trajectory '
+                f'(x={x}, y={y}, yaw={yaw}) on /agent_{i}/reference_trajectory '
+                f'and /agent_{i}/reference_path')
+
+    def _publish_routed(self, agents):
+        for i, name, start_id, goal_id in agents:
             path = self._compute_route(name, start_id, goal_id)
             if path is None:
                 continue

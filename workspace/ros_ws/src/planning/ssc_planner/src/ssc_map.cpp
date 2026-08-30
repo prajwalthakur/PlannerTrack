@@ -9,6 +9,8 @@
  */
 #include "ssc_planner/ssc_map.hpp"
 
+#include <algorithm>
+
 #include <opencv2/core.hpp>
 #include <opencv2/imgproc.hpp>
 
@@ -151,7 +153,16 @@ ErrorType SscMap::constructCorridorUsingInitialTrajectory(const mt::vec_E<FsVehi
 			AxisAlignedCubeNd<int, 3> cube;
 			getInitialCubeUsingSeed(trajSeeds[i], trajSeeds[i + 1], &cube);
 			if (!checkIfCubeIsFree(cube)) {
-				mLogger.error("[SccMap]: Initial cube is not free, seed id: %d", i);
+				// Convert the failing seed's grid-index coords to real
+				// metric (s,d,t) so the error names WHERE this actually is,
+				// not just which index into the (already-filtered) seed list.
+				float sMetric = 0, dMetric = 0, tMetric = 0;
+				mGrid.GetGlobalMetricUsingCoordOnSingleDim(trajSeeds[i][0], 0, &sMetric);
+				mGrid.GetGlobalMetricUsingCoordOnSingleDim(trajSeeds[i][1], 1, &dMetric);
+				mGrid.GetGlobalMetricUsingCoordOnSingleDim(trajSeeds[i][2], 2, &tMetric);
+				mLogger.error(
+				    "[SccMap]: Initial cube is not free, seed id: %d, at s=%.2f d=%.2f t=%.2f", i,
+				    sMetric, dMetric, tMetric);
 				DrivingCube drivingCube;
 				drivingCube.cube = cube;
 				drivingCube.seeds.push_back(trajSeeds[i]);
@@ -183,7 +194,13 @@ ErrorType SscMap::constructCorridorUsingInitialTrajectory(const mt::vec_E<FsVehi
 				AxisAlignedCubeNd<int, 3> cube;
 				getInitialCubeUsingSeed(trajSeeds[i], trajSeeds[i + 1], &cube);
 				if (!checkIfCubeIsFree(cube)) {
-					mLogger.error("[SccMap]: Initial cube is not free, seed id: %d", i);
+					float sMetric = 0, dMetric = 0, tMetric = 0;
+					mGrid.GetGlobalMetricUsingCoordOnSingleDim(trajSeeds[i][0], 0, &sMetric);
+					mGrid.GetGlobalMetricUsingCoordOnSingleDim(trajSeeds[i][1], 1, &dMetric);
+					mGrid.GetGlobalMetricUsingCoordOnSingleDim(trajSeeds[i][2], 2, &tMetric);
+					mLogger.error(
+					    "[SccMap]: Initial cube is not free, seed id: %d, at s=%.2f d=%.2f t=%.2f", i,
+					    sMetric, dMetric, tMetric);
 					DrivingCube drivingCube;
 					drivingCube.cube = cube;
 					drivingCube.seeds.push_back(trajSeeds[i]);
@@ -237,63 +254,70 @@ ErrorType SscMap::getFinalGlobalMetricCubesList()
 	mIfCorridorValid.clear();
 	for (const auto & corridor : mDrivingCorridorVec) {
 		mt::vec_E<SpatioTemporalSemanticCubeNd<2>> cubes;
-		if (!corridor.isValid) {
-			mIfCorridorValid.push_back(0);
-		} else {
-			mIfCorridorValid.push_back(1);
-			for (int k = 0; k < static_cast<int>(corridor.cubes.size()); ++k) {
-				SpatioTemporalSemanticCubeNd<2> cube;
-				float xLb, xUb;
-				float yLb, yUb;
-				float zLb, zUb;
+		mIfCorridorValid.push_back(corridor.isValid ? 1 : 0);
+		// Convert cube bounds to metric even when the corridor is invalid --
+		// an infeasible corridor still has the ONE cube that failed
+		// checkIfCubeIsFree (constructCorridorUsingInitialTrajectory pushes
+		// it before marking isValid=false), and visualizing exactly where/
+		// how it failed is more useful than publishing nothing. Downstream,
+		// computeBezierTrajectory() already gates the actual QP solve on
+		// ifCorridorValid()[0]==0 independent of whether cubes is empty, so
+		// populating it here can't let an invalid corridor reach the solver.
+		for (int k = 0; k < static_cast<int>(corridor.cubes.size()); ++k) {
+			SpatioTemporalSemanticCubeNd<2> cube;
+			float xLb, xUb;
+			float yLb, yUb;
+			float zLb, zUb;
 
-				mGrid.GetGlobalMetricUsingCoordOnSingleDim(corridor.cubes[k].cube.lowerBound[0], 0, &xLb);
-				mGrid.GetGlobalMetricUsingCoordOnSingleDim(corridor.cubes[k].cube.upperBound[0], 0, &xUb);
-				mGrid.GetGlobalMetricUsingCoordOnSingleDim(corridor.cubes[k].cube.lowerBound[1], 1, &yLb);
-				mGrid.GetGlobalMetricUsingCoordOnSingleDim(corridor.cubes[k].cube.upperBound[1], 1, &yUb);
-				mGrid.GetGlobalMetricUsingCoordOnSingleDim(corridor.cubes[k].cube.lowerBound[2], 2, &zLb);
-				mGrid.GetGlobalMetricUsingCoordOnSingleDim(corridor.cubes[k].cube.upperBound[2], 2, &zUb);
+			mGrid.GetGlobalMetricUsingCoordOnSingleDim(corridor.cubes[k].cube.lowerBound[0], 0, &xLb);
+			mGrid.GetGlobalMetricUsingCoordOnSingleDim(corridor.cubes[k].cube.upperBound[0], 0, &xUb);
+			mGrid.GetGlobalMetricUsingCoordOnSingleDim(corridor.cubes[k].cube.lowerBound[1], 1, &yLb);
+			mGrid.GetGlobalMetricUsingCoordOnSingleDim(corridor.cubes[k].cube.upperBound[1], 1, &yUb);
+			mGrid.GetGlobalMetricUsingCoordOnSingleDim(corridor.cubes[k].cube.lowerBound[2], 2, &zLb);
+			mGrid.GetGlobalMetricUsingCoordOnSingleDim(corridor.cubes[k].cube.upperBound[2], 2, &zUb);
 
-				cube.tLb = zLb;
-				cube.tUb = zUb;
+			cube.tLb = zLb;
+			cube.tUb = zUb;
 
-				// s: min/max longitudinal vel and accel/decel are separate,
-				// independently-tuned bounds -- forward and backward motion
-				// along s aren't symmetric for a car (see the v_lb[1]
-				// discussion a few turns back).
-				cube.pLb[0] = xLb;
-				cube.pUb[0] = xUb;
-				cube.vLb[0] = static_cast<float>(mConfig.dynBounds.minLonVel);
-				cube.vUb[0] = static_cast<float>(mConfig.dynBounds.maxLonVel);
-				cube.aLb[0] = static_cast<float>(mConfig.dynBounds.maxLonDec);
-				cube.aUb[0] = static_cast<float>(mConfig.dynBounds.maxLonAcc);
+			// s: min/max longitudinal vel and accel/decel are separate,
+			// independently-tuned bounds -- forward and backward motion
+			// along s aren't symmetric for a car (see the v_lb[1]
+			// discussion a few turns back).
+			cube.pLb[0] = xLb;
+			cube.pUb[0] = xUb;
+			cube.vLb[0] = static_cast<float>(mConfig.dynBounds.minLonVel);
+			cube.vUb[0] = static_cast<float>(mConfig.dynBounds.maxLonVel);
+			cube.aLb[0] = static_cast<float>(mConfig.dynBounds.maxLonDec);
+			cube.aUb[0] = static_cast<float>(mConfig.dynBounds.maxLonAcc);
 
-				// d: lateral vel/accel are symmetric (no inherent left/right
-				// preference), so a single magnitude is negated for both signs.
-				cube.pLb[1] = yLb;
-				cube.pUb[1] = yUb;
-				cube.vLb[1] = static_cast<float>(-mConfig.dynBounds.maxLatVel);
-				cube.vUb[1] = static_cast<float>(mConfig.dynBounds.maxLatVel);
-				cube.aLb[1] = static_cast<float>(-mConfig.dynBounds.maxLatAcc);
-				cube.aUb[1] = static_cast<float>(mConfig.dynBounds.maxLatAcc);
+			// d: lateral vel/accel are symmetric (no inherent left/right
+			// preference), so a single magnitude is negated for both signs.
+			cube.pLb[1] = yLb;
+			cube.pUb[1] = yUb;
+			cube.vLb[1] = static_cast<float>(-mConfig.dynBounds.maxLatVel);
+			cube.vUb[1] = static_cast<float>(mConfig.dynBounds.maxLatVel);
+			cube.aLb[1] = static_cast<float>(-mConfig.dynBounds.maxLatAcc);
+			cube.aUb[1] = static_cast<float>(mConfig.dynBounds.maxLatAcc);
 
-				// The first cube must actually contain ego's real (un-rounded)
-				// current d -- not structurally guaranteed the way s is,
-				// since d's bounds come from occupancy-driven inflation, not
-				// directly from mInitialFs.d. Catches a discretization edge
-				// case that would otherwise silently produce an unusable
-				// corridor.
-				if (k == 0) {
-					if (yLb > mInitialFs.d || yUb < mInitialFs.d) {
-						mLogger.error(
-						    "[SccMap]: Initial state out of bound d: %.3f, lb: %.3f, ub: %.3f",
-						    mInitialFs.d, yLb, yUb);
-						return kWrongStatus;
-					}
+			// The first cube of a VALID corridor must actually contain
+			// ego's real (un-rounded) current d -- not structurally
+			// guaranteed the way s is, since d's bounds come from
+			// occupancy-driven inflation, not directly from mInitialFs.d.
+			// Catches a discretization edge case that would otherwise
+			// silently produce an unusable corridor. Only meaningful for a
+			// valid corridor -- an invalid one's only cube is the one that
+			// already failed checkIfCubeIsFree, so this invariant isn't
+			// expected to hold there and shouldn't block visualizing it.
+			if (corridor.isValid && k == 0) {
+				if (yLb > mInitialFs.d || yUb < mInitialFs.d) {
+					mLogger.error(
+					    "[SccMap]: Initial state out of bound d: %.3f, lb: %.3f, ub: %.3f",
+					    mInitialFs.d, yLb, yUb);
+					return kWrongStatus;
 				}
-
-				cubes.push_back(cube);
 			}
+
+			cubes.push_back(cube);
 		}
 		mFinalCorridorVec.push_back(cubes);
 	}
@@ -592,6 +616,7 @@ ErrorType SscMap::fillDynamicPart(
 	for (auto it = sur_vehicle_trajs_fs.begin(); it != sur_vehicle_trajs_fs.end(); ++it) {
 		auto status = fillMapWithFsVehicleTraj(it->second);
 		if (status == kWrongStatus) {
+			mLogger.error("[SscMap] wrong status for vehicle id %d",it->first.value());
 			return kWrongStatus;
 		}
 	}
@@ -610,7 +635,7 @@ ErrorType SscMap::fillMapWithFsVehicleTraj(const mt::vec_E<FsVehicle> & traj)
 		bool isValid = true;
 		// check if all the vertices are within the range of the
 		// ego-ref frenet lane
-		for (const auto v : traj[i].vertices) {
+		for (const auto& v : traj[i].vertices) {
 			if (v(0) <= 0) {
 				isValid = false;
 				break;
@@ -623,22 +648,42 @@ ErrorType SscMap::fillMapWithFsVehicleTraj(const mt::vec_E<FsVehicle> & traj)
 		int tIdx = 0;
 		std::vector<cv::Point2i> vCoordCv;
 		std::array<float, 3> pointWorld;
-		for (const auto v : traj[i].vertices) {
+		const int w = mGrid.dims_size()[0];
+		const int h = mGrid.dims_size()[1];
+		for (const auto& v : traj[i].vertices) {
 			pointWorld = {v(0), v(1), z};
 			auto coord = mGrid.GetCoordUsingGlobalPosition(pointWorld);
 			tIdx = coord[2];
-			if (!mGrid.CheckCoordInRange(coord)) {
+			// Time axis: an out-of-range t means no grid layer exists to
+			// write into at all, so skipping the whole point here is
+			// correct (all 4 vertices share the same t/tIdx -- it comes
+			// from traj[i].frenetState.t, a per-point value, not
+			// per-vertex).
+			if (!mGrid.CheckCoordInRangeOnSingleDim(tIdx, 2)) {
 				isValid = false;
 				break;
 			}
-			vCoordCv.push_back(cv::Point2i(coord[0], coord[1]));
+			// s/d axes: clamp into range instead of rejecting the whole
+			// point. Previously used the same "any out-of-range vertex
+			// drops the whole point" rule as the time axis -- that
+			// silently made any agent whose inflated footprint ever
+			// poked past the s/d grid edges invisible to corridor
+			// construction for its ENTIRE trajectory, not just the
+			// out-of-range instant (confirmed live: agent_2 crossing
+			// through d up to +0.50 produced zero narrowing anywhere in
+			// the corridor, d staying the full unconstrained
+			// [-0.625,0.625] the whole route -- see
+			// project_docs/ssc_planner_status.md). A footprint that
+			// straddles the grid boundary should rasterize wherever it
+			// overlaps the grid, not vanish entirely.
+			const int sIdx = std::clamp(coord[0], 0, w - 1);
+			const int dIdx = std::clamp(coord[1], 0, h - 1);
+			vCoordCv.push_back(cv::Point2i(sIdx, dIdx));
 		}
 		if (!isValid) {
 			continue;
 		}
 		std::vector<std::vector<cv::Point2i>> vvCoordCv{vCoordCv};
-		int w = mGrid.dims_size()[0];
-		int h = mGrid.dims_size()[1];
 		int layerOffset = tIdx * w * h;
 		// get the layer at layerOffset
 		// now this a  layer at time index tIdx, with size hxw

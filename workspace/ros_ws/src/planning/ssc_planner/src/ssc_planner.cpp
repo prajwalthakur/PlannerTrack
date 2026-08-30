@@ -8,6 +8,7 @@
 
 #include <pluginlib/class_list_macros.hpp>
 
+#include <algorithm>
 #include <array>
 #include <cmath>
 
@@ -88,6 +89,10 @@ void SscPlanner::configure(mpl::rclcpp_utils::Logger & logger, const YAML::Node 
 	    "~/ssc/corridor_markers", rclcpp::QoS(1).transient_local());
 	mCorridorMarkerCartesianPub = mNode->create_publisher<visualization_msgs::msg::MarkerArray>(
 	    "~/ssc/corridor_markers_map", rclcpp::QoS(1).transient_local());
+	mBezierTrajectoryPub = mNode->create_publisher<project_utils_msgs::msg::Trajectory>(
+	    "~/ssc/bezier_trajectory", rclcpp::QoS(1).transient_local());
+	mBezierTrajectoryMarkerPub = mNode->create_publisher<visualization_msgs::msg::MarkerArray>(
+	    "~/ssc/bezier_trajectory_markers", rclcpp::QoS(1).transient_local());
 
 	// Own geometry model
 	const YAML::Node egoConfig = mAgentsConfig["agent_" + std::to_string(mAgentNum)];
@@ -166,8 +171,8 @@ void SscPlanner::computeTrajectory(const InputData & inputData)
 	projectAgentsToFrenet();
 	projectEgoToFrenet(inputData);
 	mSscMap->resetSscMap(mWorldSnapshot.egoFrenetSnapShot.at(0).frenetState);
-	computeSSCCorridor();
-	computeBezierTrajectory();
+	const ssc_planner::ErrorType status = computeSSCCorridor();
+	computeBezierTrajectory(status);
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -278,21 +283,22 @@ void SscPlanner::projectEgoToFrenet(const InputData & inputData)
 
 //////////////////////////////////////////////////////////////////////////
 
-void SscPlanner::computeSSCCorridor()
+ssc_planner::ErrorType SscPlanner::computeSSCCorridor()
 {
 	auto status = mSscMap->constructSscMap(mWorldSnapshot.mAgentsFrenetSnapShot);
 	if (status == ssc_planner::kWrongStatus) {
 		mLogger.error("[SscPlanner] failed to construct ssc map");
-		return;
+		return ssc_planner::kWrongStatus;
 	}
 	mSscMap->constructCorridorUsingInitialTrajectory(mWorldSnapshot.egoFrenetSnapShot);
 	if (mSscMap->getFinalGlobalMetricCubesList() == ssc_planner::kWrongStatus) {
 		mLogger.error("[SscPlanner] failed to get final corridor");
+		return ssc_planner::kWrongStatus;
 	}
 
-	const auto markerArray = ssc_planner::buildCorridorMarkers(mSscMap->finalCorridorVec(),
-	    mSscMap->ifCorridorValid(), "agent_" + std::to_string(mAgentNum) + "/ssc_debug",
-	    mNode->now());
+	const auto markerArray =
+	    ssc_planner::buildCorridorMarkers(mSscMap->finalCorridorVec(), mSscMap->ifCorridorValid(),
+	        "agent_" + std::to_string(mAgentNum) + "/ssc_debug", mNode->now());
 	mCorridorMarkerPub->publish(markerArray);
 
 	// Real-map-frame overlay, for showing the corridor alongside the actual
@@ -300,12 +306,208 @@ void SscPlanner::computeSSCCorridor()
 	const auto markerArrayCartesian = ssc_planner::buildCorridorMarkersCartesian(
 	    mSscMap->finalCorridorVec(), mSscMap->ifCorridorValid(), mRefLane, "map", mNode->now());
 	mCorridorMarkerCartesianPub->publish(markerArrayCartesian);
+	return ssc_planner::kSuccess;
 }
 
 //////////////////////////////////////////////////////////////////////////
 
-void SscPlanner::computeBezierTrajectory()
+namespace
 {
+// Estimates (velocity, acceleration) in both s and d 
+void estimateVelAccel(const FsVehicle & p0, const FsVehicle & p1, const FsVehicle & p2,
+    mt::Vecf<2> * vel, mt::Vecf<2> * acc)
+{
+	const float dt01 = p1.frenetState.t - p0.frenetState.t;
+	const float dt12 = p2.frenetState.t - p1.frenetState.t;
+	const mt::Vecf<2> v01(
+	    (p1.frenetState.s - p0.frenetState.s) / dt01, (p1.frenetState.d - p0.frenetState.d) / dt01);
+	const mt::Vecf<2> v12(
+	    (p2.frenetState.s - p1.frenetState.s) / dt12, (p2.frenetState.d - p1.frenetState.d) / dt12);
+	*vel = v01;
+	*acc = (v12 - v01) / (0.5f * (dt01 + dt12));
+}
+
+// velocity_singularity_eps guard (ssc_planner.cc), applied
+// to the s-component only
+constexpr float kVelocitySingularityEps = 0.1f;
+constexpr double kWeightProximity = 1.0;
+
+constexpr double kOutputDt = 0.25;
+
+// One sample of the solved spline, already converted to world-frame
+// (x,y,heading,speed) -- kept separate from the final TrajectoryPoint so
+// consecutive samples can be finite-differenced into
+// acceleration/heading-rate/curvature afterward (same idea as
+// estimateVelAccel above, applied to the OUTPUT samples this time).
+struct BezierSample
+{
+	double t;
+	float x, y, heading, speed;
+};
+
+// solved spline into actual waypoints. Heading/speed use the standard
+// Frenet->Cartesian formula (Werling et al.): heading = yaw_ref(s) +
+// atan2(dDot, sDot*(1-kappa_r*d)), speed = the resulting velocity
+// vector's own magnitude.
+BezierSample sampleBezierSpline(const BezierSpline<kBezierOrder, kBezierDim> & spline,
+    const mpl::interpolation::SplineInterpolationPoints2d & refLane, double t)
+{
+	mt::Vecf<2> pos, vel;
+	spline.evaluate(t, 0, &pos);
+	spline.evaluate(t, 1, &vel);
+	const float s = pos[0];
+	const float d = pos[1];
+	const float sDot = vel[0];
+	const float dDot = vel[1];
+
+	const double sForLane = std::clamp(static_cast<double>(s), refLane.getAccumulatedLength(0),
+	    refLane.getAccumulatedLength(refLane.getSize() - 1));
+	const double yawRef = refLane.getSplineInterpolatedYaw(0, sForLane);
+	const double kappaRef = refLane.getSplineInterpolatedCurvature(0, sForLane);
+	// Floored the same way velStart/velEnd are for the QP's boundary
+	// conditions (kVelocitySingularityEps) -- without this, a near-zero
+	// sample (mid-trajectory, not just at the boundary) makes atan2(dDot,
+	// sDotEff) noisy/undefined instead of a real heading. Using the same
+	// floored value for speed below keeps the two internally consistent.
+	const double sDotEff =
+	    std::max(sDot * (1.0 - kappaRef * d), static_cast<double>(kVelocitySingularityEps));
+	const double heading = yawRef + std::atan2(dDot, sDotEff);
+	const double speed = std::hypot(sDotEff, dDot);
+
+	const auto point = ssc_planner::toCartesian(refLane, s, d, 0.0);
+	return BezierSample{t, static_cast<float>(point.x), static_cast<float>(point.y),
+	    static_cast<float>(heading), static_cast<float>(speed)};
+}
+
+// Samples the whole solved spline at kOutputDt  
+//Werling, Ziegler, Kammel & Thrun's 2010 ICRA paper "Optimal Trajectory Generation for Dynamic Street Scenarios in a Frenet Frame"
+project_utils_msgs::msg::Trajectory buildTrajectoryFromSpline(
+    const BezierSpline<kBezierOrder, kBezierDim> & spline,
+    const mpl::interpolation::SplineInterpolationPoints2d & refLane, const rclcpp::Time & stamp)
+{
+	project_utils_msgs::msg::Trajectory traj;
+	traj.header.stamp = stamp;
+	traj.header.frame_id = "map";
+
+	const double tBegin = spline.begin();
+	const double tEnd = spline.end();
+	if (tEnd <= tBegin) {
+		return traj;
+	}
+
+	std::vector<BezierSample> samples;
+	for (double t = tBegin; t < tEnd; t += kOutputDt) {
+		samples.push_back(sampleBezierSpline(spline, refLane, t));
+	}
+	samples.push_back(sampleBezierSpline(spline, refLane, tEnd));
+
+	traj.points.reserve(samples.size());
+	for (std::size_t i = 0; i < samples.size(); ++i) {
+		project_utils_msgs::msg::TrajectoryPoint pt;
+		pt.time_from_start = rclcpp::Duration::from_seconds(samples[i].t - tBegin);
+		pt.pose.position.x = samples[i].x;
+		pt.pose.position.y = samples[i].y;
+		pt.pose.orientation = mpl::geometry_utils::createQuaternionFromYaw(samples[i].heading);
+		pt.longitudinal_velocity_mps = samples[i].speed;
+		pt.lateral_velocity_mps = 0.0f;
+
+		if (i + 1 < samples.size()) {
+			const double dtOut = samples[i + 1].t - samples[i].t;
+			const double dSpeed = samples[i + 1].speed - samples[i].speed;
+			const double dHeading = mpl::geometry_utils::shortestAngularDistanceNormalized(
+			    static_cast<double>(samples[i].heading), static_cast<double>(samples[i + 1].heading));
+			const double headingRate = dtOut > 1e-6 ? dHeading / dtOut : 0.0;
+			pt.acceleration_mps2 = static_cast<float>(dtOut > 1e-6 ? dSpeed / dtOut : 0.0);
+			pt.heading_rate_rps = static_cast<float>(headingRate);
+			pt.track_kappa_radpm =
+			    headingRate / std::max(static_cast<double>(samples[i].speed),
+			                      static_cast<double>(kVelocitySingularityEps));
+		} else if (!traj.points.empty()) {
+			// Last sample: repeat the previous point's rates rather than
+			// snapping to zero right at the final waypoint.
+			pt.acceleration_mps2 = traj.points.back().acceleration_mps2;
+			pt.heading_rate_rps = traj.points.back().heading_rate_rps;
+			pt.track_kappa_radpm = traj.points.back().track_kappa_radpm;
+		}
+		traj.points.push_back(pt);
+	}
+	return traj;
+}
+}  // namespace
+
+void SscPlanner::computeBezierTrajectory(ssc_planner::ErrorType corridorStatus)
+{
+	if (corridorStatus == ssc_planner::kWrongStatus) {
+		mLogger.error("[SscPlanner] skipping Bezier solve -- corridor generation failed");
+		return;
+	}
+	mLogger.info("[SscPlanner] computing bezier trajectory from corridor");
+
+	const auto finalCorridor = mSscMap->finalCorridorVec();
+	const auto ifCorridorValid = mSscMap->ifCorridorValid();
+	// One fixed ego route -> one corridor 
+	if (finalCorridor.empty() || finalCorridor[0].empty() ||
+	    (!ifCorridorValid.empty() && ifCorridorValid[0] == 0)) {
+		mLogger.error("[SscPlanner] skipping Bezier solve -- empty/invalid corridor");
+		return;
+	}
+
+	const auto & egoTraj = mWorldSnapshot.egoFrenetSnapShot;
+	if (egoTraj.size() < 3) {
+		mLogger.error(
+		    "[SscPlanner] skipping Bezier solve -- egoFrenetSnapShot has < 3 points (%zu)",
+		    egoTraj.size());
+		return;
+	}
+
+	// ~ boundary conditions, finite-differenced from the seed trajectory
+	mt::Vecf<2> velStart, accStart, velEnd, accEnd;
+	estimateVelAccel(egoTraj[0], egoTraj[1], egoTraj[2], &velStart, &accStart);
+	estimateVelAccel(
+	    egoTraj[egoTraj.size() - 3], egoTraj[egoTraj.size() - 2], egoTraj.back(), &velEnd, &accEnd);
+	velStart[0] = std::max(velStart[0], kVelocitySingularityEps);
+	velEnd[0] = std::max(velEnd[0], kVelocitySingularityEps);
+
+	const mt::Vecf<2> posStart(egoTraj.front().frenetState.s, egoTraj.front().frenetState.d);
+	const float sEndClamped =
+	    std::min(egoTraj.back().frenetState.s, finalCorridor[0].back().pUb[0]);
+	const mt::Vecf<2> posEnd(sEndClamped, egoTraj.back().frenetState.d);
+
+	const mt::vec_E<mt::Vecf<2>> startConstraints{posStart, velStart, accStart};
+	const mt::vec_E<mt::Vecf<2>> endConstraints{posEnd, velEnd};
+
+	// ~ reference-tracking samples: the whole seed trajectory
+	std::vector<double> refStamps;
+	mt::vec_E<mt::Vecf<2>> refPoints;
+	refStamps.reserve(egoTraj.size());
+	refPoints.reserve(egoTraj.size());
+	for (const auto & fv : egoTraj) {
+		refStamps.push_back(static_cast<double>(fv.frenetState.t));
+		refPoints.push_back(mt::Vecf<2>(fv.frenetState.s, fv.frenetState.d));
+	}
+
+	BezierSpline<kBezierOrder, kBezierDim> spline;
+	const auto solveStatus = SolveBezierSpline(finalCorridor[0], startConstraints, endConstraints,
+	    refStamps, refPoints, kWeightProximity, &spline);
+	if (solveStatus != ssc_planner::kSuccess) {
+		mLogger.error("[SscPlanner] Bezier QP solve failed");
+		return;
+	}
+
+	mBezierSpline = spline;
+	mBezierSplineValid = true;
+	mLogger.info("[SscPlanner] Bezier trajectory solved -- %d segments", spline.num_segments());
+
+	const auto trajectory = buildTrajectoryFromSpline(mBezierSpline, mRefLane, mNode->now());
+	mBezierTrajectoryPub->publish(trajectory);
+	mLogger.info(
+	    "[SscPlanner] published Bezier trajectory -- %zu waypoints", trajectory.points.size());
+
+	const auto trajectoryMarker =
+	    ssc_planner::buildBezierTrajectoryMarker(trajectory, "map", mNode->now());
+	mBezierTrajectoryMarkerPub->publish(trajectoryMarker);
+	mLogger.info("[SscPlanner] computed bezier trajectory,published marker");
+
 }
 
 PLUGINLIB_EXPORT_CLASS(SscPlanner, PlannerBase)

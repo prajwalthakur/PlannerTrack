@@ -10,7 +10,7 @@
     regulated_pp:
       optimizer:
         set_external_target_speed: false
-        external_target_speed: 0.2
+        external_target_speed: 0.5
         ld_velocity_ratio: 1.2
         ld_lateral_error_ratio: 2.5
         ld_curvature_ratio: 60.0

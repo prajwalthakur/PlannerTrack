@@ -8,6 +8,7 @@ Panels:
         - /TF1
         - /agent11
         - /ssc_corridor (map)1
+        - /ssc_bezier_trajectory (map)1
       Splitter Ratio: 0.5
     Tree Height: 247
   - Class: rviz_common/Selection
@@ -453,6 +454,18 @@ Visualization Manager:
         History Policy: Keep Last
         Reliability Policy: Reliable
         Value: /agent_1/planner/ssc/corridor_markers_map
+      Value: true
+    - Class: rviz_default_plugins/MarkerArray
+      Enabled: true
+      Name: ssc_bezier_trajectory (map)
+      Namespaces:
+        ssc_bezier_trajectory: true
+      Topic:
+        Depth: 5
+        Durability Policy: Transient Local
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+        Value: /agent_1/planner/ssc/bezier_trajectory_markers
       Value: true
     - Class: rviz_default_plugins/MarkerArray
       Enabled: false

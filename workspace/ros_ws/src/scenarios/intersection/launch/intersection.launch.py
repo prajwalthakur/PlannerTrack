@@ -186,7 +186,7 @@ def generate_launch_description():
             parameters=[{
                 'agents_config_file': agents_config,
                 'frame_id': 'map',
-                'cruise_speed_mps': 1.0,
+                'cruise_speed_mps': 0.4,
                 'decel_distance_m': 0.5,
             }]
         ),
