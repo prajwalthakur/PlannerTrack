@@ -21,6 +21,7 @@ Panels:
         - /MarkerArray3
         - /MarkerArray4
         - /Path2
+        - /MarkerArray5
       Splitter Ratio: 0.4991150498390198
     Tree Height: 715
   - Class: rviz_common/Selection
@@ -74,14 +75,6 @@ Visualization Manager:
           Value: true
         agent_1/lidar_link:
           Value: true
-        agent_2/base_link:
-          Value: true
-        agent_2/lidar_link:
-          Value: true
-        agent_3/base_link:
-          Value: true
-        agent_3/lidar_link:
-          Value: true
         map:
           Value: true
         odom:
@@ -97,12 +90,6 @@ Visualization Manager:
             agent_1/base_link:
               agent_1/lidar_link:
                 {}
-            agent_2/base_link:
-              agent_2/lidar_link:
-                {}
-            agent_3/base_link:
-              agent_3/lidar_link:
-                {}
       Update Interval: 0
       Value: true
     - Class: rviz_common/Group
@@ -111,8 +98,7 @@ Visualization Manager:
           Enabled: true
           Name: MarkerArray
           Namespaces:
-            Candidate Trajectories: true
-            optimal_trajectory: true
+            {}
           Topic:
             Depth: 5
             Durability Policy: Volatile
@@ -604,8 +590,7 @@ Visualization Manager:
       Enabled: true
       Name: MarkerArray
       Namespaces:
-        Candidate Trajectories: true
-        optimal_trajectory: true
+        {}
       Topic:
         Depth: 5
         Durability Policy: Volatile
@@ -640,6 +625,18 @@ Visualization Manager:
         History Policy: Keep Last
         Reliability Policy: Reliable
         Value: /agent_1/pruned_plan
+      Value: true
+    - Class: rviz_default_plugins/MarkerArray
+      Enabled: true
+      Name: MarkerArray
+      Namespaces:
+        {}
+      Topic:
+        Depth: 5
+        Durability Policy: Volatile
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+        Value: /global_planner/iqp_trajectory_markers
       Value: true
   Enabled: true
   Global Options:
@@ -704,9 +701,9 @@ Visualization Manager:
       Near Clip Distance: 0.009999999776482582
       Pitch: 0.7936272025108337
       Position:
-        X: -0.36166757345199585
-        Y: 7.828237533569336
-        Z: 7.143470287322998
+        X: 1.479713797569275
+        Y: 9.599395751953125
+        Z: 9.864195823669434
       Target Frame: map
       Value: FPS (rviz_default_plugins)
       Yaw: 4.292752742767334

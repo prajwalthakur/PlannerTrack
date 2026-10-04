@@ -7,6 +7,9 @@
 
 #include <pluginlib/class_list_macros.hpp>
 
+#include <algorithm>
+#include <cmath>
+
 /** \file
  * \brief \ref SingleTrackDynStateModel implementation.
  * `PLUGINLIB_EXPORT_CLASS` at the bottom of this file is what actually
@@ -39,6 +42,11 @@ void SingleTrackDynStateModel::initialze(
 	mLr = mVehConfig["lr"].as<double>();
 	mCf = mVehConfig["cf"].as<double>();
 	mCr = mVehConfig["cr"].as<double>();
+	// mCf/mCr are load-normalized coefficients C_Sf/C_Sr [1/rad]; the physical
+	// cornering stiffness is mu * C_S * F_z (see xdot()). mu and hcg are
+	// optional -- defaults give unit friction and the static axle-load split.
+	mMu = mVehConfig["mu"] ? mVehConfig["mu"].as<double>() : 1.0;
+	mHcg = mVehConfig["hcg"] ? mVehConfig["hcg"].as<double>() : 0.0;
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -137,23 +145,72 @@ StateVector SingleTrackDynStateModel::xdot(
 	auto xk = this->VectorToState(statevector);
 	auto uk = this->VectorToInput(inputvector);
 
-	// Linear tire model: front/rear slip angles from body-frame velocity at
-	// each axle, guarded against the vx->0 singularity in atan2's argument
+	const double wheel_base = mLf + mLr;
+	const double vx_dot = uk.acc + xk.vy * xk.yaw_rate;
 
-	constexpr double kMinVx = 0.05;
+	// Front/rear slip angles from body-frame velocity at each axle, guarded
+	// against the vx->0 singularity in atan2's argument (the low-speed blend
+	// below is what actually keeps the model well-posed near standstill; this
+	// is only a numerical floor).
+	constexpr double kMinVx = 1e-3;
 	const double vx_safe =
 	    std::abs(xk.vx) < kMinVx ? std::copysign(kMinVx, xk.vx == 0.0 ? 1.0 : xk.vx) : xk.vx;
 	const double alpha_f = xk.steer - std::atan2(xk.vy + mLf * xk.yaw_rate, vx_safe);
 	const double alpha_r = -std::atan2(xk.vy - mLr * xk.yaw_rate, vx_safe);
-	const double fyf = mCf * alpha_f;
-	const double fyr = mCr * alpha_r;
+
+	// --- Fix 1: load-normalized cornering stiffness -----------------------------
+	// mCf, mCr are the load-normalized coefficients C_Sf, C_Sr [1/rad]
+	// (f1tenth / CommonRoad convention). Physical cornering stiffness is
+	// mu * C_S * F_z. Vertical axle loads carry longitudinal load transfer
+	// (a_x ~= vx_dot, h_cg = mHcg); mHcg = 0 recovers the static split.
+	constexpr double kG = 9.81;
+	constexpr double kFzMin = 1e-3;  // keep axle load positive under hard braking / wheel lift
+	const double fzf = std::max(mMass * (kG * mLr - vx_dot * mHcg) / wheel_base, kFzMin);
+	const double fzr = std::max(mMass * (kG * mLf + vx_dot * mHcg) / wheel_base, kFzMin);
+	const double cornering_stiffness_f = mMu * mCf * fzf;  // [N/rad]
+	const double cornering_stiffness_r = mMu * mCr * fzr;  // [N/rad]
+
+	// --- Fix 2: saturate lateral force at the friction limit mu * F_z ----------
+	// Smooth (C-infinity) clamp that preserves the small-slip slope: as
+	// alpha -> 0, fy_max * tanh(K * alpha / fy_max) -> K * alpha (linear model).
+	const double fyf_max = mMu * fzf;
+	const double fyr_max = mMu * fzr;
+	const double fyf = fyf_max * std::tanh(cornering_stiffness_f * alpha_f / fyf_max);
+	const double fyr = fyr_max * std::tanh(cornering_stiffness_r * alpha_r / fyr_max);
+
+	// Dynamic single-track lateral / yaw accelerations
+	const double vy_dot_dyn = (fyf * std::cos(xk.steer) + fyr) / mMass - xk.vx * xk.yaw_rate;
+	const double r_dot_dyn = (mLf * fyf * std::cos(xk.steer) - mLr * fyr) / mIz;
+
+	// --- Fix 3: blend with the kinematic single-track model at low speed -------
+	// The dynamic model is ill-conditioned as vx -> 0. Below kBlendLo it is
+	// fully kinematic, above kBlendHi fully dynamic, linear blend in between.
+	// The 1/kTau terms relax (vy, yaw_rate) back onto the kinematic manifold
+	// so the integrated state does not drift while the blend is active.
+	constexpr double kBlendLo = 1.0;  // [m/s]
+	constexpr double kBlendHi = 3.0;  // [m/s]
+	constexpr double kTau = 0.1;      // [s] manifold relaxation time constant
+	const double lambda =
+	    std::clamp((std::abs(xk.vx) - kBlendLo) / (kBlendHi - kBlendLo), 0.0, 1.0);
+
+	const double tan_d = std::tan(xk.steer);
+	const double sec2_d = 1.0 + tan_d * tan_d;
+	const double r_kin = xk.vx * tan_d / wheel_base;
+	const double r_dot_kin = (vx_dot * tan_d + xk.vx * sec2_d * uk.sv) / wheel_base;
+	const double vy_kin = mLr * r_kin;
+	const double vy_dot_kin = mLr * r_dot_kin;
+
+	const double vy_dot =
+	    lambda * vy_dot_dyn + (1.0 - lambda) * (vy_dot_kin + (vy_kin - xk.vy) / kTau);
+	const double r_dot =
+	    lambda * r_dot_dyn + (1.0 - lambda) * (r_dot_kin + (r_kin - xk.yaw_rate) / kTau);
 
 	statevector_dot(0) = xk.vx * std::cos(xk.yaw) - xk.vy * std::sin(xk.yaw);
 	statevector_dot(1) = xk.vx * std::sin(xk.yaw) + xk.vy * std::cos(xk.yaw);
 	statevector_dot(2) = xk.yaw_rate;
-	statevector_dot(3) = uk.acc + xk.vy * xk.yaw_rate;
-	statevector_dot(4) = (fyf * std::cos(xk.steer) + fyr) / mMass - xk.vx * xk.yaw_rate;
-	statevector_dot(5) = (mLf * fyf * std::cos(xk.steer) - mLr * fyr) / mIz;
+	statevector_dot(3) = vx_dot;
+	statevector_dot(4) = vy_dot;
+	statevector_dot(5) = r_dot;
 	statevector_dot(6) = uk.sv;
 	return statevector_dot;
 }

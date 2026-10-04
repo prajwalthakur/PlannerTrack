@@ -110,7 +110,7 @@ agents:
       angle_max: 3.14159265
       range_min: 0.05
       range_max: 10.0
-    controller: "pure_pursuit"
+    controller: "xyz"
     # North-incoming outer tip -> south-outgoing outer tip: straight through.
     route:
       start_id: -100 #0

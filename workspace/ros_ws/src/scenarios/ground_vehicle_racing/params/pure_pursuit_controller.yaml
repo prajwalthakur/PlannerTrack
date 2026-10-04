@@ -10,13 +10,14 @@
     regulated_pp:
       optimizer:
         set_external_target_speed: true
-        external_target_speed: 0.2
-        ld_velocity_ratio: 1.2
+        allow_regulated_long_control: true
+        external_target_speed: 3.0
+        ld_velocity_ratio: 1.2 #1.2
         ld_lateral_error_ratio: 2.5
-        ld_curvature_ratio: 60.0
-        long_ld_lateral_error_threshold: 0.3
+        ld_curvature_ratio: 20.0 #60.0
+        long_ld_lateral_error_threshold: 0.1 #0.01
         min_lookahead_distance: 0.7
-        max_lookahead_distance: 2.4
+        max_lookahead_distance: 6.0
         converged_steer_rad: 0.1
         reverse_min_lookahead_distance: 1.5
         prediction_ds: 0.2
@@ -24,8 +25,21 @@
         resampling_ds: 0.1
         curvature_calculation_distance: 1.0
         max_steering_angle: 0.40
-        speed_lookahead: 0.02 
-        lat_err_coeff: 1.0
+        # --- corner speed regulation ------------------------------------------
+        # Anticipatory braking: v <= sqrt(corner_max_lat_acc / kappa_max), where
+        # kappa_max is the worst track curvature within corner_speed_lookahead_dist
+        # ahead of the car. Track here: kappa_median ~0.27, kappa_max ~0.98 rad/m.
+        # Lower corner_max_lat_acc => slower corners (grip limit mu*g ~10.3):
+        #   2.0 -> hairpin ~1.4 m/s, mid-corner ~2.0 m/s, straight = target (2.5)
+        #   1.2 -> hairpin ~1.1 m/s (very slow) ;  5.0 -> mild
+        corner_max_lat_acc: 2.0
+        corner_speed_lookahead_dist: 2.0   # m, ~0.6 s preview at 2.5 m/s; raise if braking is late
+        min_speed: 0.5                     # m/s floor on the command
+        # lateral-error term -- now just a mild recovery trim on top of the cap
+        max_curv_est: 0.6              # 0.3 -> real curvature scale so norm_curv isn't pinned at 1
+        min_curv_est: 0.0
+        speed_lookahead: 0.3 #0.02     # s, preview point for the lateral-error term
+        lat_err_coeff: 0.4 #1.0        # mild -- corner_max_lat_acc does the slowdown now
         enable_path_smoothing: false
         path_filter_moving_ave_num: 10.0
       vehicle:

@@ -101,6 +101,12 @@ void Optimizer::onConfigure()
 	paramGetter(mOptimParam.set_external_target_speed, "set_external_target_speed", false);
 
 	paramGetter(mOptimParam.external_target_speed, "external_target_speed", 0.3);
+	
+	paramGetter(mOptimParam.allow_regulated_long_control, "allow_regulated_long_control",false);
+
+	paramGetter(mOptimParam.corner_max_lat_acc, "corner_max_lat_acc", 2.5);
+	paramGetter(mOptimParam.corner_speed_lookahead_dist, "corner_speed_lookahead_dist", 1.5);
+	paramGetter(mOptimParam.min_speed, "min_speed", 0.5);
 
 	mLogger.info("Optimzer initialized with min ld %.3f max ld %.3f , set_external_target_speed %d , external_target_speed %.3f", mOptimParam.min_lookahead_distance,
 	    mOptimParam.max_lookahead_distance, mOptimParam.set_external_target_speed, mOptimParam.external_target_speed);
@@ -114,16 +120,20 @@ void Optimizer::reset()
 float Optimizer::generateSpeedCommand(const trajectory_follower::InputData & inputData)
 {
 	float speed_command = 0.0;
-	if (mOptimParam.set_external_target_speed) {
-		speed_command = mOptimParam.external_target_speed;
-	} else {
+	if(mOptimParam.allow_regulated_long_control)
+	{
 		// speed calculation based on some heuristic
 		// lookahead for speed
 		auto & curr_pose = inputData.mCurrentOdometry.pose.pose;
 		auto & curr_speed = inputData.mCurrentOdometry.twist.twist;
 		auto adv_ts_speed = mOptimParam.speed_lookahead;
-		float x_pred = curr_pose.position.x + curr_speed.linear.x * adv_ts_speed;
-		float y_pred = curr_pose.position.y + curr_speed.linear.y * adv_ts_speed;
+		// float x_pred = curr_pose.position.x + curr_speed.linear.x * adv_ts_speed;
+		// float y_pred = curr_pose.position.y + curr_speed.linear.y * adv_ts_speed;
+		const double yaw = tf2::getYaw(curr_pose.orientation);
+		const double vx = curr_speed.linear.x;
+		const double vy = curr_speed.linear.y;
+		float x_pred = curr_pose.position.x + (std::cos(yaw)*vx - std::sin(yaw)*vy) * adv_ts_speed;
+		float y_pred = curr_pose.position.y + (std::sin(yaw)*vx + std::cos(yaw)*vy) * adv_ts_speed;
 		auto s_ec_pair = mInterpolator->projectPointOntoSpline(x_pred, y_pred);
 
 		[[maybe_unused]] float s = static_cast<float>(s_ec_pair.first);
@@ -135,16 +145,30 @@ float Optimizer::generateSpeedCommand(const trajectory_follower::InputData & inp
 			mLogger.error("cannot find closest waypoint");
 			return {};
 		}
-		const double target_speed = static_cast<float>(
-		    mSampledTrajwayPoints.at(*closest_idx_result).longitudinal_velocity_mps);
+		double target_speed = 0.0;
+		if(mOptimParam.set_external_target_speed)
+		{
+			/*constant target max speed set externally*/
+			target_speed = mOptimParam.external_target_speed;
+		}else{
+			target_speed = static_cast<float>(
+		    	mSampledTrajwayPoints.at(*closest_idx_result).longitudinal_velocity_mps);
+		}
 
 		float kappa =
 		    static_cast<float>(mSampledTrajwayPoints.at(*closest_idx_result)
 		                           .track_kappa_radpm);  // hack : track curvature appended in traj
 
-		speed_command = speedAdjustLatError(kappa, target_speed, lateral_error);
+		// Anticipatory corner braking: cap to a lateral-acceleration limit from the
+		// worst curvature in the lookahead window, then apply the lateral-error trim.
+		float v_cmd = speedAdjustCurvature(
+		    static_cast<float>(target_speed), static_cast<size_t>(*closest_idx_result));
+		speed_command = speedAdjustLatError(kappa, v_cmd, lateral_error);
+	}else if (mOptimParam.set_external_target_speed){
+		speed_command = mOptimParam.external_target_speed;
+	}else{
+		mLogger.error("regulated config is not ser properly in pure-pursuit controller");
 	}
-
 	return speed_command;
 }
 
@@ -168,6 +192,39 @@ float Optimizer::speedAdjustLatError(float kappa, float target_speed, float late
 	return target_speed * scale;
 }
 
+float Optimizer::speedAdjustCurvature(float target_speed, size_t closest_idx)
+{
+	const size_t n = mSampledTrajwayPoints.size();
+	if (n < 2) {
+		return target_speed;
+	}
+
+	// Scan forward from the closest point, accumulating arc length, and take the
+	// worst |curvature| seen within corner_speed_lookahead_dist. The IQP raceline is
+	// a closed loop (last point == first), so the index wraps with % n.
+	float kappa_max = 0.0f;
+	double dist_acc = 0.0;
+	for (size_t k = 0; k < n; ++k) {
+		const size_t i = (closest_idx + k) % n;
+		kappa_max = std::max(kappa_max,
+		    std::abs(static_cast<float>(mSampledTrajwayPoints.at(i).track_kappa_radpm)));
+		const auto & a = mSampledTrajwayPoints.at(i).pose.position;
+		const auto & b = mSampledTrajwayPoints.at((i + 1) % n).pose.position;
+		dist_acc += std::hypot(b.x - a.x, b.y - a.y);
+		if (dist_acc >= mOptimParam.corner_speed_lookahead_dist) {
+			break;
+		}
+	}
+
+	if (kappa_max < 1e-3f) {
+		return target_speed;  // effectively straight -- no cap
+	}
+
+	// v_curve = sqrt(a_lat_max / kappa): the speed at which lateral accel hits the limit.
+	const float v_curve = std::sqrt(mOptimParam.corner_max_lat_acc / kappa_max);
+	return std::clamp(std::min(target_speed, v_curve), mOptimParam.min_speed, target_speed);
+}
+
 bool Optimizer::optimize(const trajectory_follower::InputData & inputData,
     trajectory_follower::HybridOutput & outputData)
 {
@@ -179,12 +236,12 @@ bool Optimizer::optimize(const trajectory_follower::InputData & inputData,
 	[[maybe_unused]] auto & currentSteering = inputData.mCurrentSteering.steering_tire_angle;
 	// mLogger.info("currentOdom referenced");
 
-	//mLogger.info("local wp size = %d", inputData.mLocalWpArray.wpnts.size());
 
 	// mpl::extra_utils::convertPathWptsToTrajectory(
 	//     inputData.mLocalWpArray, mLocalTrajectoryToFollow);
 	mLocalTrajectoryToFollow = inputData.mCurrentTrajectory;
 	// mLogger.info("convertPathWptsToTrajectory called");
+	mLogger.info("local wp size = %d", mLocalTrajectoryToFollow.points.size());
 
 	// project_utils_msgs::msg::Trajectory
 	if (mInterpolator == nullptr) mLogger.error("mInterpolator is nullptr!");
@@ -260,7 +317,7 @@ std::optional<PpOutput> Optimizer::calcTargetCurvature(
 	}
 
 	double target_vel = 0.0;
-	if (mOptimParam.set_external_target_speed) {
+	if (mOptimParam.set_external_target_speed ) {
 		target_vel = mOptimParam.external_target_speed;
 	} else {
 		target_vel= mSampledTrajwayPoints.at(*closest_idx_result).longitudinal_velocity_mps;
@@ -268,6 +325,7 @@ std::optional<PpOutput> Optimizer::calcTargetCurvature(
 	// calculate the lateral error
 	auto pp = mInterpolator->projectPointOntoSpline(pose.position.x, pose.position.y);
 	float lateral_error = pp.second;
+	//mLogger.info("lateral-error %.3f",lateral_error);
 	[[maybe_unused]] float closest_s = pp.first;
 	// const double current_curvature = mInterpolator->getSplineInterpolatedCurvature(0.0,
 	// closest_s);

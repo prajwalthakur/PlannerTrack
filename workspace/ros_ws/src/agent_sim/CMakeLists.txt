@@ -61,9 +61,11 @@ install(DIRECTORY include/
   DESTINATION include
 )
 
-install(DIRECTORY launch
-  DESTINATION share/${PROJECT_NAME}/
-)
+if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/launch")
+  install(DIRECTORY launch
+    DESTINATION share/${PROJECT_NAME}/
+  )
+endif()
 
 ament_export_include_directories(include)
 ament_export_libraries(vehicle_interface_class)

@@ -103,6 +103,13 @@ struct stOptimParam
 	bool set_external_target_speed{false};
 
 	float external_target_speed{0.5};
+	bool allow_regulated_long_control{false};
+
+	// Curvature (lateral-acceleration) corner-speed cap: v <= sqrt(corner_max_lat_acc / kappa_max),
+	// where kappa_max is the worst track curvature within corner_speed_lookahead_dist ahead.
+	float corner_max_lat_acc{2.5};           // m/s^2 -- lower => slower corners
+	float corner_speed_lookahead_dist{1.5};  // m -- forward scan window for the worst curvature
+	float min_speed{0.5};                    // m/s -- floor on the commanded speed
 };
 
 /// \brief One pure-pursuit solve's result: target curvature and the velocity it was computed against.
@@ -181,6 +188,9 @@ class Optimizer
 	float generateSpeedCommand(const trajectory_follower::InputData &);
 	/// \brief Scale down \p target_speed when curvature and lateral error are both high (cuts speed into corners while off-track).
 	float speedAdjustLatError(float kappa, float target_speed, float lateral_error);
+	/// \brief Cap \p target_speed to a lateral-acceleration limit using the worst track curvature
+	/// within \ref stOptimParam::corner_speed_lookahead_dist ahead of \p closest_idx (anticipatory corner braking).
+	float speedAdjustCurvature(float target_speed, size_t closest_idx);
 
   private:
 	// mpcc_controller::model::stState mXo;

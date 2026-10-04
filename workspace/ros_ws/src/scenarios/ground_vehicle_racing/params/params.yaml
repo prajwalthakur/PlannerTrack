@@ -6,7 +6,7 @@
     agent_interface:
       state_publisher_dt: 0.01  # odom/TF publish rate (s)
       fixed_frame: "odom"
-      num_agents: 3  #should be same as defined in agents.yaml
+      num_agents: 1  #should be same as defined in agents.yaml
     lidar:
       vis_dt: 0.1 #visualization update rate 
     obstacles:

@@ -18,8 +18,9 @@
 //////////////////////////////////////////////////////////////////////////
 /**
  * \class SingleTrackDynStateModel
- * \brief Nonlinear single-track (bicycle) dynamic vehicle model with a
- * linear (small-slip-angle) tire model, in global frame.
+ * \brief Nonlinear single-track (bicycle) dynamic vehicle model in global
+ * frame, with a load-normalized, friction-limited tire model and a
+ * kinematic blend at low speed.
  *
  * This is the master plant model -- the one actually integrated by
  * \ref SingleTrackDynStateModel::xdot() below.
@@ -37,23 +38,35 @@
    m        : mass
    Iz       : yaw inertia
    lf, lr   : distance from CG to front/rear axle
-   cf, cr   : front/rear tire cornering stiffness (linear tire model)
-  
+   cf, cr   : load-normalized cornering stiffness coefficients C_Sf, C_Sr
+              [1/rad] (f1tenth / CommonRoad convention); physical stiffness
+              is mu * C_S * F_z
+   mu       : tire-road friction coefficient
+   hcg      : height of CG above ground (drives longitudinal load transfer;
+              hcg = 0 -> static axle-load split)
+
       State & Input
    x = [x, y, yaw, vx, vy, yaw_rate, steer]^T
    u = [acc, sv]^T
-  
+
       Nonlinear dynamics
+   L            = lf + lr
+   vx_dot       = acc + vy*yaw_rate
+   Fzf          = m*(g*lr - vx_dot*hcg)/L,  Fzr = m*(g*lf + vx_dot*hcg)/L  (axle loads)
    af           = steer - atan2(vy + lf*yaw_rate, vx)   (front slip angle)
    ar           = -atan2(vy - lr*yaw_rate, vx)           (rear slip angle)
-   Fyf          = cf * af,  Fyr = cr * ar                (linear tire forces)
-   vx_dot       = acc + vy*yaw_rate
-   vy_dot       = (Fyf*cos(steer) + Fyr)/m - vx*yaw_rate
-   yaw_rate_dot = (lf*Fyf*cos(steer) - lr*Fyr) / Iz
+   Kf           = mu*C_Sf*Fzf,  Kr = mu*C_Sr*Fzr        (cornering stiffness, N/rad)
+   Fyf          = mu*Fzf*tanh(Kf*af/(mu*Fzf)),  Fyr analogous   (friction-limited tire force)
+   vy_dot_dyn   = (Fyf*cos(steer) + Fyr)/m - vx*yaw_rate
+   r_dot_dyn    = (lf*Fyf*cos(steer) - lr*Fyr) / Iz
    x_dot        = vx*cos(yaw) - vy*sin(yaw)
    y_dot        = vx*sin(yaw) + vy*cos(yaw)
    yaw_dot      = yaw_rate
    steer_dot    = sv
+
+   Low-speed blend: for vx in [1, 3] m/s the (vy_dot, r_dot) above are linearly
+   blended with the kinematic single-track values (r = vx*tan(steer)/L,
+   vy = lr*r), fully kinematic below 1 m/s, to avoid the vx -> 0 singularity.
   
    Reference : Jarrod M. Snider, "Automatic Steering Methods for Autonomous Automobile Path
    Tracking", Robotics Institute, Carnegie Mellon University, February 2009.
@@ -168,6 +181,8 @@ class SingleTrackDynStateModel : public DynamicModel
 	double mLr;
 	double mCf;
 	double mCr;
+	double mMu{1.0};
+	double mHcg{0.0};
 	InputStruct mInputStruct;
 	StateStruct mStateStruct;
 	InputVector mInputVector;
