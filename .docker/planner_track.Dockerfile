@@ -109,7 +109,16 @@ RUN pip3 install \
     tyro \
     viser
 
-RUN apt-install -y apt install libopencv-dev    
+# ---------- PyTorch (CUDA build) ----------
+# pip CUDA wheels ship their own CUDA runtime (cuDNN/cuBLAS/NCCL), so no
+# nvidia/cuda base image or CUDA toolkit is required here. Needs only a recent
+# host NVIDIA driver (host = 595.84) + nvidia-container-toolkit, and running the
+# container with `--gpus all`.
+ARG TORCH_INDEX=https://download.pytorch.org/whl/cu124
+RUN pip3 install --index-url ${TORCH_INDEX} torch==2.6.0 \
+ && pip3 install "numpy<2.0.0"
+
+RUN apt-get update && apt-get install -y libopencv-dev && rm -rf /var/lib/apt/lists/*
 
 RUN curl -1sLf 'https://dl.cloudsmith.io/public/mc-rtc/stable/setup.deb.sh' | bash
 RUN apt install -y libeigen-quadprog-dev \
@@ -155,5 +164,27 @@ COPY workspace/ros_ws/src src
 WORKDIR /workspace/ros_ws
 COPY ./.docker/entrypoint.sh /entrypoint.sh
 ENTRYPOINT ["/entrypoint.sh"]
-RUN echo "source /entrypoint.sh" >> ~/.bashrc
+
+# ---------- non-root dev user (matches host UID/GID so bind-mounted files ----------
+# ---------- under workspace/ros_ws/src aren't left root-owned on the host) --------
+ARG USER_UID=1000
+ARG USER_GID=1000
+ARG USERNAME=dev
+RUN apt-get update && apt-get install -y sudo && rm -rf /var/lib/apt/lists/* && \
+    if ! getent passwd ${USERNAME} > /dev/null; then \
+      existing_user="$(getent passwd ${USER_UID} | cut -d: -f1)"; \
+      [ -n "$existing_user" ] && userdel -r "$existing_user" 2>/dev/null; \
+      existing_group="$(getent group ${USER_GID} | cut -d: -f1)"; \
+      [ -n "$existing_group" ] && groupdel "$existing_group" 2>/dev/null; \
+      groupadd --gid ${USER_GID} ${USERNAME} && \
+      useradd --uid ${USER_UID} --gid ${USER_GID} -m -s /bin/bash ${USERNAME}; \
+    fi && \
+    usermod -aG video,dialout ${USERNAME} 2>/dev/null || true && \
+    echo "${USERNAME} ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/${USERNAME} && \
+    chmod 0440 /etc/sudoers.d/${USERNAME} && \
+    chown -R ${USERNAME}:${USERNAME} /workspace
+
+USER ${USERNAME}
+ENV HOME=/home/${USERNAME}
+RUN echo "source /entrypoint.sh" >> ${HOME}/.bashrc
 

@@ -6,7 +6,10 @@ IMAGE_NAME="${IMAGE_NAME:-${BASE_NAME}}"
 CONTAINER_NAME="${CONTAINER_NAME:-${BASE_NAME}}"
 
 run_docker() {
-    xhost +local:root
+    # Container now runs as a non-root user with the same UID as the host
+    # user (see .docker/planner_track.Dockerfile), so X11 access-control
+    # must be granted to that host user, not root.
+    xhost "+local:$(whoami)"
 
     # parse args: everything before '--' -> docker options, after '--' -> command inside container
     local -a docker_opts=()
@@ -34,12 +37,13 @@ run_docker() {
     docker rm -f "${CONTAINER_NAME}" >/dev/null 2>&1 || true
 
     docker run -it --privileged --network=host \
+        --gpus all \
         --name "${CONTAINER_NAME}" \
         -e DISPLAY \
         -e QT_X11_NO_MITSHM=1 \
         -e ROS_DOMAIN_ID="${ROS_DOMAIN_ID:-1}" \
         -e ROS_DISTRO="${ROS_DISTRO}" \
-        -v "${PROJECT_ROOT}/scripts/deploy/app.sh:/root/app.sh" \
+        -v "${PROJECT_ROOT}/scripts/.deploy/app.sh:/tmp/app.sh" \
         "${docker_opts[@]}" \
         "${IMAGE_NAME}" \
         "${cmd[@]}"
