@@ -118,6 +118,16 @@ ARG TORCH_INDEX=https://download.pytorch.org/whl/cu124
 RUN pip3 install --index-url ${TORCH_INDEX} torch==2.6.0 \
  && pip3 install "numpy<2.0.0"
 
+# ---------- JAX (CUDA build) ----------
+# Same deal as torch above: the `jax[cuda12]` pip extra bundles its own
+# cuDNN/cuBLAS/NCCL via nvidia-*-cu12 packages, so it doesn't need (or share)
+# a system CUDA toolkit, and it doesn't conflict with torch's copies -- each
+# loads its own .so's at import time.
+# Pin nvidia-cuda-nvcc-cu12 to 12.4.131 (matches cu124): newer nvcc wheels
+# (>=12.5) ship nvidia/cuda_nvcc as a pure namespace package with no
+# __init__.py, which breaks jaxlib 0.4.34's _cuda_path() (__file__ is None).
+RUN pip3 install "jax[cuda12]==0.4.35" "numpy<2.0.0" "nvidia-cuda-nvcc-cu12==12.4.131"
+
 RUN apt-get update && apt-get install -y libopencv-dev && rm -rf /var/lib/apt/lists/*
 
 RUN curl -1sLf 'https://dl.cloudsmith.io/public/mc-rtc/stable/setup.deb.sh' | bash

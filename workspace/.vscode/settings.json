@@ -14,20 +14,27 @@
   "C_Cpp.clang_format_path": "/workspace/ros_ws/tools/clang_format_with_separators.sh",
   "C_Cpp.clang_format_style": "file",
   "C_Cpp.formatting": "clangFormat",
-
   "psi-header.config": {
     "forceToTop": true,
     "blankLinesAfter": 1,
     "license": "Custom"
   },
   "psi-header.variables": [
-    ["author", "Prajwal Thakur"],
-    ["authoremail", "prajwalthakur98@gmail.com"]
+    [
+      "author",
+      "Prajwal Thakur"
+    ],
+    [
+      "authoremail",
+      "prajwalthakur98@gmail.com"
+    ]
   ],
   "psi-header.templates": [
     {
       "language": "*",
-      "template": ["Author: <<author>> <<<authoremail>>>"]
+      "template": [
+        "Author: <<author>> <<<authoremail>>>"
+      ]
     }
   ],
   "psi-header.lang-config": [
@@ -56,9 +63,12 @@
     "modDate": "Last Modified:",
     "modDateFormat": "date",
     "autoHeader": "autoSave",
-    "excludeGlob": ["**/build/**", "**/install/**", "**/log/**"]
+    "excludeGlob": [
+      "**/build/**",
+      "**/install/**",
+      "**/log/**"
+    ]
   },
-
   "C_Cpp.errorSquiggles": "disabled",
   "files.associations": {
     "random": "cpp",
@@ -195,5 +205,6 @@
   "C_Cpp_Runner.useLeakSanitizer": false,
   "C_Cpp_Runner.showCompilationTime": false,
   "C_Cpp_Runner.useLinkTimeOptimization": false,
-  "C_Cpp_Runner.msvcSecureNoWarnings": false
+  "C_Cpp_Runner.msvcSecureNoWarnings": false,
+  "cmake.sourceDirectory": "/workspace/ros_ws/src/agent_sim"
 }
