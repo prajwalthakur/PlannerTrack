@@ -275,7 +275,25 @@ def strip_noise(text):
     return "\n".join(kept)
 
 
-CLANG_FORMAT_BIN = "/usr/bin/clang-format"
+def find_clang_format():
+    """$CLANG_FORMAT, then clang-format on PATH, then the binary bundled with
+    the VS Code C/C++ extension (the container image doesn't persist apt
+    installs, but ~/.vscode-server does)."""
+    import glob
+    import os
+    import shutil
+
+    candidates = [os.environ.get("CLANG_FORMAT"), shutil.which("clang-format")]
+    candidates += sorted(
+        glob.glob(os.path.expanduser(
+            "~/.vscode-server/extensions/ms-vscode.cpptools-*/LLVM/bin/clang-format")),
+        reverse=True,
+    )
+    for c in candidates:
+        if c and os.access(c, os.X_OK):
+            return c
+    sys.exit("insert_function_separators: no clang-format found "
+             "(set $CLANG_FORMAT or `apt install clang-format`)")
 
 
 def run_real_clang_format(args, stdin_bytes):
@@ -283,7 +301,7 @@ def run_real_clang_format(args, stdin_bytes):
 
     forwarded = [a for a in args if a != "-output-replacements-xml"]
     proc = subprocess.run(
-        [CLANG_FORMAT_BIN] + forwarded,
+        [find_clang_format()] + forwarded,
         input=stdin_bytes,
         stdout=subprocess.PIPE,
         check=True,

@@ -85,7 +85,7 @@ void SingleTrackDynStateModel::reset()
 {
 	mStateStruct.x = mInitXPose;
 	mStateStruct.y = mInitYPose;
-	mStateStruct.yaw = mInitYaw;
+	mStateStruct.yaw = mpl::geometry_utils::normalizeAngles(mInitYaw);  // [-pi, pi], as in setState
 	mStateStruct.vx = mInitVx;
 	mStateStruct.vy = mInitVy;
 	mStateStruct.yaw_rate = mInitYawRate;
@@ -107,6 +107,8 @@ void SingleTrackDynStateModel::reset()
 void SingleTrackDynStateModel::setState(const StateVector & statevector)
 {
 	mStateVector = statevector;
+	// Yaw kept in [-pi, pi]: every state update (integrator, Python set_state) passes here.
+	mStateVector(2) = mpl::geometry_utils::normalizeAngles(statevector(2));
 	mStateStruct = VectorToState(mStateVector);
 	// std::cerr << " updated states " <<  mStateStruct.x << " " << mStateStruct.y << std::endl;
 }
@@ -187,8 +189,10 @@ StateVector SingleTrackDynStateModel::xdot(
 	// fully kinematic, above kBlendHi fully dynamic, linear blend in between.
 	// The 1/kTau terms relax (vy, yaw_rate) back onto the kinematic manifold
 	// so the integrated state does not drift while the blend is active.
-	constexpr double kBlendLo = 1.0;  // [m/s]
-	constexpr double kBlendHi = 3.0;  // [m/s]
+	// 0.5-2.5 m/s (was 1-3): above 2.5 m/s the model is exactly the dynamic one, which the
+	// Diff-WMPC prediction model (dynamic only) matches at the tightest hairpin (v_ref 2.95 m/s; steps.md §5).
+	constexpr double kBlendLo = 0.5;  // [m/s]
+	constexpr double kBlendHi = 2.5;  // [m/s]
 	constexpr double kTau = 0.1;      // [s] manifold relaxation time constant
 	const double lambda =
 	    std::clamp((std::abs(xk.vx) - kBlendLo) / (kBlendHi - kBlendLo), 0.0, 1.0);
@@ -278,6 +282,7 @@ StateStruct SingleTrackDynStateModel::VectorToState(const StateVector & statevec
 	st.x = statevector(0);
 	st.y = statevector(1);
 	st.yaw = statevector(2);
+	
 	st.vx = statevector(3);
 	st.vy = statevector(4);
 	st.yaw_rate = statevector(5);

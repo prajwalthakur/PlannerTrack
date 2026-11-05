@@ -49,9 +49,13 @@ class SscPlanner : public PlannerBase
 	~SscPlanner() override = default;
 
 	void configure(mpl::rclcpp_utils::Logger & logger, const YAML::Node & agentsConfig,
-	    const std::string & graphFilepath, const std::string & sscConfigFilePath,
+	    const std::string & graphFile, const std::string & plannerConfigFile,
 	    const UniqueId & id, const rclcpp::Node::SharedPtr & node) override;
 	void receivePredictedTrajectory() override {};
+
+	// getTrajectory(): PlannerBase's default (returns mTrajectory, set by
+	// computeBezierTrajectory()).
+
 	void receivePredictedTrajectoryStatic();  // for now -its just recieved the predicited
 	                                          // trajectory only once
 	void computeTrajectory(const InputData & inputData) override;
@@ -98,7 +102,7 @@ class SscPlanner : public PlannerBase
 	mpl::interpolation::SplineInterpolationPoints2d mRefLane;
 	rclcpp::Time mStartTime;
 	pluginlib::ClassLoader<GeometricModel> mGeometryLoader;
-	// Loaded in configure() from sscConfigFilePath (scenarios/intersection/
+	// Loaded in configure() from plannerConfigFile (scenarios/intersection/
 	// params/ssc_planner.yaml) -- this planner's own tuning, separate from
 	// the scenario's agents.yaml/route graph.
 	ssc_planner::SscMapConfig mMapConfig;

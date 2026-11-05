@@ -70,7 +70,7 @@ void BicycleKinematicModel::reset()
 {
 	mStateStruct.x = mInitXPose;
 	mStateStruct.y = mInitYPose;
-	mStateStruct.yaw = mInitYaw;
+	mStateStruct.yaw = mpl::geometry_utils::normalizeAngles(mInitYaw);  // [-pi, pi], as in setState
 	mStateStruct.vx = mInitVx;
 	mStateStruct.sf = mInitSf;
 	mInputStruct.acc = mInitAcc;
@@ -94,6 +94,8 @@ void BicycleKinematicModel::reset()
 void BicycleKinematicModel::setState(const StateVector & statevector)
 {
 	mStateVector = statevector;
+	// Yaw kept in [-pi, pi]: every state update (integrator, Python set_state) passes here.
+	mStateVector(2) = mpl::geometry_utils::normalizeAngles(statevector(2));
 	mStateStruct.x = mStateVector(0);
 	mStateStruct.y = mStateVector(1);
 	mStateStruct.yaw = mStateVector(2);

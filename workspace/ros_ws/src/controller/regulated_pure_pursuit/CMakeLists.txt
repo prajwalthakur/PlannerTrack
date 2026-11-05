@@ -11,6 +11,7 @@ include_directories(
 ament_auto_add_library(${PROJECT_NAME} SHARED
   src/regulated_pure_pursuit.cpp
   src/optimizer.cpp
+  src/lookahead_search.cpp
 )
 
 target_include_directories(${PROJECT_NAME}

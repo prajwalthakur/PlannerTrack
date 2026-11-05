@@ -80,6 +80,16 @@ void AgentModel::resetToInitialState()
 
 //////////////////////////////////////////////////////////////////////////
 
+void AgentModel::setState(const StateVector & state)
+{
+	mDynamicModel->setState(state);
+	const auto pose = mDynamicModel->getStatePose();
+	mGeomModel->step(pose);
+	mCollisionFootPrint->step(pose);
+}
+
+//////////////////////////////////////////////////////////////////////////
+
 void AgentModel::updateCommandedControl(const InputVector & u)
 {
 	mDynamicModel->updateCommandedControl(u);

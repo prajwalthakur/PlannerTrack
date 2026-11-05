@@ -8,6 +8,15 @@
     "editor.defaultFormatter": "xaver.clang-format",
     "editor.formatOnSave": true
   },
+  "[python]": {
+    "editor.defaultFormatter": "charliermarsh.ruff",
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+      "source.organizeImports.ruff": "explicit"
+    }
+  },
+  "ruff.configuration": "/workspace/ros_ws/tools/ruff.toml",
+  "ruff.configurationPreference": "filesystemFirst",
   "clang-format.executable": "/workspace/ros_ws/tools/clang_format_with_separators.sh",
   "clang-format.style": "file",
   "clang-format.fallbackStyle": "none",

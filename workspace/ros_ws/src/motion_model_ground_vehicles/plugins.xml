@@ -12,3 +12,9 @@ Author: Prajwal Thakur <prajwalthakur98@gmail.com>
     <description>Single-track dynamic state model.</description>
   </class>
 </library>
+
+<library path="motion_model_ground_vehicles">
+  <class type="SingleTrackAugDynModel" base_class_type="DynamicModel">
+    <description>Single-track dynamic model with the acceleration as a state, driven by jerk (state [x, y, yaw, vx, vy, yaw_rate, steer, acc], input [jerk, steer_rate]).</description>
+  </class>
+</library>

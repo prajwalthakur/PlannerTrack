@@ -84,6 +84,15 @@ class AgentModel
 	 * simulation.
 	 */
 	void resetToInitialState();
+
+	/**
+	 * \brief Overwrite this agent's state vector and move its geometry and
+	 * collision footprint to the new pose.
+	 *
+	 * For external drivers that need arbitrary initial states (e.g. learning
+	 * environments); \p state must match the dynamics plugin's state layout.
+	 */
+	void setState(const StateVector & state);
 	// virtual void setState(const StateVector &) = 0;
 	// virtual bool checkNumStatesInputs(
 	//     const StateVector & stateVec, const InputVector & inputVec) = 0;

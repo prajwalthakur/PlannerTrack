@@ -16,6 +16,7 @@
 
 #include "project_utils/planning_utils.hpp"
 #include "regulated_pure_pursuit/optimizer.hpp"
+#include "regulated_pure_pursuit/lookahead_search.hpp"
 
 /** \file
  * \brief \ref regulatedpp_controller::optimizer::Optimizer "Optimizer"
@@ -438,20 +439,22 @@ std::pair<bool, double> Optimizer::runPP(const geometry_msgs::msg::Pose & currPo
 		return std::make_pair(false, std::numeric_limits<double>::quiet_NaN());
 	}
 
+	// Closed path (racing line): the lookahead search wraps across the start/finish seam.
+	const int32_t loop_size = lookahead::closedLoopSize(waypoints);
 	int32_t next_wp_idx =
-	    findNextPointIdx(currPose, waypoints, lookAheadDistance, closest_pair.second);
+	    findNextPointIdx(currPose, waypoints, lookAheadDistance, closest_pair.second, loop_size);
 	if (next_wp_idx == -1) {
 		mLogger.warn("lost next waypoint");
 		return std::make_pair(false, std::numeric_limits<double>::quiet_NaN());
 	}
 
 	[[maybe_unused]] geometry_msgs::msg::Point loc_next_wp_ = waypoints.at(next_wp_idx).position;
-	if (next_wp_idx == 0) {
+	if (loop_size == 0 && next_wp_idx == 0) {
 		mNextTgtPosition = waypoints.at(next_wp_idx).position;
 	} else {
 		// linear interpolation to find exact position
 		std::pair<bool, geometry_msgs::msg::Point> lerp_pair =
-		    lerpNextTarget(currPose, waypoints, lookAheadDistance, next_wp_idx);
+		    lerpNextTarget(currPose, waypoints, lookAheadDistance, next_wp_idx, loop_size);
 		if (!lerp_pair.first) {
 			mLogger.warn(" lost target! ");
 			return std::make_pair(false, std::numeric_limits<double>::quiet_NaN());
@@ -464,63 +467,21 @@ std::pair<bool, double> Optimizer::runPP(const geometry_msgs::msg::Pose & currPo
 
 int32_t Optimizer::findNextPointIdx(const geometry_msgs::msg::Pose & currPose,
     std::vector<geometry_msgs::msg::Pose> & waypoints, double lookAheadDistance,
-    int32_t search_start_idx)
+    int32_t search_start_idx, int32_t loop_size)
 {
-	// if waypoints are not given, do nothing.
-	if (waypoints.empty() || search_start_idx == -1) {
-		return -1;
-	}
-
-	// check if the waypoint direction is forward
-	const int8_t wpDir =
-	    mpl::planning_utils::getPathDirection(waypoints, mOptimParam.resampling_ds / 2.0);
-	// look for the next waypoint
-	for (int32_t i = search_start_idx; i < static_cast<int32_t>(waypoints.size()); ++i) {
-		// if the first waypoint is the last
-		if (i == static_cast<int32_t>(waypoints.size()) - 1) {
-			return i;
-		}
-		if (wpDir == 0) {
-			// wp is in forward direction (x_prev < x_next) normal forward driving
-			// if wp is not in front of ego ? prev_wp ---> car --> next_wp
-			auto ret = mpl::planning_utils::transformToRelativeCoordinate2D(
-			    waypoints.at(i).position, currPose);
-			if (ret.x < 0) {
-				// wp is increasing in x direction (forward motion expected)
-				// but the car pose is in different direction
-				continue;
-			}
-		} else if (wpDir == 1) {
-			// waypoint direction is backward
-			// if waypoint is in front of ego, skip
-			auto ret = mpl::planning_utils::transformToRelativeCoordinate2D(
-			    waypoints.at(i).position, currPose);
-			if (ret.x > 0) {
-				continue;
-			}
-		} else {
-			return -1;
-		}
-		const geometry_msgs::msg::Point & curr_motion_point = waypoints.at(i).position;
-		const geometry_msgs::msg::Point & curr_pose_point = currPose.position;
-		// if there exists an effective waypoint
-		const double ds =
-		    mpl::geometry_utils::calcDistance2dSquare(curr_motion_point, curr_pose_point);
-		if (ds > std::pow(lookAheadDistance, 2)) {
-			return i;
-		}
-	}
-	return -1;
+	return lookahead::findNextPointIdx(currPose, waypoints, lookAheadDistance, search_start_idx,
+	    loop_size, mOptimParam.resampling_ds / 2.0);
 }
 
 // linear interpolation of next target
 std::pair<bool, geometry_msgs::msg::Point> Optimizer::lerpNextTarget(
     const geometry_msgs::msg::Pose & currPose, std::vector<geometry_msgs::msg::Pose> & waypoints,
-    double lookAheadDistance, int32_t next_wp_idx)
+    double lookAheadDistance, int32_t next_wp_idx, int32_t loop_size)
 {
 	constexpr double ERROR2 = 1e-5;  // 0.00001
 	const geometry_msgs::msg::Point & vec_end = waypoints.at(next_wp_idx).position;
-	const geometry_msgs::msg::Point & vec_start = waypoints.at(next_wp_idx - 1).position;
+	const geometry_msgs::msg::Point & vec_start =
+	    waypoints.at(lookahead::previousIdx(next_wp_idx, loop_size)).position;
 	const geometry_msgs::msg::Pose & curr_pose = currPose;
 
 	Eigen::Vector3d vec_a(

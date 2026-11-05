@@ -33,7 +33,17 @@ ptSharedPtr<AgentModel> VehicleModelFactory::create(
 	// shared_ptr<DynamicModel> -- the concrete type is never named here.
 	const std::string dynType = agentConfig["dynamics_plugin"].as<std::string>();
 	auto dyn = mDynamicsLoader.createSharedInstance(dynType);
-	YAML::Node dynParams = agentConfig["dynamics_params"];
+	// Clone: the vehicle_limits block is attached for the plugin without
+	// modifying the caller's agentConfig (YAML::Node copies share data).
+	// vehicle limits are seperate, and we are not passing it downstream.
+	// Now dynParams gets the vehicle limits also.
+	YAML::Node dynParams = YAML::Clone(agentConfig["dynamics_params"]);
+	if (agentConfig["vehicle_limits"] && !dynParams["vehicle_limits"]) {
+		// One source for the limits: plugins that enforce actuator limits in
+		// simulation (e.g. SingleTrackAugDynModel, clip_control_in_sim) read
+		// the agent's vehicle_limits as dynamics_params.vehicle_limits.
+		dynParams["vehicle_limits"] = YAML::Clone(agentConfig["vehicle_limits"]);
+	}
 	dyn->initialze(simConfig, dynParams, id);
 	if(createStPublisher){
 		const std::string ns = "agent_" + std::to_string(id.value());

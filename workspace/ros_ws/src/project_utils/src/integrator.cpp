@@ -41,7 +41,7 @@ mt::StateVector IntegratorClass::rk4Integrator(
 	mt::StateVector k1 = mDynamicsFunc(x, u);
 	mt::StateVector k2 = mDynamicsFunc(x + (ts / 2.) * k1, u);
 	mt::StateVector k3 = mDynamicsFunc(x + (ts / 2.) * k2, u);
-	mt::StateVector k4 = mDynamicsFunc(x + (ts / 2.) * k3, u);
+	mt::StateVector k4 = mDynamicsFunc(x + ts * k3, u);
 	mt::StateVector x_next = x + ts * (k1 / 6. + k2 / 3. + k3 / 3. + k4 / 6.);
 	// std::cerr << " x_next " << x_next << std::endl;
 	return x_next;

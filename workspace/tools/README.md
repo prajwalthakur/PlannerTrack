@@ -143,7 +143,8 @@ ros2 launch scenarios ssc_corridor_debug.launch.py     # corridor visualization 
 ```
 
 `tools/` holds clang-format helpers (`clang_format_with_separators.sh`,
-`insert_function_separators.py`); `.clang-format` is the style.
+`insert_function_separators.py`); `.clang-format` is the style. Python is formatted
+on save by the Ruff extension (`charliermarsh.ruff`) with `tools/ruff.toml` as the style.
 
 ---
 

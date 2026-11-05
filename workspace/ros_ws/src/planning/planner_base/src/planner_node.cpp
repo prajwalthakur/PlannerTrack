@@ -19,7 +19,7 @@ PlannerNode::PlannerNode(const rclcpp::NodeOptions & nodeOptions) : Node("planne
 	getParam(mAgentNumber, "agent_number", 0);
 	getParam(mAgentsConfigFile, "agents_config_file", std::string(""));
 	getParam(mGraphFile, "graph_file", std::string(""));
-	getParam(mSscConfigFile, "ssc_config_file", std::string(""));
+	getParam(mPlannerConfigFile, "planner_config_file", std::string(""));
 	// Hardcoded default for now
 	getParam(mPlannerPluginName, "planner_plugin", std::string("SscPlanner"));
 	getParam(mPlannerFrequencyHz, "planner_frequency", 2.0f);
@@ -40,7 +40,8 @@ void PlannerNode::configure()
 	const UniqueId id("planning_agent", mAgentNumber);
 
 
-	mPlanner->configure(mLogger, agentsConfig, mGraphFile, mSscConfigFile, id, shared_from_this());
+	mPlanner->configure(
+	    mLogger, agentsConfig, mGraphFile, mPlannerConfigFile, id, shared_from_this());
 
 	const auto periodNs = std::chrono::duration_cast<std::chrono::nanoseconds>(
 	    std::chrono::duration<double, std::ratio<1, 1>>(1.0 / mPlannerFrequencyHz));
@@ -51,28 +52,40 @@ void PlannerNode::configure()
 
 bool PlannerNode::buildInputData(InputData * inputData)
 {
+	// Only wait for (and fill) what the loaded planner says it needs.
+	const PlannerInputs required = mPlanner->requiredInputs();
 	const auto pathData = mSubReferencePath.takeData();
 	const auto trajData = mSubReferenceTrajectory.takeData();
 	const auto odomData = mSubOdometry.takeData();
 
-	if (!pathData) {
+	const bool pathMissing = required.referencePath && !pathData;
+	const bool trajMissing = required.referenceTrajectory && !trajData;
+	const bool odomMissing = required.odometry && !odomData;
+
+	if (pathMissing) {
 		mLogger.info_throttle(*get_clock(), loggerThrottleIntervalMs, "waiting for reference_path");
 	}
-	if (!trajData) {
+	if (trajMissing) {
 		mLogger.info_throttle(
 		    *get_clock(), loggerThrottleIntervalMs, "waiting for reference_trajectory");
 	}
-	if (!odomData) {
+	if (odomMissing) {
 		mLogger.info_throttle(*get_clock(), loggerThrottleIntervalMs, "waiting for odom");
 	}
-	if (!pathData || !trajData || !odomData) {
+	if (pathMissing || trajMissing || odomMissing) {
 		return false;
 	}
 
-	inputData->mEgoPath = *pathData;
-	inputData->mEgoInitTraj = *trajData;
-	inputData->mEgoPose.header = odomData->header;
-	inputData->mEgoPose.pose = odomData->pose.pose;
+	if (pathData) {
+		inputData->mEgoPath = *pathData;
+	}
+	if (trajData) {
+		inputData->mEgoInitTraj = *trajData;
+	}
+	if (odomData) {
+		inputData->mEgoPose.header = odomData->header;
+		inputData->mEgoPose.pose = odomData->pose.pose;
+	}
 	return true;
 }
 

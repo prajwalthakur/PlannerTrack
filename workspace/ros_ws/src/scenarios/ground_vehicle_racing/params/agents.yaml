@@ -5,9 +5,13 @@
 #
 agents:
   agent_1:
-    dynamics_plugin: SingleTrackDynStateModel
+    # Augmented single-track plant (same as ground_vehicle_racing_rl): state
+    # [x, y, yaw, vx, vy, yaw_rate, steer, acc]. command_mode: acceleration lets
+    # pure_pursuit -> pid_controller drive it: u = [a_cmd, steer_rate], and the
+    # acc state follows a_cmd through a first-order drive actuator.
+    dynamics_plugin: SingleTrackAugDynModel
     dynamics_params:
-      numStates: 7
+      numStates: 8
       numControlInputs: 2
       initXPose: -1.31735      # on global_traj_wpnts_iqp, index 0 (start/finish)
       initYPose: -6.6550
@@ -16,8 +20,10 @@ agents:
       initVx: 0.0
       initVy: 0.0
       initSf: 0.0             # initial steering angle (rad)
-      initAcc: 0.0
+      initAcc: 0.0             # initial acceleration STATE (m/s^2)
       initSv: 0.0              # initial steering velocity (rad/s)
+      command_mode: acceleration   # jerk (default, rl_framework) | acceleration (pid_controller)
+      accelTimeConstant: 0.05      # s, drive actuator lag: jerk = (a_cmd - acc) / accelTimeConstant -- placeholder
       # F1TENTH-scale reference values (wheelbase/dims match this platform
       # closely)
       mass: 3.47                # kg
@@ -32,6 +38,14 @@ agents:
       steeringTimeConstant: 0.1   # first-order steering-actuator lag, s -- placeholder, tune to actual servo
       integration:
         integrationStepSize: 0.001   # rk4 integration step (s), independent of simTimeStep this is (model_dt)
+
+    # Vehicle limits shared by planners (min_curv_planner) and controllers.
+    # Not read by agent_sim. PLACEHOLDERS -- verify on the real car.
+    vehicle_limits:
+      max_steer: 0.4189          # rad, TODO measure (value from TUM f110.ini); curvature limit = tan(max_steer)/vehWheelBase
+      max_accel: 5.0             # m/s^2, drive limit, TODO; must match the MPC's acceleration upper bound
+      max_decel: 8.0             # m/s^2, braking limit (positive), TODO; ~ friction_margin * mu * g
+      max_speed: 10.0            # m/s, TODO
 
     geometry_plugin: RectangularGeometry
     geometry_params:

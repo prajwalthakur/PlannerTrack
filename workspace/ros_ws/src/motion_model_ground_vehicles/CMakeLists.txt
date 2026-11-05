@@ -20,6 +20,7 @@ find_package(yaml-cpp REQUIRED)
 
 add_library(motion_model_ground_vehicles SHARED
   src/singleTrackDynStateModel/SingleTrackDynStateModel.cpp
+  src/singleTrackAugDynModel/SingleTrackAugDynModel.cpp
   src/bicycleKinematicModel/BicycleKinematicModel.cpp
 )
 add_library(motion_model_ground_vehicles::motion_model_ground_vehicles ALIAS motion_model_ground_vehicles)

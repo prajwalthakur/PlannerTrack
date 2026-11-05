@@ -168,16 +168,17 @@ class Optimizer
 	    project_utils_msgs::msg::Trajectory & trajToFollow);
 
 	/// \brief Index of the first waypoint at least \p lookAheadDistance ahead of \p currPose, searching from \p search_start_idx.
+	/// Wraps around a closed path (\p loop_size > 0, see lookahead::closedLoopSize).
 	int32_t findNextPointIdx(const geometry_msgs::msg::Pose & currPose,
 	    std::vector<geometry_msgs::msg::Pose> & waypoints, double lookAheadDistance,
-	    int32_t search_start_idx);
+	    int32_t search_start_idx, int32_t loop_size);
 
 	/// \brief Linearly interpolate the exact lookahead-distance target point between waypoints.
 	/// \return `{success, target point}`.
 	std::pair<bool, geometry_msgs::msg::Point> lerpNextTarget(
 	    const geometry_msgs::msg::Pose & currPose,
 	    std::vector<geometry_msgs::msg::Pose> & waypoints, double lookAheadDistance,
-	    int32_t next_wp_idx);
+	    int32_t next_wp_idx, int32_t loop_size);
 
 	/**
 	 * \brief Target speed for this cycle: either \ref stOptimParam::external_target_speed

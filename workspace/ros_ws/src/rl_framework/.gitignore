@@ -1,0 +1,9 @@
+# Generated / large artifacts
+data/*
+!data/COLCON_IGNORE
+runs/*
+!runs/COLCON_IGNORE
+c_generated_code/
+*.json.acados
+__pycache__/
+*.egg-info/

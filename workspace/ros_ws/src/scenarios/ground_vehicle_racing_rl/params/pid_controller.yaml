@@ -1,0 +1,16 @@
+/**/pid_controller:
+  ros__parameters:
+    controller_frequency: 100.0
+    timeout_thr_sec: 0.5
+    accel_pararms:
+      kp: 2.5
+      ki: 0.4
+      kd: 0.0
+      min: -9.51  # matches regulated_pp.vehicle.a_max 
+      max: 9.51   # regulated_pp.vehicle.a_max
+    steering_params:
+      kp: 4.0
+      ki: 0.0
+      kd: 0.8
+      min: -3.2  # regulated_pp.vehicle.sv_min
+      max: 3.2   # regulated_pp.vehicle.sv_max

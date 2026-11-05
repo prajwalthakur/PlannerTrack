@@ -173,7 +173,7 @@ def generate_launch_description():
                 'agent_number': 1,
                 'agents_config_file': agents_config,
                 'graph_file': route_graph_file,
-                'ssc_config_file': ssc_config,
+                'planner_config_file': ssc_config,
                 'planner_plugin': 'SscPlanner',
                 'planner_frequency': 2.0,
             }],

@@ -67,7 +67,7 @@ SscPlanner::SscPlanner() : mGeometryLoader("motion_model_base", "GeometricModel"
 //////////////////////////////////////////////////////////////////////////
 
 void SscPlanner::configure(mpl::rclcpp_utils::Logger & logger, const YAML::Node & agentsConfig,
-    const std::string & graphFilepath, const std::string & sscConfigFilePath, const UniqueId & id,
+    const std::string & graphFile, const std::string & plannerConfigFile, const UniqueId & id,
     const rclcpp::Node::SharedPtr & node)
 {
 	mLogger = logger;
@@ -77,10 +77,10 @@ void SscPlanner::configure(mpl::rclcpp_utils::Logger & logger, const YAML::Node 
 	mAgentNum = static_cast<int>(id.value());
 	mWorldSnapshot.mAgentsSnapShot.clear();
 	if (!mpl_route::GraphLoader().loadGraphFromFile(
-	        mWorldSnapshot.routeGraph, mWorldSnapshot.routeGraphIdMap, graphFilepath)) {
-		mLogger.error("SscPlanner: failed to load route graph from %s", graphFilepath.c_str());
+	        mWorldSnapshot.routeGraph, mWorldSnapshot.routeGraphIdMap, graphFile)) {
+		mLogger.error("SscPlanner: failed to load route graph from %s", graphFile.c_str());
 	}
-	mMapConfig = ssc_planner::loadSscMapConfig(sscConfigFilePath);
+	mMapConfig = ssc_planner::loadSscMapConfig(plannerConfigFile);
 	mSscMap = std::make_unique<ssc_planner::SscMap>(mMapConfig, mLogger);
 	// Latched: computeTrajectory() currently runs once (see PlannerNode's
 	// one-shot timer), so a late-connecting RViz subscriber still needs to
@@ -498,13 +498,13 @@ void SscPlanner::computeBezierTrajectory(ssc_planner::ErrorType corridorStatus)
 	mBezierSplineValid = true;
 	mLogger.info("[SscPlanner] Bezier trajectory solved -- %d segments", spline.num_segments());
 
-	const auto trajectory = buildTrajectoryFromSpline(mBezierSpline, mRefLane, mNode->now());
-	mBezierTrajectoryPub->publish(trajectory);
+	mTrajectory = buildTrajectoryFromSpline(mBezierSpline, mRefLane, mNode->now());
+	mBezierTrajectoryPub->publish(mTrajectory);
 	mLogger.info(
-	    "[SscPlanner] published Bezier trajectory -- %zu waypoints", trajectory.points.size());
+	    "[SscPlanner] published Bezier trajectory -- %zu waypoints", mTrajectory.points.size());
 
 	const auto trajectoryMarker =
-	    ssc_planner::buildBezierTrajectoryMarker(trajectory, "map", mNode->now());
+	    ssc_planner::buildBezierTrajectoryMarker(mTrajectory, "map", mNode->now());
 	mBezierTrajectoryMarkerPub->publish(trajectoryMarker);
 	mLogger.info("[SscPlanner] computed bezier trajectory,published marker");
 

@@ -1,0 +1,9 @@
+# Plain YAML, loaded directly via YAML::LoadFile() in agent_sim -- NOT a
+# ros__parameters file. Same simConfig node is handed to every agent's
+# DynamicModel::initialze()/GeometricModel/CollisionFootPrint::initialize().
+#
+# Kept deliberately minimal: only fields an existing plugin actually reads.
+# simTimeStep is read by SingleTrackDynStateModel::createIntegrator()
+# (motion_model_ground_vehicles) as simConfig["simTimeStep"].
+
+simTimeStep: 0.01

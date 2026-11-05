@@ -1,0 +1,41 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>plannertrack_py</name>
+  <version>0.0.1</version>
+  <description>
+    pybind11 bindings exposing the PlannerTrack simulator core (VehicleModelFactory /
+    AgentModel) and the minimum-curvature raceline (min_curv_planner) to Python for
+    learning-based control, without a ROS graph.
+  </description>
+  <maintainer email="prajwalthakur98@gmail.com">Prajwal Thakur</maintainer>
+  <license>TODO</license>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+  <buildtool_depend>ament_cmake_python</buildtool_depend>
+
+  <build_depend>pybind11_vendor</build_depend>
+  <build_depend>python3-dev</build_depend>
+
+  <depend>motion_model_base</depend>
+  <depend>min_curv_planner</depend>
+  <depend>project_utils</depend>
+  <depend>pluginlib</depend>
+  <depend>rclcpp</depend>
+  <depend>eigen</depend>
+  <depend>yaml-cpp</depend>
+
+  <!-- Plugins loaded at runtime through pluginlib; must be installed alongside. -->
+  <exec_depend>motion_model_ground_vehicles</exec_depend>
+  <exec_depend>motion_model_shapes</exec_depend>
+  <exec_depend>motion_model_sensors</exec_depend>
+  <exec_depend>python3-numpy</exec_depend>
+  <exec_depend>python3-yaml</exec_depend>
+
+  <test_depend>ament_cmake_pytest</test_depend>
+  <test_depend>python3-pytest</test_depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>

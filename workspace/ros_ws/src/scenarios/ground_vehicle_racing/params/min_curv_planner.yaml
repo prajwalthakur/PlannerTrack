@@ -1,0 +1,39 @@
+# Minimum-curvature raceline planner (planning/min_curv_planner) config. Loaded with
+# YAML::LoadFile() by the plugin -- the ros__parameters wrapper only mirrors
+# intersection/params/ssc_planner.yaml.
+#
+# Vehicle values (mu, vehWheelBase, mass, width, vehicle_limits) come from
+# this agent's entry in agents.yaml. Derived values:
+#   curvature limit = tan(max_steer) / vehWheelBase
+#   ay_max          = friction_margin * mu * g
+#   width_opt       = geometry width + 2 * safety_margin
+# Values marked TODO are placeholders.
+/**:
+  ros__parameters:
+    min_curv_planner:
+      # Relative paths are resolved against this file's directory.
+      centerline_file: ../map/global_waypoints.json
+      centerline_key: centerline_waypoints   # x_m, y_m, d_right, d_left per waypoint
+      frame_id: map
+
+      friction_margin: 0.85     # TODO; headroom left for mass/mu perturbation experiments
+      safety_margin: 0.10       # m per side, TODO
+
+      preprocessing:
+        enable_smoothing: true
+        stepsize_prep: 0.1        # m, linear resampling before smoothing
+        stepsize_reg: 0.3         # m, optimization grid
+        smoothing_residual: 10.0  # m^2, same meaning as TUM s_reg
+
+      optimization:
+        objective: min_curvature  # min_curvature | tph_compat (parity tests only)
+        iqp_iters_min: 3
+        iqp_iters_max: 20
+        iqp_curv_error_allowed: 0.01   # rad/m
+
+      velocity_profile:
+        dyn_model_exp: 1.0        # friction-ellipse exponent, [1, 2]
+        drag_coeff: 0.0           # kg/m; our vehicle model has no drag
+
+      output:
+        stepsize_interp: 0.2      # m

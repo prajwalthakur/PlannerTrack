@@ -86,7 +86,7 @@ class BicycleKinematicModel : public DynamicModel
 	 * \param input Current input `[acc, sv]`.
 	 * \return State derivative, same layout as \p state.
 	 */
-	StateVector xdot(const StateVector & state, const InputVector & input) const;
+	StateVector xdot(const StateVector & state, const InputVector & input) const override;
 	void createIntegrator() override;
 	void setupRos(const rclcpp::Node::SharedPtr & node, const std::string & ns,
 	    const std::string & fixedFrame) override;

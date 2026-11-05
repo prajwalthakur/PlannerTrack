@@ -100,5 +100,18 @@ ament_export_include_directories(
 ament_export_targets(
   export_${PROJECT_NAME}
 )
+# planner_base's exported target links these (PUBLIC), so every plugin's
+# find_package(planner_base) must also find them.
+ament_export_dependencies(
+  rclcpp
+  geometry_msgs
+  nav_msgs
+  project_utils
+  project_utils_msgs
+  mpl_route_planner
+  motion_model_base
+  pluginlib
+  yaml-cpp
+)
 
 ament_package()

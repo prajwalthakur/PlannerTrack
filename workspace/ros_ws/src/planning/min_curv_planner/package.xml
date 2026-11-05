@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>min_curv_planner</name>
+  <version>0.0.0</version>
+  <description>Minimum-curvature global raceline + speed profile (light C++ port of TUM mincurv_iqp), as a PlannerBase plugin. The algorithm lives in a separate ROS-free library target (min_curv_planner_core).</description>
+  <maintainer email="prajwalthakur98@gmail.com">Prajwal Thakur</maintainer>
+  <license>Apache-2.0</license>
+
+  <buildtool_depend>ament_cmake_ros</buildtool_depend>
+
+  <depend>eigen</depend>
+  <depend>yaml-cpp</depend>
+  <depend>libeigen-quadprog-dev</depend>
+  <depend>planner_base</depend>
+  <depend>pluginlib</depend>
+  <depend>rclcpp</depend>
+  <depend>project_utils</depend>
+  <depend>project_utils_msgs</depend>
+  <depend>visualization_msgs</depend>
+
+  <test_depend>ament_cmake_gtest</test_depend>
+  <test_depend>ament_lint_auto</test_depend>
+  <test_depend>ament_lint_common</test_depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+    <planner_base plugin="${prefix}/plugins.xml" />
+  </export>
+</package>

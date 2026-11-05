@@ -1,0 +1,19 @@
+# Python style for the workspace, used by the editor's format-on-save (Ruff extension,
+# see .vscode/settings.json "ruff.configuration") and by the CLI:
+#   ruff format --config tools/ruff.toml <files>
+#   ruff check --select I --fix --config tools/ruff.toml <files>   # sort imports
+# Lives in tools/ because the workspace root is not persisted in the container.
+line-length = 100  # matches ColumnLimit in .clang-format
+target-version = "py312"
+extend-exclude = ["**/build", "**/install", "**/log", "**/leap-c"]
+
+[format]
+quote-style = "double"
+indent-style = "space"
+
+[lint]
+select = ["E", "F", "W", "I", "B", "UP"]
+ignore = ["E501"]  # long lines are the formatter's job
+
+[lint.isort]
+known-first-party = ["plannertrack_py"]

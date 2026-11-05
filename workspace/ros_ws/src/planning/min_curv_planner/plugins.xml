@@ -1,0 +1,8 @@
+<!--
+Author: Prajwal Thakur <prajwalthakur98@gmail.com>
+-->
+<library path="min_curv_planner">
+  <class type="MinCurvPlanner" base_class_type="PlannerBase">
+    <description>Global raceline planner: minimum-curvature path + speed profile over the track centerline, computed once and published latched.</description>
+  </class>
+</library>

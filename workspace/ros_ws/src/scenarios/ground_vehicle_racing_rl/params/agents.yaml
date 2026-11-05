@@ -1,0 +1,81 @@
+# Plain YAML, loaded directly via YAML::LoadFile() in agent_sim -- NOT a
+# ros__parameters file. Named keys (agent_1, agent_2, ...) become each
+# agent's UniqueId. Agent count is derived from this map's size, not
+# tracked separately anywhere.
+#
+agents:
+  agent_1:
+    # Augmented single-track plant (rl_framework): state [x, y, yaw, vx, vy,
+    # yaw_rate, steer, acc], input [jerk, steer_rate]. Same vehicle physics and
+    # parameters as SingleTrackDynStateModel in ground_vehicle_racing.
+    dynamics_plugin: SingleTrackAugDynModel
+    dynamics_params:
+      numStates: 8
+      numControlInputs: 2
+      initXPose: -1.31735      # on global_traj_wpnts_iqp, index 0 (start/finish)
+      initYPose: -6.6550
+      initYaw: -2.8359
+      initYawRate: 0.0
+      initVx: 0.0
+      initVy: 0.0
+      initSf: 0.0             # initial steering angle (rad)
+      initAcc: 0.0             # initial acceleration STATE (m/s^2)
+      initJerk: 0.0            # initial jerk input (m/s^3)
+      initSv: 0.0              # initial steering velocity (rad/s)
+      # F1TENTH-scale reference values (wheelbase/dims match this platform
+      # closely)
+      mass: 3.47                # kg
+      Iz: 0.04712                # yaw inertia, kg*m^2
+      lf: 0.17                   # CG-to-front-axle, m (half of wheelbase 0.34)
+      lr: 0.17                   # CG-to-rear-axle, m
+      cf: 4.718                  # load-normalized front cornering stiffness C_Sf [1/rad] (f1tenth/CommonRoad)
+      cr: 5.4562                 # load-normalized rear cornering stiffness  C_Sr [1/rad]
+      mu: 1.0489                 # tire-road friction coefficient
+      hcg: 0.074                 # height of CG above ground, m (longitudinal load transfer; 0 -> static split)
+      vehWheelBase: 0.34          # lf + lr, m
+      steeringTimeConstant: 0.1   # first-order steering-actuator lag, s -- placeholder, tune to actual servo
+      integration:
+        integrationStepSize: 0.001   # rk4 integration step (s), independent of simTimeStep this is (model_dt)
+      # Enforce vehicle_limits in the simulator (SingleTrackAugDynModel only): jerk and steer rate
+      # clipped, steer and acc held at their limits (end stop, checked every RK4 sub-step).
+      clip_control_in_sim: true
+
+    # Vehicle limits shared by planners (min_curv_planner) and the MPC. Not read
+    # by agent_sim. F1TENTH-gym values, as in the controller configs
+    # (pure_pursuit_controller.yaml: s_max, sv_max, a_max, v_max).
+    vehicle_limits:
+      max_steer: 0.6981          # rad (40 deg, racing lock; gym s_max was 0.4189); curvature limit = tan(max_steer)/vehWheelBase = 2.47 rad/m
+      max_steer_rate: 3.2        # rad/s (gym sv_max); MPC bound on the steer_rate input
+      max_accel: 9.51            # m/s^2, drive limit (gym a_max); above max_decel, so acceleration is grip-limited
+      max_decel: 8.64            # m/s^2, braking limit (positive): longitudinal axis of the friction ellipse
+                                 # in the speed profile and the MPC. Slightly above the lateral axis
+                                 # friction_margin * mu * g = 0.82 * 1.0489 * 9.81 = 8.44 (min_curv_planner.yaml),
+                                 # well below mu * g = 10.29; the plant has no longitudinal tire limit
+      max_speed: 20.0            # m/s (gym v_max); not reached on this track
+      max_jerk: 50.0             # m/s^3, MPC bound on the jerk input (design choice; Diff-WMPC
+                                 # penalizes jerk above 8 m/s^3 in its loss)
+
+    geometry_plugin: RectangularGeometry
+    geometry_params:
+      length: 0.58
+      width: 0.31
+
+    collision_plugin: EllipseCollisionFootPrint
+    collision_params:
+      major_axis_length: 0.60
+      minor_axis_length: 0.34
+
+    sensor_plugin: LidarSensorModel
+    sensor_params:
+      num_beams: 360
+      angle_min: -3.14159265
+      angle_max: 3.14159265
+      range_min: 0.05
+      range_max: 10.0
+    # pure_pursuit / mppi_controller command acceleration (via pid_controller):
+    # the launch runs the plant with command_mode: acceleration in a derived copy
+    # of this file (this file stays jerk-driven for rl_framework). With
+    # `controller:=none` an external node publishes [jerk, steer_rate] on
+    # /agent_1/control (EigenVectorStamped).
+    controller: "pure_pursuit"
+ 

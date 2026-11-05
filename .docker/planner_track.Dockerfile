@@ -128,6 +128,11 @@ RUN pip3 install --index-url ${TORCH_INDEX} torch==2.6.0 \
 # __init__.py, which breaks jaxlib 0.4.34's _cuda_path() (__file__ is None).
 RUN pip3 install "jax[cuda12]==0.4.35" "numpy<2.0.0" "nvidia-cuda-nvcc-cu12==12.4.131"
 
+RUN wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2404/x86_64/cuda-keyring_1.1-1_all.deb && \
+    dpkg -i cuda-keyring_1.1-1_all.deb && apt-get update && \
+    apt-get install -y cuda-toolkit-12-6 && rm -rf /var/lib/apt/lists/*
+
+
 RUN apt-get update && apt-get install -y libopencv-dev && rm -rf /var/lib/apt/lists/*
 
 RUN curl -1sLf 'https://dl.cloudsmith.io/public/mc-rtc/stable/setup.deb.sh' | bash

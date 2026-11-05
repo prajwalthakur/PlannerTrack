@@ -80,7 +80,7 @@ class PlannerNode : public rclcpp::Node
 	int mAgentNumber{0};
 	std::string mAgentsConfigFile;
 	std::string mGraphFile;
-	std::string mSscConfigFile;
+	std::string mPlannerConfigFile;
 	std::string mPlannerPluginName;
 	float mPlannerFrequencyHz{2.0f};
 

@@ -12,7 +12,8 @@ from nav2_common.launch import RewrittenYaml
 # loop against this agent's own odom/steering_report feedback and is the one
 # that actually owns /agent_N/control (EigenVectorStamped), which is what
 # agent_sim's control subscriber expects -- same pattern as pure_pursuit.py.
-def build_nodes(i, sim_config, agents_config):
+def build_nodes(i, sim_config, agents_config,
+                reference_topic='/global_planner/iqp_trajectory'):
     params_dir = os.path.join(
         get_package_share_directory('scenarios'), 'ground_vehicle_racing', 'params')
     mppi_config = os.path.join(params_dir, 'mppi_controller.yaml')
@@ -46,7 +47,7 @@ def build_nodes(i, sim_config, agents_config):
                 },
             ],
             remappings=[
-                ('~/input/reference_trajectory', '/global_planner/iqp_trajectory'),
+                ('~/input/reference_trajectory', reference_topic),
                 ('~/input/current_odometry', f'/agent_{i}/odom'),
                 ('~/input/current_steering', f'/agent_{i}/steering_report'),
                 ('~/output/control_cmd', f'/agent_{i}/amr_control'),

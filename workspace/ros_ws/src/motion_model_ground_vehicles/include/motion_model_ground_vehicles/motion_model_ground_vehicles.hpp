@@ -6,7 +6,7 @@
 /** \file
  * \brief Unused `ament_cmake` package-template boilerplate, left over from
  * `ros2 pkg create`. The package's actual content is
- * \ref BicycleKinematicModel and \ref SingleTrackDynStateModel.
+ * \ref BicycleKinematicModel, \ref SingleTrackDynStateModel and \ref SingleTrackAugDynModel.
  */
 namespace motion_model_ground_vehicles
 {

@@ -14,7 +14,7 @@
 
 namespace
 {
-std::string pkg_path = ament_index_cpp::get_package_share_directory("mpcc_controller");
+std::string pkg_path = ament_index_cpp::get_package_share_directory("regulated_pure_pursuit");
 std::string param_file = pkg_path + "/test_config/params.yaml";
 }  // namespace
 class DummyTest : public mplTestFixture

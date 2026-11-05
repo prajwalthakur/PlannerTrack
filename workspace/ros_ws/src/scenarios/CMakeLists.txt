@@ -7,7 +7,7 @@ find_package(ament_cmake REQUIRED)
 # them wholesale, preserving structure, so a scenario's own launch file can
 # locate its own params/map via get_package_share_directory('scenarios').
 install(
-  DIRECTORY ground_vehicle_racing industrial_yard intersection drone_racing
+  DIRECTORY ground_vehicle_racing ground_vehicle_racing_rl industrial_yard intersection drone_racing
   DESTINATION share/${PROJECT_NAME}
 )
 
@@ -21,10 +21,16 @@ install(PROGRAMS
   intersection/scripts/generate_lane_graph.py
   intersection/scripts/publish_lane_markers.py
   intersection/scripts/publish_route_graph_markers.py
-  drone_racing/scripts/course_publisher.py
-  drone_racing/scripts/camera_sensor_test_node.py
   DESTINATION lib/${PROJECT_NAME}
 )
+
+# drone_racing scripts are not in the tree yet; install them once they exist
+# instead of failing the whole package install.
+foreach(script course_publisher.py camera_sensor_test_node.py)
+  if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/drone_racing/scripts/${script}")
+    install(PROGRAMS drone_racing/scripts/${script} DESTINATION lib/${PROJECT_NAME})
+  endif()
+endforeach()
 
 # intersection/ has its own global_waypoints_publisher.py (a different
 # script -- ComputeRoute action client + trajectory generator, not the

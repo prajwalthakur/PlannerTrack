@@ -39,6 +39,18 @@ class DynamicModel
 	virtual void updateCommandedControl(const InputVector & u) = 0;
 	/// \brief Advance the vehicle's state by one simulation timestep.
 	virtual void step() = 0;
+	/**
+	 * \brief Continuous-time state derivative dx/dt = f(x, u): the function
+	 * this model's integrator integrates.
+	 *
+	 * Side-effect free (does not touch the model's own state or input), so it
+	 * can be evaluated at any point, e.g. to check an MPC's prediction model
+	 * against the plant.
+	 * \param state State vector in this model's layout.
+	 * \param input Input vector in this model's layout.
+	 * \return State derivative, same layout as \p state.
+	 */
+	virtual StateVector xdot(const StateVector & state, const InputVector & input) const = 0;
 	/// \brief Get the vehicle's current state vector.
 	virtual const StateVector & getState() const = 0;
 	/// \brief Get the vehicle's current pose.

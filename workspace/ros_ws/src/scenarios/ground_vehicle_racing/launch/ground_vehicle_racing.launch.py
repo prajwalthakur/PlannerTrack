@@ -5,7 +5,7 @@ import sys
 import yaml
 
 from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument
+from launch.actions import DeclareLaunchArgument, OpaqueFunction
 from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node
 from ament_index_python.packages import get_package_share_directory
@@ -27,6 +27,7 @@ def generate_launch_description():
     params_config = os.path.join(params_dir, 'params.yaml')
     agents_config = os.path.join(params_dir, 'agents.yaml')
     sim_config = os.path.join(params_dir, 'sim.yaml')
+    min_curv_planner_config = os.path.join(params_dir, 'min_curv_planner.yaml')
     rviz_config = os.path.join(params_dir, 'multi_rviz.rviz')
 
     # Read agents.yaml at launch-generation time (same file agent_sim itself
@@ -56,20 +57,70 @@ def generate_launch_description():
         'pure_pursuit': build_pure_pursuit_nodes,
         'mppi_controller': build_mppi_nodes,
     }
+    # Both controllers end in pid_controller, which sends [acceleration,
+    # steer_rate] via DynamicModel::packAccelSteerRate(). SingleTrackAugDynModel
+    # only accepts that with command_mode: acceleration (jerk is its default).
+    JERK_PLANTS = {'SingleTrackAugDynModel'}
 
-    controller_nodes = []
-    for i, agent_name in enumerate(agent_names, start=1):
-        controller_type = agents_yaml[agent_name].get('controller', 'pure_pursuit')
-        builder = CONTROLLER_BUILDERS.get(controller_type)
-        if builder is None:
-            raise ValueError(
-                f"{agent_name}: unknown controller '{controller_type}', "
-                f"expected one of {list(CONTROLLER_BUILDERS)}"
-            )
-        controller_nodes.extend(builder(i, sim_config, agents_config))
+    # Which reference trajectory the controllers follow:
+    #   json             -- /global_planner/iqp_trajectory from
+    #                       global_waypoints_publisher.py (precomputed by the
+    #                       Python global planner)
+    #   min_curv_planner -- /min_curv_planner/trajectory, computed at startup
+    #                       by the C++ MinCurvPlanner plugin
+    reference_source_arg = DeclareLaunchArgument(
+        'reference_source',
+        default_value='min_curv_planner',
+        choices=['json', 'min_curv_planner'],
+        description='Reference trajectory source for the controllers'
+    )
+    reference_topics = {
+        'json': '/global_planner/iqp_trajectory',
+        'min_curv_planner': '/min_curv_planner/trajectory',
+    }
+
+    def build_reference_and_controllers(context):
+        reference_source = LaunchConfiguration('reference_source').perform(context)
+        nodes = []
+        if reference_source == 'min_curv_planner':
+            # Global raceline from the centerline in global_waypoints.json,
+            # computed once with agent_1's vehicle parameters (agents.yaml).
+            nodes.append(Node(
+                package='planner_base',
+                executable='planner_node_exe',
+                name='min_curv_planner',
+                output='screen',
+                parameters=[{
+                    'agent_number': 1,
+                    'agents_config_file': agents_config,
+                    'planner_config_file': min_curv_planner_config,
+                    'planner_plugin': 'MinCurvPlanner',
+                    'planner_frequency': 1.0,
+                }],
+            ))
+        for i, agent_name in enumerate(agent_names, start=1):
+            controller_type = agents_yaml[agent_name].get('controller', 'pure_pursuit')
+            builder = CONTROLLER_BUILDERS.get(controller_type)
+            if builder is None:
+                raise ValueError(
+                    f"{agent_name}: unknown controller '{controller_type}', "
+                    f"expected one of {list(CONTROLLER_BUILDERS)}"
+                )
+            plugin = agents_yaml[agent_name].get('dynamics_plugin')
+            dynamics_params = agents_yaml[agent_name].get('dynamics_params', {})
+            if plugin in JERK_PLANTS and dynamics_params.get('command_mode', 'jerk') != 'acceleration':
+                raise ValueError(
+                    f"{agent_name}: '{controller_type}' commands acceleration, but "
+                    f"{plugin} takes jerk; set command_mode: acceleration (and "
+                    f"accelTimeConstant) in its dynamics_params"
+                )
+            nodes.extend(builder(i, sim_config, agents_config,
+                                 reference_topic=reference_topics[reference_source]))
+        return nodes
 
     return LaunchDescription([
         map_arg,
+        reference_source_arg,
         Node(
             package='agent_sim',
             executable='vehicle_interface_node',
@@ -132,5 +183,5 @@ def generate_launch_description():
             arguments=['-d', rviz_config],
             output='screen'
         ),
-        *controller_nodes,
+        OpaqueFunction(function=build_reference_and_controllers),
     ])

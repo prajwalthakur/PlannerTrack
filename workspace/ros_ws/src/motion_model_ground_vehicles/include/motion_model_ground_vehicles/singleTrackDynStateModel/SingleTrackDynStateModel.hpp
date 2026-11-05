@@ -64,9 +64,9 @@
    yaw_dot      = yaw_rate
    steer_dot    = sv
 
-   Low-speed blend: for vx in [1, 3] m/s the (vy_dot, r_dot) above are linearly
+   Low-speed blend: for vx in [0.5, 2.5] m/s the (vy_dot, r_dot) above are linearly
    blended with the kinematic single-track values (r = vx*tan(steer)/L,
-   vy = lr*r), fully kinematic below 1 m/s, to avoid the vx -> 0 singularity.
+   vy = lr*r), fully kinematic below 0.5 m/s, to avoid the vx -> 0 singularity.
   
    Reference : Jarrod M. Snider, "Automatic Steering Methods for Autonomous Automobile Path
    Tracking", Robotics Institute, Carnegie Mellon University, February 2009.
@@ -141,7 +141,7 @@ class SingleTrackDynStateModel : public DynamicModel
 	 * \param input Current input `[acc, sv]`.
 	 * \return State derivative, same layout as \p state.
 	 */
-	StateVector xdot(const StateVector & state, const InputVector & input) const;
+	StateVector xdot(const StateVector & state, const InputVector & input) const override;
 	void createIntegrator() override;
 	void setupRos(const rclcpp::Node::SharedPtr & node, const std::string & ns,
 	    const std::string & fixedFrame) override;
